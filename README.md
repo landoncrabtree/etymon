@@ -4,6 +4,8 @@ Replace `CLAUDE.md`, `AGENTS.md`, `opencode.json`, `.codex/config.toml`, `.curso
 
 Make your repositories portable and AI harness-agnostic with Etymon.
 
+[Website](https://landoncrabtree.github.io/etymon/) · [CLI reference](docs/CLI.md)
+
 ## Install
 
 ```bash

@@ -1,0 +1,192 @@
+[
+  {
+    "id": "claude",
+    "label": "Claude Code",
+    "skills": true,
+    "agents": true,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "codex",
+    "label": "Codex",
+    "skills": true,
+    "agents": true,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "copilot-cli",
+    "label": "GitHub Copilot CLI",
+    "skills": true,
+    "agents": true,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "copilot-cloud",
+    "label": "GitHub Copilot cloud",
+    "skills": true,
+    "agents": true,
+    "mcp": false,
+    "rules": true,
+    "projectOnly": true,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "vscode-local",
+    "label": "VS Code Local",
+    "skills": true,
+    "agents": true,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "gemini",
+    "label": "Gemini CLI",
+    "skills": true,
+    "agents": true,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "kiro",
+    "label": "Kiro CLI 3 / IDE 1",
+    "skills": true,
+    "agents": true,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "pi",
+    "label": "Pi",
+    "skills": true,
+    "agents": false,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "omp",
+    "label": "Oh My Pi",
+    "skills": true,
+    "agents": true,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "opencode",
+    "label": "OpenCode",
+    "skills": true,
+    "agents": true,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "cursor",
+    "label": "Cursor",
+    "skills": true,
+    "agents": true,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "antigravity",
+    "label": "Antigravity CLI",
+    "skills": true,
+    "agents": true,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "roo",
+    "label": "Roo Code",
+    "skills": true,
+    "agents": false,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "cline",
+    "label": "Cline",
+    "skills": true,
+    "agents": false,
+    "mcp": false,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "kilo",
+    "label": "Kilo Code",
+    "skills": true,
+    "agents": true,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "continue",
+    "label": "Continue",
+    "skills": false,
+    "agents": false,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "windsurf",
+    "label": "Devin Cascade / Windsurf",
+    "skills": true,
+    "agents": false,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": true
+  },
+  {
+    "id": "amp",
+    "label": "Amp",
+    "skills": true,
+    "agents": false,
+    "mcp": true,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  },
+  {
+    "id": "zed",
+    "label": "Zed native agent",
+    "skills": true,
+    "agents": false,
+    "mcp": false,
+    "rules": true,
+    "projectOnly": false,
+    "globalMcpOnly": false
+  }
+]

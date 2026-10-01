@@ -1,0 +1,6 @@
+build/
+review/
+mocks/website/
+mocks/website-a.png*
+mocks/website-c.png*
+direction.txt

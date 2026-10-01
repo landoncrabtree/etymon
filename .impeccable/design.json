@@ -1,0 +1,715 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-01T07:40:15.419Z",
+  "title": "Design System: Etymon website",
+  "extensions": {
+    "colorMeta": {
+      "bg-light": {
+        "role": "neutral",
+        "displayName": "Page background (light)",
+        "sourceProperty": "--bg",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.00264 106.45)",
+          "oklch(26% 0.00264 106.45)",
+          "oklch(37% 0.00264 106.45)",
+          "oklch(48% 0.00264 106.45)",
+          "oklch(59% 0.00264 106.45)",
+          "oklch(70% 0.00264 106.45)",
+          "oklch(81% 0.00264 106.45)",
+          "oklch(95% 0.00264 106.45)"
+        ]
+      },
+      "surface-light": {
+        "role": "neutral",
+        "displayName": "Section surface (light)",
+        "sourceProperty": "--surface",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.00398 106.47)",
+          "oklch(26% 0.00398 106.47)",
+          "oklch(37% 0.00398 106.47)",
+          "oklch(48% 0.00398 106.47)",
+          "oklch(59% 0.00398 106.47)",
+          "oklch(70% 0.00398 106.47)",
+          "oklch(81% 0.00398 106.47)",
+          "oklch(95% 0.00398 106.47)"
+        ]
+      },
+      "panel-light": {
+        "role": "neutral",
+        "displayName": "Panel (light)",
+        "sourceProperty": "--panel",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.00000 0.00)",
+          "oklch(26% 0.00000 0.00)",
+          "oklch(37% 0.00000 0.00)",
+          "oklch(48% 0.00000 0.00)",
+          "oklch(59% 0.00000 0.00)",
+          "oklch(70% 0.00000 0.00)",
+          "oklch(81% 0.00000 0.00)",
+          "oklch(95% 0.00000 0.00)"
+        ]
+      },
+      "soft-light": {
+        "role": "neutral",
+        "displayName": "Soft control surface (light)",
+        "sourceProperty": "--soft",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.00266 106.45)",
+          "oklch(26% 0.00266 106.45)",
+          "oklch(37% 0.00266 106.45)",
+          "oklch(48% 0.00266 106.45)",
+          "oklch(59% 0.00266 106.45)",
+          "oklch(70% 0.00266 106.45)",
+          "oklch(81% 0.00266 106.45)",
+          "oklch(95% 0.00266 106.45)"
+        ]
+      },
+      "text-light": {
+        "role": "neutral",
+        "displayName": "Main text (light)",
+        "sourceProperty": "--text",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.00476 248.01)",
+          "oklch(26% 0.00476 248.01)",
+          "oklch(37% 0.00476 248.01)",
+          "oklch(48% 0.00476 248.01)",
+          "oklch(59% 0.00476 248.01)",
+          "oklch(70% 0.00476 248.01)",
+          "oklch(81% 0.00476 248.01)",
+          "oklch(95% 0.00476 248.01)"
+        ]
+      },
+      "muted-light": {
+        "role": "neutral",
+        "displayName": "Muted text (light)",
+        "sourceProperty": "--muted",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.00934 253.91)",
+          "oklch(26% 0.00934 253.91)",
+          "oklch(37% 0.00934 253.91)",
+          "oklch(48% 0.00934 253.91)",
+          "oklch(59% 0.00934 253.91)",
+          "oklch(70% 0.00934 253.91)",
+          "oklch(81% 0.00934 253.91)",
+          "oklch(95% 0.00934 253.91)"
+        ]
+      },
+      "line-light": {
+        "role": "neutral",
+        "displayName": "Border (light)",
+        "sourceProperty": "--line",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.00421 121.57)",
+          "oklch(26% 0.00421 121.57)",
+          "oklch(37% 0.00421 121.57)",
+          "oklch(48% 0.00421 121.57)",
+          "oklch(59% 0.00421 121.57)",
+          "oklch(70% 0.00421 121.57)",
+          "oklch(81% 0.00421 121.57)",
+          "oklch(95% 0.00421 121.57)"
+        ]
+      },
+      "accent-light": {
+        "role": "primary",
+        "displayName": "Orange text accent (light)",
+        "sourceProperty": "--accent",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.16269 38.37)",
+          "oklch(26% 0.16269 38.37)",
+          "oklch(37% 0.16269 38.37)",
+          "oklch(48% 0.16269 38.37)",
+          "oklch(59% 0.16269 38.37)",
+          "oklch(70% 0.16269 38.37)",
+          "oklch(81% 0.16269 38.37)",
+          "oklch(95% 0.16269 38.37)"
+        ]
+      },
+      "accent-fill": {
+        "role": "primary",
+        "displayName": "Orange action fill",
+        "sourceProperty": "--accent-fill",
+        "tonalRamp": [
+          "oklch(15% 0.16862 41.16)",
+          "oklch(26% 0.16862 41.16)",
+          "oklch(37% 0.16862 41.16)",
+          "oklch(48% 0.16862 41.16)",
+          "oklch(59% 0.16862 41.16)",
+          "oklch(70% 0.16862 41.16)",
+          "oklch(81% 0.16862 41.16)",
+          "oklch(95% 0.16862 41.16)"
+        ]
+      },
+      "on-accent": {
+        "role": "neutral",
+        "displayName": "Charcoal action text",
+        "sourceProperty": "--on-accent",
+        "tonalRamp": [
+          "oklch(15% 0.00639 258.36)",
+          "oklch(26% 0.00639 258.36)",
+          "oklch(37% 0.00639 258.36)",
+          "oklch(48% 0.00639 258.36)",
+          "oklch(59% 0.00639 258.36)",
+          "oklch(70% 0.00639 258.36)",
+          "oklch(81% 0.00639 258.36)",
+          "oklch(95% 0.00639 258.36)"
+        ]
+      },
+      "green-light": {
+        "role": "functional",
+        "displayName": "Success check (light)",
+        "sourceProperty": "--green",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.09254 153.15)",
+          "oklch(26% 0.09254 153.15)",
+          "oklch(37% 0.09254 153.15)",
+          "oklch(48% 0.09254 153.15)",
+          "oklch(59% 0.09254 153.15)",
+          "oklch(70% 0.09254 153.15)",
+          "oklch(81% 0.09254 153.15)",
+          "oklch(95% 0.09254 153.15)"
+        ]
+      },
+      "folder-light": {
+        "role": "functional",
+        "displayName": "Folder icon (light)",
+        "sourceProperty": "--folder",
+        "theme": "light",
+        "tonalRamp": [
+          "oklch(15% 0.07785 229.91)",
+          "oklch(26% 0.07785 229.91)",
+          "oklch(37% 0.07785 229.91)",
+          "oklch(48% 0.07785 229.91)",
+          "oklch(59% 0.07785 229.91)",
+          "oklch(70% 0.07785 229.91)",
+          "oklch(81% 0.07785 229.91)",
+          "oklch(95% 0.07785 229.91)"
+        ]
+      },
+      "bg-dark": {
+        "role": "neutral",
+        "displayName": "Page background (dark)",
+        "sourceProperty": "--bg",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.00855 223.90)",
+          "oklch(26% 0.00855 223.90)",
+          "oklch(37% 0.00855 223.90)",
+          "oklch(48% 0.00855 223.90)",
+          "oklch(59% 0.00855 223.90)",
+          "oklch(70% 0.00855 223.90)",
+          "oklch(81% 0.00855 223.90)",
+          "oklch(95% 0.00855 223.90)"
+        ]
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "Section surface (dark)",
+        "sourceProperty": "--surface",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.00956 219.89)",
+          "oklch(26% 0.00956 219.89)",
+          "oklch(37% 0.00956 219.89)",
+          "oklch(48% 0.00956 219.89)",
+          "oklch(59% 0.00956 219.89)",
+          "oklch(70% 0.00956 219.89)",
+          "oklch(81% 0.00956 219.89)",
+          "oklch(95% 0.00956 219.89)"
+        ]
+      },
+      "panel-dark": {
+        "role": "neutral",
+        "displayName": "Panel (dark)",
+        "sourceProperty": "--panel",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.01268 233.05)",
+          "oklch(26% 0.01268 233.05)",
+          "oklch(37% 0.01268 233.05)",
+          "oklch(48% 0.01268 233.05)",
+          "oklch(59% 0.01268 233.05)",
+          "oklch(70% 0.01268 233.05)",
+          "oklch(81% 0.01268 233.05)",
+          "oklch(95% 0.01268 233.05)"
+        ]
+      },
+      "soft-dark": {
+        "role": "neutral",
+        "displayName": "Soft control surface (dark)",
+        "sourceProperty": "--soft",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.00932 248.16)",
+          "oklch(26% 0.00932 248.16)",
+          "oklch(37% 0.00932 248.16)",
+          "oklch(48% 0.00932 248.16)",
+          "oklch(59% 0.00932 248.16)",
+          "oklch(70% 0.00932 248.16)",
+          "oklch(81% 0.00932 248.16)",
+          "oklch(95% 0.00932 248.16)"
+        ]
+      },
+      "text-dark": {
+        "role": "neutral",
+        "displayName": "Main text (dark)",
+        "sourceProperty": "--text",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.00264 106.45)",
+          "oklch(26% 0.00264 106.45)",
+          "oklch(37% 0.00264 106.45)",
+          "oklch(48% 0.00264 106.45)",
+          "oklch(59% 0.00264 106.45)",
+          "oklch(70% 0.00264 106.45)",
+          "oklch(81% 0.00264 106.45)",
+          "oklch(95% 0.00264 106.45)"
+        ]
+      },
+      "muted-dark": {
+        "role": "neutral",
+        "displayName": "Muted text (dark)",
+        "sourceProperty": "--muted",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.01036 252.84)",
+          "oklch(26% 0.01036 252.84)",
+          "oklch(37% 0.01036 252.84)",
+          "oklch(48% 0.01036 252.84)",
+          "oklch(59% 0.01036 252.84)",
+          "oklch(70% 0.01036 252.84)",
+          "oklch(81% 0.01036 252.84)",
+          "oklch(95% 0.01036 252.84)"
+        ]
+      },
+      "line-dark": {
+        "role": "neutral",
+        "displayName": "Border (dark)",
+        "sourceProperty": "--line",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.01183 243.14)",
+          "oklch(26% 0.01183 243.14)",
+          "oklch(37% 0.01183 243.14)",
+          "oklch(48% 0.01183 243.14)",
+          "oklch(59% 0.01183 243.14)",
+          "oklch(70% 0.01183 243.14)",
+          "oklch(81% 0.01183 243.14)",
+          "oklch(95% 0.01183 243.14)"
+        ]
+      },
+      "accent-dark": {
+        "role": "primary",
+        "displayName": "Orange text accent (dark)",
+        "sourceProperty": "--accent",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.16862 41.16)",
+          "oklch(26% 0.16862 41.16)",
+          "oklch(37% 0.16862 41.16)",
+          "oklch(48% 0.16862 41.16)",
+          "oklch(59% 0.16862 41.16)",
+          "oklch(70% 0.16862 41.16)",
+          "oklch(81% 0.16862 41.16)",
+          "oklch(95% 0.16862 41.16)"
+        ]
+      },
+      "green-dark": {
+        "role": "functional",
+        "displayName": "Success check (dark)",
+        "sourceProperty": "--green",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.05916 156.51)",
+          "oklch(26% 0.05916 156.51)",
+          "oklch(37% 0.05916 156.51)",
+          "oklch(48% 0.05916 156.51)",
+          "oklch(59% 0.05916 156.51)",
+          "oklch(70% 0.05916 156.51)",
+          "oklch(81% 0.05916 156.51)",
+          "oklch(95% 0.05916 156.51)"
+        ]
+      },
+      "terminal-dark": {
+        "role": "neutral",
+        "displayName": "Terminal surface (dark)",
+        "sourceProperty": "--terminal",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.00994 220.03)",
+          "oklch(26% 0.00994 220.03)",
+          "oklch(37% 0.00994 220.03)",
+          "oklch(48% 0.00994 220.03)",
+          "oklch(59% 0.00994 220.03)",
+          "oklch(70% 0.00994 220.03)",
+          "oklch(81% 0.00994 220.03)",
+          "oklch(95% 0.00994 220.03)"
+        ]
+      },
+      "finder-dark": {
+        "role": "neutral",
+        "displayName": "Finder surface (dark)",
+        "sourceProperty": "--finder",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.01268 233.05)",
+          "oklch(26% 0.01268 233.05)",
+          "oklch(37% 0.01268 233.05)",
+          "oklch(48% 0.01268 233.05)",
+          "oklch(59% 0.01268 233.05)",
+          "oklch(70% 0.01268 233.05)",
+          "oklch(81% 0.01268 233.05)",
+          "oklch(95% 0.01268 233.05)"
+        ]
+      },
+      "output-dark": {
+        "role": "neutral",
+        "displayName": "Native output surface (dark)",
+        "sourceProperty": "--output",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.01194 225.78)",
+          "oklch(26% 0.01194 225.78)",
+          "oklch(37% 0.01194 225.78)",
+          "oklch(48% 0.01194 225.78)",
+          "oklch(59% 0.01194 225.78)",
+          "oklch(70% 0.01194 225.78)",
+          "oklch(81% 0.01194 225.78)",
+          "oklch(95% 0.01194 225.78)"
+        ]
+      },
+      "folder-dark": {
+        "role": "functional",
+        "displayName": "Folder icon (dark)",
+        "sourceProperty": "--folder",
+        "theme": "dark",
+        "tonalRamp": [
+          "oklch(15% 0.07155 226.08)",
+          "oklch(26% 0.07155 226.08)",
+          "oklch(37% 0.07155 226.08)",
+          "oklch(48% 0.07155 226.08)",
+          "oklch(59% 0.07155 226.08)",
+          "oklch(70% 0.07155 226.08)",
+          "oklch(81% 0.07155 226.08)",
+          "oklch(95% 0.07155 226.08)"
+        ]
+      }
+    },
+    "colorPreviewNote": "Tonal ramps are synthesized preview swatches from extracted sRGB colors, with fixed OKLCH hue and chroma and lightness steps from 15% to 95%. They are not shipping CSS tokens or an approved palette extension.",
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero heading; bundled Encode Sans Expanded weight 700."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Interface names."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Shared-source explanations."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Navigation and text links."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Terminal and file paths."
+      },
+      "command": {
+        "displayName": "Installation command",
+        "purpose": "Read-only copy field."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "link-color",
+        "value": "160ms",
+        "purpose": "CSS text-link hover color transition."
+      },
+      {
+        "name": "demo-ease",
+        "value": "expo.out",
+        "purpose": "GSAP reveal, tree, connector, output, and completion effects."
+      },
+      {
+        "name": "typing-ease",
+        "value": "none",
+        "purpose": "Linear character progression."
+      },
+      {
+        "name": "typing-duration",
+        "value": "Math.min(1.7, 0.035 * scene.command.length + 0.35)",
+        "purpose": "Seconds; command typing begins at 0.3s."
+      },
+      {
+        "name": "status-lines",
+        "value": "0.35s; stagger 0.16s",
+        "purpose": "Terminal status-line reveal."
+      },
+      {
+        "name": "tree-before",
+        "value": "0.4s; y -7px",
+        "purpose": "Fade the earlier illustrative tree state."
+      },
+      {
+        "name": "tree-after",
+        "value": "0.65s; y 10px to 0",
+        "purpose": "Reveal shared source."
+      },
+      {
+        "name": "connectors",
+        "value": "0.65s",
+        "purpose": "Draw SVG paths via strokeDashoffset."
+      },
+      {
+        "name": "native-outputs",
+        "value": "0.65s; stagger 0.14s; y 12px to 0",
+        "purpose": "Reveal native output cells."
+      },
+      {
+        "name": "completion",
+        "value": "0.45s",
+        "purpose": "Completion message reveal."
+      },
+      {
+        "name": "scene-hold",
+        "value": "3s",
+        "purpose": "Hold the completed scene before advancing."
+      },
+      {
+        "name": "copy-confirmation",
+        "value": "2400ms",
+        "purpose": "Clear the copy check and live status."
+      },
+      {
+        "name": "reduced-motion-css",
+        "value": "0.01ms",
+        "purpose": "CSS animation and transition duration under reduced motion; GSAP separately renders completed scenes without autoplay."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1280px"
+      },
+      {
+        "name": "stacked",
+        "value": "1000px"
+      },
+      {
+        "name": "mobile",
+        "value": "640px"
+      },
+      {
+        "name": "narrow",
+        "value": "360px"
+      }
+    ],
+    "themeAssignments": {
+      "light": {
+        "--bg": "{colors.bg-light}",
+        "--surface": "{colors.surface-light}",
+        "--panel": "{colors.panel-light}",
+        "--soft": "{colors.soft-light}",
+        "--text": "{colors.text-light}",
+        "--muted": "{colors.muted-light}",
+        "--line": "{colors.line-light}",
+        "--accent": "{colors.accent-light}",
+        "--accent-fill": "{colors.accent-fill}",
+        "--on-accent": "{colors.on-accent}",
+        "--green": "{colors.green-light}",
+        "--folder": "{colors.folder-light}"
+      },
+      "dark": {
+        "--bg": "{colors.bg-dark}",
+        "--surface": "{colors.surface-dark}",
+        "--panel": "{colors.panel-dark}",
+        "--soft": "{colors.soft-dark}",
+        "--text": "{colors.text-dark}",
+        "--muted": "{colors.muted-dark}",
+        "--line": "{colors.line-dark}",
+        "--accent": "{colors.accent-dark}",
+        "--green": "{colors.green-dark}",
+        "--terminal": "{colors.terminal-dark}",
+        "--finder": "{colors.finder-dark}",
+        "--output": "{colors.output-dark}",
+        "--folder": "{colors.folder-dark}"
+      }
+    },
+    "focus": {
+      "outline": "2px solid var(--accent)",
+      "outlineOffset": "5px",
+      "copyOutlineColor": "#202225"
+    },
+    "provenance": {
+      "mode": "scan",
+      "sources": [
+        {
+          "path": "website/src/styles/site.css",
+          "sha256": "f0a20edb7f01e0ab1025900dccedc2e4aefefc95f63cc7b4b0de9bfcec86125d"
+        },
+        {
+          "path": "website/src/layouts/Layout.astro",
+          "sha256": "06bb917cdbab5ec5cf1d39ec588e9af1bf96ba737c30dcbdc13f1923aad47674"
+        },
+        {
+          "path": "website/src/pages/index.astro",
+          "sha256": "d2ddb6a3a559cf52f47b11a7c28f4907e25ce840046f6efc533464ac82a98c43"
+        },
+        {
+          "path": "website/src/scripts/site.ts",
+          "sha256": "270178c9d7d5060f56bd60255b66313bef3f74d64983a782b2a8db8551810009"
+        },
+        {
+          "path": "website/src/components/CopyCommand.astro",
+          "sha256": "ad175296964da236615be9e0080f5a7a207251f717e431597fec7994295d5311"
+        },
+        {
+          "path": "website/src/components/WorkflowDemo.astro",
+          "sha256": "298dda0d4e015af1249ba5a33e3cca84037d13ee651ce70bf163add9335e79b0"
+        },
+        {
+          "path": "website/src/components/Icon.astro",
+          "sha256": "cd697a6434f5eb9aa92133cf5aa1ef88c229f562837490993b54d9aea0d5be97"
+        },
+        {
+          "path": "website/src/data/scenes.ts",
+          "sha256": "664ca155ab5970a1dfb6a0ec5a3825d58cc2e712907f722b31c67a1ab2d6d3ce"
+        }
+      ],
+      "product": "PRODUCT.md",
+      "direction": ".impeccable/surfaces/website-src-pages-index-astro.md",
+      "approvedComp": ".impeccable/mocks/website-b.png",
+      "approvalSidecar": ".impeccable/mocks/website-b.png.json",
+      "buildEvidence": ".impeccable/review/build-evidence.json",
+      "notes": [
+        "The direction initially named Manrope display; final headings use Encode Sans Expanded.",
+        "No shipping raster plates.",
+        "The unused --ease custom property is not promoted into an applied motion rule.",
+        "The bounded visual verdict remains fix solely for the separate open tracker receipt; this record does not close machine phases."
+      ]
+    }
+  },
+  "components": [
+    {
+      "name": "Copy command",
+      "kind": "custom",
+      "refersTo": "copy-command",
+      "description": "Selectable installation command with a separate copy control.",
+      "html": "<div class=\"ds-copy-command\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m9 5 7 7-7 7\"></path></svg><input aria-label=\"npx etymon\" value=\"npx etymon\" readonly spellcheck=\"false\"><button type=\"button\" aria-label=\"Copy npx etymon\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 9h11v11H9zM5 15H3V3h12v2\"></path></svg></button></div>",
+      "css": ".ds-copy-command{display:flex;align-items:center;gap:7px;background:var(--accent-fill,#f87947);color:var(--on-accent,#202225);padding:10px 10px 10px 18px;width:260px;min-height:62px;border-radius:9px}.ds-copy-command input{width:100%;min-width:0;font-family:var(--mono,\"JetBrains Mono Variable\",monospace);font-size:17px;letter-spacing:-.035em;color:inherit;background:none;border:0;padding:6px 0}.ds-copy-command button{display:grid;place-items:center;width:44px;height:44px;flex:none;border:0;border-radius:5px;background:none;color:inherit;cursor:pointer}.ds-copy-command button:hover{background:#20222512}.ds-copy-command input:focus-visible,.ds-copy-command button:focus-visible{outline:2px solid #202225;outline-offset:5px}"
+    },
+    {
+      "name": "Guide link",
+      "kind": "nav",
+      "description": "UI-text link with an inline directional arrow.",
+      "html": "<a class=\"ds-guide-link\" href=\"https://github.com/landoncrabtree/etymon/blob/main/docs/CLI.md\">Read the guide <svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"></path></svg></a>",
+      "css": ".ds-guide-link{display:inline-flex;align-items:center;gap:10px;min-height:44px;color:var(--text,#222426);font-family:var(--sans,\"Manrope Variable\",sans-serif);font-size:16px;font-weight:500;text-decoration:underline;text-underline-offset:6px;transition:color 160ms}.ds-guide-link svg{color:var(--accent,#b74013)}.ds-guide-link:hover{color:var(--accent,#b74013)}.ds-guide-link:focus-visible{outline:2px solid var(--accent,#b74013);outline-offset:5px}"
+    },
+    {
+      "name": "Theme choice",
+      "kind": "button",
+      "refersTo": "theme-choice",
+      "description": "Icon-only theme choice with a pressed state.",
+      "html": "<div class=\"ds-theme-group\" role=\"group\" aria-label=\"Color theme\"><button class=\"ds-theme-choice\" type=\"button\" aria-label=\"Light theme\" aria-pressed=\"true\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5\"></path></svg></button></div>",
+      "css": ".ds-theme-group{display:inline-flex;align-items:center;padding:2px;border:1px solid var(--line,#d5d6d3);border-radius:8px}.ds-theme-choice{width:44px;height:44px;border:0;border-radius:5px;background:none;color:var(--muted,#62666b);cursor:pointer}.ds-theme-choice[aria-pressed=\"true\"]{background:var(--soft,#ededeb);color:var(--text,#222426)}.ds-theme-choice:focus-visible{outline:2px solid var(--accent,#b74013);outline-offset:5px}"
+    },
+    {
+      "name": "Scene tab",
+      "kind": "button",
+      "refersTo": "scene-tab",
+      "description": "Inactive command tab within the workflow tablist.",
+      "html": "<button class=\"ds-scene-tab\" type=\"button\" role=\"tab\" aria-selected=\"false\">convert</button>",
+      "css": ".ds-scene-tab{display:flex;justify-content:center;align-items:center;gap:10px;min-width:153px;min-height:48px;padding:10px 24px;border:0;background:none;color:var(--muted,#62666b);font-family:var(--mono,\"JetBrains Mono Variable\",monospace);font-size:14px;border-radius:28px;cursor:pointer}.ds-scene-tab:hover:not([aria-selected=\"true\"]){background:var(--soft,#ededeb);color:var(--text,#222426)}.ds-scene-tab:focus-visible{outline:2px solid var(--accent,#b74013);outline-offset:5px}"
+    },
+    {
+      "name": "Selected scene tab",
+      "kind": "button",
+      "refersTo": "scene-tab-selected",
+      "description": "Orange selected command tab with charcoal text.",
+      "html": "<button class=\"ds-scene-selected\" type=\"button\" role=\"tab\" aria-selected=\"true\">sync</button>",
+      "css": ".ds-scene-selected{display:flex;justify-content:center;align-items:center;gap:10px;min-width:153px;min-height:48px;padding:10px 24px;border:0;background:var(--accent-fill,#f87947);color:var(--on-accent,#202225);font-family:var(--mono,\"JetBrains Mono Variable\",monospace);font-size:14px;border-radius:28px;cursor:pointer}.ds-scene-selected:focus-visible{outline:2px solid var(--accent,#b74013);outline-offset:5px}"
+    },
+    {
+      "name": "Playback control",
+      "kind": "button",
+      "refersTo": "playback",
+      "description": "Separate demo pause or play control.",
+      "html": "<button class=\"ds-playback\" type=\"button\" aria-label=\"Pause demo\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 5v14M16 5v14\"></path></svg></button>",
+      "css": ".ds-playback{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--line,#d5d6d3);border-radius:7px;background:none;color:var(--muted,#62666b);cursor:pointer}.ds-playback:hover{color:var(--text,#222426);background:var(--soft,#ededeb)}.ds-playback:focus-visible{outline:2px solid var(--accent,#b74013);outline-offset:5px}"
+    },
+    {
+      "name": "Native file",
+      "kind": "card",
+      "refersTo": "native-file",
+      "description": "Static generated file cell, with path and muted detail.",
+      "html": "<div class=\"ds-native-file\"><svg width=\"36\" height=\"36\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 2H5v20h14V7zm0 0v6h5M8 13h8M8 17h6\"></path></svg><div><span class=\"ds-native-filename\">AGENTS.md</span><span class=\"ds-native-detail\">Generated guidance</span></div></div>",
+      "css": ".ds-native-file{display:flex;align-items:center;gap:12px;min-height:71px;padding:10px 14px;background:var(--output,var(--panel,#ffffff));border:1px solid var(--line,#d5d6d3);border-radius:7px;color:var(--text,#222426)}.ds-native-file>svg{color:var(--muted,#62666b)}.ds-native-file>div{min-width:0}.ds-native-filename{display:block;font-family:var(--mono,\"JetBrains Mono Variable\",monospace);font-size:clamp(11px,1vw,15px);overflow-wrap:anywhere}.ds-native-detail{display:block;font-family:var(--sans,\"Manrope Variable\",sans-serif);color:var(--muted,#62666b);font-size:10px;margin-top:5px}"
+    },
+    {
+      "name": "Source tag",
+      "kind": "chip",
+      "refersTo": "source-tag",
+      "description": "Static source label in the Finder toolbar.",
+      "html": "<span class=\"ds-source-tag\">source</span>",
+      "css": ".ds-source-tag{display:inline-block;font-family:var(--mono,\"JetBrains Mono Variable\",monospace);font-size:10px;padding:3px 7px;border:1px solid var(--line,#d5d6d3);border-radius:4px;color:var(--muted,#62666b)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Minimal product studio",
+    "overview": "The website uses broad display type, quiet neutral surfaces, and one orange accent. Commands and file paths give it its developer character. The approved direction is clean, modern, and restrained, with no cyberpunk or hacker styling.\n\nThe workflow demonstration is built from text, SVG, CSS, and an authored timeline. Motion explains commands and file outcomes while leaving visitors in control. This record describes the website; it does not define the CLI or terminal UI. Product claims remain in [PRODUCT.md](PRODUCT.md).\n\n",
+    "keyCharacteristics": [
+      "Broad display lettering paired with readable UI text and code.",
+      "Light and dark neutral surfaces with orange actions and connections.",
+      "Flat, bordered UI chrome with modest corners.",
+      "Controllable motion and completed scenes for reduced motion."
+    ],
+    "rules": [
+      {
+        "name": "The Orange Action Rule",
+        "body": "Use the action fill with on-accent charcoal text. Use the theme's text accent for small orange text and outlines.",
+        "section": "colors"
+      },
+      {
+        "name": "The Readable Tracking Rule",
+        "body": "Display headings use `-0.04em` tracking. Do not tighten display tracking below that value.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Surface Rule",
+        "body": "Separate adjacent surfaces with their tone and border; preserve the quiet depth of the existing windows and lists.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** use the theme's semantic surface, text, line, and accent roles.",
+      "**Do** keep orange filled controls paired with on-accent charcoal text.",
+      "**Do** preserve display tracking at or above `-0.04em`.",
+      "**Do** keep real commands and paths in the bundled monospace face.",
+      "**Do** keep the demo controllable and render completed scenes for reduced motion.",
+      "**Do** use short, concrete product copy and preserve the factual labels on illustrative demonstrations."
+    ],
+    "donts": [
+      "**Don't** introduce neon, cyberpunk, or hacker styling.",
+      "**Don't** use raster plates in place of the editable text, SVG, and CSS demonstration.",
+      "**Don't** imply that conversion deletes original files or that every tool supports identical capabilities.",
+      "**Don't** add invented endorsements, usage metrics, or pricing.",
+      "**Don't** use em dashes in product copy."
+    ]
+  }
+}

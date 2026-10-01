@@ -1,0 +1,68 @@
+---
+import "@fontsource/encode-sans-expanded/latin-700.css";
+import "@fontsource-variable/manrope";
+import "@fontsource-variable/jetbrains-mono";
+import "../styles/site.css";
+const base = import.meta.env.BASE_URL;
+const canonical = new URL(base, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="theme-color"
+      content="#171a1d"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta
+      name="theme-color"
+      content="#fafaf8"
+      media="(prefers-color-scheme: light)"
+    />
+    <title>Etymon | One setup. Every coding tool.</title>
+    <meta
+      name="description"
+      content="Keep your skills, MCP servers, agents, and rules together. Import an existing setup and sync it to the coding tools you already use."
+    />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Etymon | One setup. Every coding tool."
+    />
+    <meta
+      property="og:description"
+      content="Your skills, servers, agents, and rules. One portable setup."
+    />
+    <meta property="og:url" content={canonical} />
+    <script is:inline>
+      (() => {
+        let choice = "system";
+        try {
+          const saved = localStorage.getItem("etymon-theme");
+          if (["light", "dark", "system"].includes(saved)) choice = saved;
+        } catch {}
+        const dark =
+          choice === "dark" ||
+          (choice === "system" &&
+            matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        document.documentElement.dataset.themeChoice = choice;
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <slot />
+    <script>
+      import "../scripts/site";
+    </script>
+  </body>
+</html>

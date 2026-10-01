@@ -1,0 +1,208 @@
+---
+import Icon from "./Icon.astro";
+import { scenes } from "../data/scenes";
+---
+
+<section
+  class="workflow"
+  id="workflow"
+  aria-label="Etymon workflow demonstration"
+  data-demo
+>
+  <div class="demo-meta">
+    <span>Illustrative demo</span>
+    <span class="originals-note">
+      Original files stay until you remove them.
+    </span>
+  </div>
+  {scenes.map((scene, index) => (
+    <div
+      class="demo-scene"
+      id={`scene-${scene.id}`}
+      role="tabpanel"
+      aria-labelledby={`tab-${scene.id}`}
+      tabindex="0"
+      hidden={index !== 2}
+      data-scene={scene.id}
+    >
+      <div class="demo-layout" aria-hidden="true">
+        <div class="workspace-window">
+          <div class="terminal-pane">
+            <div class="window-toolbar">
+              <span class="window-dots">
+                <i></i>
+                <i></i>
+                <i></i>
+              </span>
+              <span>terminal</span>
+            </div>
+            <div class="terminal-body">
+              <div class="demo-command">
+                <span class="dollar">$</span>
+                <span data-typed>{scene.command}</span>
+                <span class="caret" data-caret></span>
+              </div>
+              <div class="terminal-lines">
+                {scene.lines.map((line) => (
+                  <div class="terminal-line" data-line>
+                    <Icon name="check" size={15} />
+                    <span>{line}</span>
+                  </div>
+                ))}
+              </div>
+              <p class="terminal-completion" data-completion>
+                {scene.completion}
+              </p>
+              <div class="idle-prompt">
+                <span>$</span>
+                <span class="idle-caret"></span>
+              </div>
+            </div>
+          </div>
+          <div class="finder-pane">
+            <div class="window-toolbar finder-toolbar">
+              <Icon name="folder" size={20} />
+              <span>project</span>
+              <span class="source-tag">source</span>
+            </div>
+            <div class="file-tree">
+              <div class="tree-state tree-before" data-tree-before>
+                <div class="tree-root">
+                  <Icon name="folder" size={19} />
+                  <span>
+                    {scene.id === "convert"
+                      ? "Native files"
+                      : scene.id === "init"
+                        ? "my-project/"
+                        : ".agents/"}
+                  </span>
+                </div>
+                {scene.before.map((file) => (
+                  <div class="tree-row">
+                    <Icon
+                      name={file.endsWith("/") ? "folder" : "file"}
+                      size={18}
+                    />
+                    <span>{file}</span>
+                  </div>
+                ))}
+              </div>
+              <div class="tree-state tree-after" data-tree-after>
+                <div class="tree-root">
+                  <Icon name="down" size={14} />
+                  <Icon name="folder" size={19} />
+                  <span>.agents/</span>
+                </div>
+                {scene.files.map((file) => (
+                  <div
+                    class:list={[
+                      "tree-row",
+                      { indented: file.startsWith("  ") },
+                    ]}
+                  >
+                    <Icon
+                      name={file.endsWith("/") ? "folder" : "file"}
+                      size={18}
+                    />
+                    <span>{file.trim()}</span>
+                  </div>
+                ))}
+                <div class="tree-note">
+                  <Icon name="lock" size={14} />
+                  <span>
+                    {scene.id === "skill"
+                      ? "External source locked"
+                      : "Your shared source"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="output-rail">
+          <svg
+            viewBox="0 0 160 210"
+            preserveAspectRatio="none"
+            class="connector-lines"
+            aria-hidden="true"
+          >
+            <path d="M0 105H44Q68 105 68 81V27Q68 11 91 11H156M0 105H156M0 105H44Q68 105 68 129V183Q68 199 91 199H156" />
+            <path
+              class="connector-tips"
+              d="m149 5 7 6-7 6m0 82 7 6-7 6m0 82 7 6-7 6"
+            />
+          </svg>
+          <div class="native-outputs">
+            <p class="output-caption">
+              {scene.id === "sync"
+                ? "Native files for your tools"
+                : scene.id === "convert"
+                  ? "Your portable setup"
+                  : scene.id === "skill"
+                    ? "One skill, locked in"
+                    : "A clean starting point"}
+            </p>
+            {scene.outputs.map(([file, detail]) => (
+              <div class="native-file" data-output>
+                <Icon name={file.endsWith("/") ? "folder" : "file"} size={36} />
+                <div>
+                  <span class="native-filename">{file}</span>
+                  <span class="native-detail">{detail}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <p class="sr-only">
+        Command: {scene.command}. {scene.description}
+      </p>
+    </div>
+  ))}
+  <div class="workflow-control-row">
+    <div
+      class="workflow-controls"
+      role="tablist"
+      aria-label="Choose a workflow"
+    >
+      {scenes.map((scene, index) => (
+        <button
+          id={`tab-${scene.id}`}
+          type="button"
+          role="tab"
+          aria-selected={index === 2 ? "true" : "false"}
+          aria-controls={`scene-${scene.id}`}
+          tabindex={index === 2 ? "0" : "-1"}
+          data-step={index}
+        >
+          <Icon name={scene.icon} />
+          <span>{scene.label}</span>
+        </button>
+      ))}
+    </div>
+    <button
+      class="playback"
+      type="button"
+      data-playback
+      aria-label="Pause demo"
+      title="Pause demo"
+    >
+      <span data-pause-icon>
+        <Icon name="pause" />
+      </span>
+      <span data-play-icon hidden>
+        <Icon name="play" />
+      </span>
+    </button>
+  </div>
+  <p class="demo-description" data-description aria-live="off">
+    {scenes[2].description}
+  </p>
+  <noscript>
+    <p class="no-script-demo">
+      Try: <code>etymon init</code>, <code>etymon convert claude</code>,{" "}
+      <code>etymon sync</code>, or{" "}
+      <code>etymon skills add vercel-labs/skills --skill find-skills</code>.
+    </p>
+  </noscript>
+</section>

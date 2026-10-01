@@ -1,0 +1,67 @@
+name: Website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      ['website/**', 'src/**', 'package.json', 'package-lock.json', '.github/workflows/website.yml']
+  pull_request:
+    paths:
+      ['website/**', 'src/**', 'package.json', 'package-lock.json', '.github/workflows/website.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: website-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            website/package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: website
+      - run: npm run format:check && npm run check && npm run build
+        working-directory: website
+      - run: npx playwright install --with-deps chromium
+        working-directory: website
+      - run: npm test
+        working-directory: website
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: website-test-report
+          path: |
+            website/playwright-report
+            website/test-results
+          retention-days: 7
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request'
+        with:
+          path: website/dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v6
+      - uses: actions/deploy-pages@v5
+        id: deployment

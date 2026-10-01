@@ -29,6 +29,7 @@ Sync generates the project instructions and development skills. If you use a cod
 | `src/cli.ts`, `src/tui`, `src/index.ts` | Commands, forms, and public exports                              |
 | `tests`, `testcases`                    | Focused tests and complete CLI workflows                         |
 | `docs`, `scripts`                       | References, verification evidence, and release tools             |
+| `website`                               | Product site, animated demo, and browser tests                   |
 
 The [architecture reference](ARCHITECTURE.md) has the full module map. [Rule compatibility](RULES.md) records supported locations and scopes.
 
@@ -58,6 +59,8 @@ npm run test:coverage
 Coverage includes unit tests and CLI scenarios. The minimums are 70% lines/statements, 65% branches, and 80% functions. Use useful assertions rather than changing the thresholds to fit a patch.
 
 Changes to packaging should pass `npm run smoke`. Native loader changes should be checked against the installed tool where possible. Those checks inspect skills, settings, and instructions without model requests or account credentials. Say which checks ran and what they establish; editor configuration tests do not prove an editor loaded the files.
+
+For the product site, see [website/README.md](../website/README.md). Run its format check, Astro check, production build, and browser tests. Keep tool support tied to the CLI profiles. Check both themes, keyboard controls, reduced motion, and mobile layouts.
 
 ## Send a pull request
 

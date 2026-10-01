@@ -1,0 +1,22 @@
+---
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+---
+
+<span class="brand">
+  <svg
+    width="32"
+    height="36"
+    viewBox="0 0 32 36"
+    aria-hidden="true"
+    class="brand-mark"
+  >
+    <path
+      fill="currentColor"
+      d="m16 1 14 8v8l-7-4V13l-7-4-7 4-7-4zM2 12l7 4v7l7 4 7-4 7 4-14 8-14-8zm28 8v4l-7-4v-4z"
+    />
+  </svg>
+  {!compact && <span>etymon</span>}
+</span>

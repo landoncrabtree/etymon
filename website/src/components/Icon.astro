@@ -1,0 +1,47 @@
+---
+interface Props {
+  name: string;
+  size?: number;
+  class?: string;
+}
+const { name, size = 20, class: className } = Astro.props;
+const paths: Record<string, string> = {
+  arrow: "M5 12h14m-6-6 6 6-6 6",
+  copy: "M9 9h11v11H9zM5 15H3V3h12v2",
+  check: "m5 12 4 4L19 6",
+  terminal: "m5 5 6 7-6 7m8 0h6",
+  sync: "M20 7h-5m5 0V2M4 17h5m-5 0v5M5.3 7a8 8 0 0 1 13-2L20 7M4 17l1.7 2a8 8 0 0 0 13-2",
+  convert: "M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4",
+  plus: "M12 5v14M5 12h14",
+  file: "M14 2H5v20h14V7zm0 0v6h5M8 13h8M8 17h6",
+  folder: "M3 5h6l2 2h10v13H3z",
+  chevron: "m9 5 7 7-7 7",
+  down: "m5 9 7 7 7-7",
+  layers: "m12 3 10 5-10 5L2 8zm-10 9 10 5 10-5M2 16l10 5 10-5",
+  mcp: "M12 8v5M5 17l7-4 7 4M12 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6M5 16a3 3 0 1 0 0 6 3 3 0 0 0 0-6m14 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6",
+  agent:
+    "M12 2v4M7 6h10a4 4 0 0 1 4 4v9H3v-9a4 4 0 0 1 4-4M3 12H1m20 0h2M8 11v2m8-2v2m-8 3h8",
+  sun: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5",
+  moon: "M20.8 13a9 9 0 0 1-9.8-9.8A9 9 0 1 0 20.8 13Z",
+  system: "M3 3h18v13H3zm5 18h8m-4-5v5",
+  pause: "M8 5v14M16 5v14",
+  play: "m8 4 12 8-12 8z",
+  lock: "M6 10h12v11H6zm3 0V6a3 3 0 0 1 6 0v4",
+};
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.7"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  data-icon={name}
+  class={className}
+>
+  <path d={paths[name] || paths.file} />
+</svg>

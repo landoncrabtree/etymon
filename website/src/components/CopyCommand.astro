@@ -1,0 +1,38 @@
+---
+import Icon from "./Icon.astro";
+interface Props {
+  command?: string;
+  id: string;
+  secondary?: boolean;
+}
+const { command = "npx etymon", id, secondary = false } = Astro.props;
+---
+
+<div class:list={["copy-command", { secondary }]} data-copy-command>
+  <span class="command-prompt" aria-hidden="true">
+    <Icon name="chevron" size={18} />
+  </span>
+  <label class="sr-only" for={id}>
+    Installation command
+  </label>
+  <input
+    id={id}
+    type="text"
+    value={command}
+    readonly
+    spellcheck="false"
+    aria-label={command}
+  />
+  <button
+    type="button"
+    data-copy
+    aria-label={`Copy ${command}`}
+    title="Copy command"
+  >
+    <Icon name="copy" />
+    <span class="copy-confirm">
+      <Icon name="check" />
+    </span>
+  </button>
+  <span class="copy-status sr-only" role="status" aria-live="polite"></span>
+</div>
