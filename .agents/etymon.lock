@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "toolchain": {
+    "etymon": "0.1.0",
+    "adapters": "2026-09-30.2",
+    "skills": "1.7.0"
+  },
+  "dependencies": []
+}

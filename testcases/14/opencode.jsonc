@@ -1,0 +1,11 @@
+{
+  // User comment
+  "theme": "my-theme",
+  "mcp": {
+    "service": {
+      "type": "local",
+      "command": ["node", "-e", "process.stdin.resume()"],
+      "environment": { "ETYMON_SERVICE_TOKEN": "fixture-secret" },
+    },
+  },
+}

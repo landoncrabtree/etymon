@@ -1,0 +1,4 @@
+{
+  "title": "Custom resources from command line and terminal forms",
+  "handler": "customCreation"
+}

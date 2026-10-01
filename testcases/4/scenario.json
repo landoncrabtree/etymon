@@ -1,0 +1,4 @@
+{
+  "title": "Registry MCP → immutable lock → Copilot idempotence → Pi projection",
+  "handler": "registryMcp"
+}

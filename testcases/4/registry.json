@@ -1,0 +1,11 @@
+{
+  "server": {
+    "name": "io.etymon.fixture/fixture",
+    "description": "Deterministic local registry fixture; never connects to a real service",
+    "version": "1.2.3",
+    "remotes": [{ "type": "streamable-http", "url": "https://example.invalid/mcp" }]
+  },
+  "_meta": {
+    "io.modelcontextprotocol.registry/official": { "status": "active" }
+  }
+}

@@ -1,0 +1,77 @@
+name: Native harness discovery
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      latest:
+        description: Test current upstream releases instead of the verified version pins
+        type: boolean
+        default: false
+  schedule:
+    - cron: '23 9 * * 1'
+permissions:
+  contents: read
+jobs:
+  discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - harness: codex
+            package: '@openai/codex'
+            version: '0.159.1'
+          - harness: opencode
+            package: opencode-ai
+            version: '1.18.30'
+          - harness: copilot
+            package: '@github/copilot'
+            version: '1.0.90-6'
+          - harness: claude
+            package: '@anthropic-ai/claude-code'
+            version: '2.1.286'
+          - harness: gemini
+            package: '@google/gemini-cli'
+            version: '0.62.0'
+          - harness: pi
+            package: '@earendil-works/pi-coding-agent'
+            version: '0.99.2'
+          - harness: kilo
+            package: '@kilocode/cli'
+            version: '7.8.1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install the actual harness
+        env:
+          HARNESS_PACKAGE: ${{ matrix.package }}
+          HARNESS_VERSION: ${{ matrix.version }}
+          TEST_LATEST: ${{ github.event_name == 'schedule' || inputs.latest }}
+        run: |
+          if [[ "$TEST_LATEST" == "true" ]]; then
+            npm install --prefix "$RUNNER_TEMP/etymon-harness" "${HARNESS_PACKAGE}@latest"
+          else
+            npm install --prefix "$RUNNER_TEMP/etymon-harness" "${HARNESS_PACKAGE}@${HARNESS_VERSION}"
+          fi
+          echo "$RUNNER_TEMP/etymon-harness/node_modules/.bin" >> "$GITHUB_PATH"
+      - name: Inspect native discovery without authentication or model requests
+        env:
+          HARNESS_TARGET: ${{ matrix.harness }}
+        run: bash test_harness.sh 9 --native "$HARNESS_TARGET" --report-dir test-results/native
+      - name: Keep native discovery transcripts and generated files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.harness }}
+          path: test-results/native
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Remove the temporary harness installation
+        if: always()
+        run: rm -rf -- "$RUNNER_TEMP/etymon-harness"

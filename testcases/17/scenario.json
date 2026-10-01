@@ -1,0 +1,4 @@
+{
+  "title": "Global npm uninstall: TUI keep/remove/cancel, safe scope, and scripted defaults",
+  "handler": "uninstallFlow"
+}

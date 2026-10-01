@@ -1,0 +1,4 @@
+{
+  "title": "Equivalent Claude/AGENTS and Codex skill aliases → one registration each",
+  "handler": "dedupAliases"
+}

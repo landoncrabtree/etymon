@@ -1,0 +1,10 @@
+{
+  "theme": "system",
+  "mcp": {
+    "fixture": {
+      "type": "local",
+      "command": ["node", "-e", "process.stdin.resume()"],
+      "enabled": true
+    }
+  }
+}

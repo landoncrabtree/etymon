@@ -1,0 +1,4 @@
+{
+  "title": "Real TUI startup, rule registration, harness dialog, and clean exit",
+  "handler": "tuiFlow"
+}

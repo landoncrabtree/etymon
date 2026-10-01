@@ -1,0 +1,4 @@
+{
+  "title": "Actual harness loaders discover generated skills, MCP, rules, and agents without authentication",
+  "handler": "nativeLoaders"
+}

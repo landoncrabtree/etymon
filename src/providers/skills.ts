@@ -1,0 +1,122 @@
+import { promises as fs } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
+import { bundle, exists, inside, run, temporary, walk } from '../core/fs.js';
+import { Artifact, EtymonError, SKILLS_VERSION } from '../core/model.js';
+import { Workspace } from '../core/workspace.js';
+import { bundleIdentity } from '../core/dedup.js';
+import { frontmatter } from './agents.js';
+
+export function skillMetadata(artifact: Artifact): Record<string, unknown> {
+  const file = artifact.files.find((f) => f.path === 'SKILL.md');
+  if (!file) throw new EtymonError('INVALID_SKILL', 'Skill must contain SKILL.md');
+  const { metadata } = frontmatter(Buffer.from(file.content, 'base64').toString('utf8'));
+  const name = metadata.name;
+  if (typeof name !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name) || name.length > 64)
+    throw new EtymonError(
+      'INVALID_SKILL',
+      'Skill name must be 1–64 lowercase alphanumeric characters with single hyphens',
+    );
+  if (
+    typeof metadata.description !== 'string' ||
+    !metadata.description.trim() ||
+    metadata.description.length > 1024
+  )
+    throw new EtymonError(
+      'INVALID_SKILL',
+      'Skill description is required and must be at most 1024 characters',
+    );
+  return metadata;
+}
+/** Native installers often link an alias directory to the shared skill bundle. */
+export async function discoverNativeSkills(
+  root: string,
+  boundary: string,
+): Promise<{ path: string; name: string; artifact: Artifact }[]> {
+  const result: { path: string; name: string; artifact: Artifact }[] = [],
+    seen = new Set<string>();
+  const realBoundary = await fs.realpath(boundary);
+  async function visit(path: string, depth: number) {
+    if (!depth)
+      throw new EtymonError('SOURCE_LIMIT', 'Skill discovery exceeds 16 directory levels');
+    const real = await fs.realpath(path);
+    inside(realBoundary, relative(realBoundary, real));
+    if (seen.has(real)) return;
+    seen.add(real);
+    if (await exists(join(real, 'SKILL.md'))) {
+      const artifact = await bundle(real);
+      result.push({ path, name: String(skillMetadata(artifact).name), artifact });
+      return;
+    }
+    for (const entry of await fs.readdir(real, { withFileTypes: true })) {
+      if (['.git', 'node_modules', '.etymon'].includes(entry.name)) continue;
+      const child = join(path, entry.name);
+      if (entry.isDirectory() || (entry.isSymbolicLink() && (await fs.stat(child)).isDirectory()))
+        await visit(child, depth - 1);
+    }
+  }
+  await visit(root, 16);
+  return result;
+}
+export async function discoverSkills(
+  root: string,
+  names: string[] = [],
+): Promise<{ path: string; name: string; artifact: Artifact }[]> {
+  const isFile = (await fs.stat(root)).isFile();
+  const directory = isFile ? dirname(root) : root;
+  const paths = isFile
+    ? [root]
+    : (await walk(directory)).filter((p) => p.endsWith('SKILL.md')).map((p) => join(directory, p));
+  const found = [];
+  for (const path of paths) {
+    const artifact = await bundle(dirname(path));
+    const metadata = skillMetadata(artifact);
+    const name = String(metadata.name);
+    if (!names.length || names.includes('*') || names.includes(name))
+      found.push({ path: dirname(path), name, artifact });
+  }
+  for (const name of names)
+    if (name !== '*' && !found.some((f) => f.name === name))
+      throw new EtymonError('SKILL_NOT_FOUND', `No skill named ${name} in source`);
+  if (!found.length) throw new EtymonError('NO_SKILLS', 'No SKILL.md definitions found');
+  const unique = new Map<string, (typeof found)[number]>();
+  for (const skill of found) {
+    const prior = unique.get(skill.name);
+    if (prior && bundleIdentity(prior.artifact) !== bundleIdentity(skill.artifact))
+      throw new EtymonError(
+        'SKILL_NAME_COLLISION',
+        `Different skill bundles share ${skill.name}: ${prior.path} and ${skill.path}`,
+      );
+    if (!prior) unique.set(skill.name, skill);
+  }
+  return [...unique.values()];
+}
+export async function stageWithSkills(
+  root: string,
+  names: string[],
+  workspace: Workspace,
+  version = SKILLS_VERSION,
+): Promise<{ name: string; artifact: Artifact }[]> {
+  return temporary(async (stage) => {
+    await run(
+      process.platform === 'win32' ? 'npx.cmd' : 'npx',
+      [
+        '--yes',
+        `skills@${version}`,
+        'add',
+        root,
+        '--agent',
+        'universal',
+        '--copy',
+        '--yes',
+        '--skill',
+        ...(names.length ? names : ['*']),
+      ],
+      {
+        cwd: stage,
+        env: { DISABLE_TELEMETRY: '1', DO_NOT_TRACK: '1', CI: '1' },
+        debug: workspace.debug,
+      },
+    );
+    return await discoverSkills(join(stage, '.agents', 'skills'));
+  });
+}

@@ -1,0 +1,3 @@
+# Existing project ignores survive initialization.
+node_modules/
+.agents/**

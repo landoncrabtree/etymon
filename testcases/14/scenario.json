@@ -1,0 +1,4 @@
+{
+  "title": "JSONC comments and unrelated settings survive credential externalization",
+  "handler": "configAndSecrets"
+}

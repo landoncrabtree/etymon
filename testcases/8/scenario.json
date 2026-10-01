@@ -1,0 +1,4 @@
+{
+  "title": "Shared rules → remove one fragment → preserve remaining content → drift protection",
+  "handler": "sharedRemoval"
+}

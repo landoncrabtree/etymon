@@ -1,0 +1,4 @@
+{
+  "title": "Same skill name with different assets blocks conversion atomically",
+  "handler": "conflictingSkills"
+}

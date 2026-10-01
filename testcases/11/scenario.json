@@ -1,0 +1,4 @@
+{
+  "title": "Editable destDir relocates guidance and removes stale output",
+  "handler": "relocatedRules"
+}

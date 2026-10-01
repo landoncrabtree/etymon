@@ -1,0 +1,6 @@
+{
+  "transport": "stdio",
+  "command": "node",
+  "args": ["-e", "process.stdin.resume()"],
+  "env": {}
+}

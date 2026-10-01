@@ -1,0 +1,4 @@
+{
+  "title": "Conditional rules preserve globs; unsupported targets cannot broaden them",
+  "handler": "conditionalRules"
+}

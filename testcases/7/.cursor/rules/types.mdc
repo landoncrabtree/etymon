@@ -1,0 +1,7 @@
+---
+description: TypeScript guidance
+globs: "src/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+Use explicit types for exported functions.
