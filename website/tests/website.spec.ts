@@ -132,7 +132,7 @@ test("production assets resolve under the GitHub Pages path", async ({
   });
   await page.goto("./");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "One setup.Every coding tool.",
+    "One setup.Every coding agent.",
   );
   expect(await page.locator('link[rel="canonical"]').getAttribute("href")).toBe(
     "https://landoncrabtree.github.io/etymon/",
