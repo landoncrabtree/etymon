@@ -1,0 +1,614 @@
+{
+  "repository": "https://github.com/lobehub/lobehub",
+  "commit": "4bcb808c608ed79497713ab20bcd03ac6d8713da",
+  "etymon": "0.1.1",
+  "imported": { "skills": 50, "rules": 5 },
+  "registered": { "skills": 50, "rules": 4 },
+  "lockDependencies": 0,
+  "beforeRoots": [
+    ".agents",
+    ".claude",
+    ".codex",
+    ".cursor",
+    ".gemini",
+    ".github",
+    "AGENTS.md",
+    "GEMINI.md"
+  ],
+  "afterRoots": [".agents", ".claude", ".cursor", ".github"],
+  "sourceSymlinks": {
+    ".claude/skills": "../.agents/skills",
+    ".codex/skills": "../.agents/skills",
+    ".cursor/skills": "../.agents/skills",
+    ".gemini/skills": "../.agents/skills"
+  },
+  "skillBundles": [
+    {
+      "name": "acceptance",
+      "files": 31,
+      "sha256": "3c39d812d096daac3b42e6a975a540456e73aed54ee8b8d5cdafe41459173565"
+    },
+    {
+      "name": "add-model-provider",
+      "files": 5,
+      "sha256": "36c041fb8a6fe940a09eb20704bf6c8cbb0c940b461e1542b7a8fe4b78531cfd"
+    },
+    {
+      "name": "add-setting-env",
+      "files": 2,
+      "sha256": "0faa85833ece6a9ff6be1adbf32ebd49df6ed1b71ccd9d3b3c015a1d5130052d"
+    },
+    {
+      "name": "agent-runtime-hooks",
+      "files": 1,
+      "sha256": "0e6e65479ecc0f09ce721d47e61c82768ba65ea1b928635a11068926aa795b7c"
+    },
+    {
+      "name": "agent-signal",
+      "files": 5,
+      "sha256": "3bf1b2afcab0a46a1a122b6b31bc0c77624f834a1c8abe8aa006b98d49e234c1"
+    },
+    {
+      "name": "agent-testing-bot",
+      "files": 16,
+      "sha256": "87753f0266579bee2a84f9ee508c9e1de814b64294ececca07d6f072b1f7ea6b"
+    },
+    {
+      "name": "agent-tracing",
+      "files": 1,
+      "sha256": "e862dd14e9188873aa158c7e37cf777c194603233eb29318515486250b71256b"
+    },
+    {
+      "name": "agent-work",
+      "files": 1,
+      "sha256": "1edd164f5213625144eb0da545f00553041d655cb600dbc38401a5cd8caff01f"
+    },
+    {
+      "name": "builtin-tool",
+      "files": 14,
+      "sha256": "b293c466b6bfa8cc0a5a6b241c848a130c9a924cbf683cb62afcbb10ba2361b4"
+    },
+    {
+      "name": "chat-sdk",
+      "files": 1,
+      "sha256": "cc089d5b53063211f620b54871667071d9779a8127dff11a62950c29bb18d59e"
+    },
+    {
+      "name": "cleanup-git-worktrees",
+      "files": 3,
+      "sha256": "ebb84e7005cc81c826a68f8ead801058b150b0ac845e3ab4942eb011b08fe464"
+    },
+    {
+      "name": "cli",
+      "files": 10,
+      "sha256": "b9e7c13ae96b7de36258ac06c4079dda240b5157095ac56905e0608bbb7aa340"
+    },
+    {
+      "name": "compose-atoms",
+      "files": 1,
+      "sha256": "9aa109b3d0fcad4e4e5cec53c39770961185883b0a6cd795b293d9b37a5c3dcc"
+    },
+    {
+      "name": "data-fetching-architecture",
+      "files": 3,
+      "sha256": "209711194356227684cf4f7eb215e35893a5ebb8de0b659a302071a3fc03cbfd"
+    },
+    {
+      "name": "db-migrations",
+      "files": 1,
+      "sha256": "11eee49a6e8a231e5c7379e36ca62240b150adb2b3aa5945e2a405c95bedafe3"
+    },
+    {
+      "name": "debug-frontend-with-browser",
+      "files": 3,
+      "sha256": "664878965880e7243d6abe9a1e9d298ce0495faecbac3638bed3dd32082378ce"
+    },
+    {
+      "name": "debug-package",
+      "files": 1,
+      "sha256": "2375009f9adff4c1b83c4441db74bfc97b74991ae7498a779ecfd4f5b2a763ea"
+    },
+    {
+      "name": "deep-review",
+      "files": 31,
+      "sha256": "5667a52b25abe33ca5f202b673b836e7f0ad715237c88564a167827547d335c0"
+    },
+    {
+      "name": "design-prototype",
+      "files": 5,
+      "sha256": "185b19bf8a2ca3d7d8618a815d9530b36af7d0a0864b5df869646137e032c255"
+    },
+    {
+      "name": "desktop",
+      "files": 6,
+      "sha256": "1d0c50344c4b4e34a716696f7e3b9927feae239d226d094edebd9b447100a487"
+    },
+    {
+      "name": "docs-changelog",
+      "files": 1,
+      "sha256": "26a89d57ee6872bb5f23689c33336166e148a71628aed691ba03acb7ef6045ec"
+    },
+    {
+      "name": "drizzle",
+      "files": 1,
+      "sha256": "40bb5f66ecc4e42ea7ba305ff2131a0dd9539d229922fc3f124ac0d241c0d594"
+    },
+    {
+      "name": "full-text-search",
+      "files": 2,
+      "sha256": "091ab16a7904063bec002431b815fd776fca2e145ee34af55a6d6885412b4819"
+    },
+    {
+      "name": "heterogeneous-agent",
+      "files": 2,
+      "sha256": "7640d6b51404ac04dd40006da5e90c2ee71e2b76c4f54d1af4cd08e32299369a"
+    },
+    {
+      "name": "hotkey",
+      "files": 1,
+      "sha256": "b5a5a7abf3b20ad38e20d822a794d59602f74e90fdc093a1a7c9e9909485f71d"
+    },
+    {
+      "name": "i18n",
+      "files": 1,
+      "sha256": "fd69dbe6515a6a8e2fa9683bf47445335436a231d19552e0ce7c7ad919ecb67d"
+    },
+    {
+      "name": "linear",
+      "files": 1,
+      "sha256": "c652e728a0c852bc5aec6c50ea63a6c0e5c74d16175ac6c25ce18e743d0575ab"
+    },
+    {
+      "name": "llm-generation",
+      "files": 2,
+      "sha256": "9e82c123b23ac5f7d1f0cf7e4ebee67e907c8298d7d6f0204fb5db2a100abd1a"
+    },
+    {
+      "name": "modal",
+      "files": 1,
+      "sha256": "9bb346aa1af518636dfb672c3e7da16204a4c758a716fd1ef7ca6031205b3d3f"
+    },
+    {
+      "name": "model-bank-metadata",
+      "files": 5,
+      "sha256": "65e87a27025393f061cca9743bf46c80f55d510712212735565a0095f99b337f"
+    },
+    {
+      "name": "pr",
+      "files": 2,
+      "sha256": "3e8a13c2834308e0630dad513ed6b63356c4a7e95269f886b152b505e748bf52"
+    },
+    {
+      "name": "product-design",
+      "files": 7,
+      "sha256": "9f5b270308279acc6fc36485240bc6184460802431be0a5b56da602bc7022451"
+    },
+    {
+      "name": "project-overview",
+      "files": 1,
+      "sha256": "022dce30cf2a7d512263cc2256f4d0bfdeb83c6950161544ca0a482f2a3cb181"
+    },
+    {
+      "name": "react",
+      "files": 2,
+      "sha256": "8f1b7fb559f2fd066d77d3d6749978f1de1542bde115b2a0896065013f7d9ce1"
+    },
+    {
+      "name": "response-compliance",
+      "files": 1,
+      "sha256": "44248e4270d293dfe58bbcfa0f3a53bff4f647dbe0d6c998464e679342b43e89"
+    },
+    {
+      "name": "run-eval-harbor",
+      "files": 18,
+      "sha256": "239b8ea3e9f0d4bf5864ee0d68dd23b38f2b6f70acdf400a785fa99fc924ed75"
+    },
+    {
+      "name": "skills-audit",
+      "files": 2,
+      "sha256": "8cca3662bddece74ddc125d4a52575c574909c4a0941a4b8542e91ab534ff32c"
+    },
+    {
+      "name": "spa-routes",
+      "files": 1,
+      "sha256": "62c7bbf408e15a3a15a408f12e037afafa32ef52836ee5bb8656c308996b2806"
+    },
+    {
+      "name": "split-micro-app",
+      "files": 1,
+      "sha256": "5d78b7c8ebc9880fac7c1fb3ebbf4332e43ade4f740b41a20365a52782524914"
+    },
+    {
+      "name": "store-data-structures",
+      "files": 2,
+      "sha256": "b15148176deb0cd31d81facabb1793b8b7662f86810ce05668e7e7a0d3744343"
+    },
+    {
+      "name": "testing",
+      "files": 6,
+      "sha256": "d7bec6573105f57b2322132c9c5b7bbcedcd302fc25648feb426a5071f2e714b"
+    },
+    {
+      "name": "testing-heterogeneous-agents",
+      "files": 4,
+      "sha256": "c9b103b91173731434b3cca931fd93c388d338d01634f4570c8fbbcfb3cc4bd5"
+    },
+    {
+      "name": "trpc-router",
+      "files": 1,
+      "sha256": "67d61e2ae03e31142cdf3d6a4a556dfa50b79ee4677a9d547d52048407efffcf"
+    },
+    {
+      "name": "typescript",
+      "files": 1,
+      "sha256": "c0b955bd74172af817ff1958c7579578832e9bac861870148690bcd595457d41"
+    },
+    {
+      "name": "upstash-workflow",
+      "files": 5,
+      "sha256": "b884a39b794c19ab8b1c620481d49082f9ef44f5f8a3e809b9c0acfe3c177533"
+    },
+    {
+      "name": "ux",
+      "files": 7,
+      "sha256": "faaa7757722bcc99427899445b7dd940b01b8e547d9cdbb465711de356276a09"
+    },
+    {
+      "name": "ux-audit",
+      "files": 31,
+      "sha256": "2a61285af864c26c10dbd5249a339460c170cdc85fe7a797e31f20c8381e36c5"
+    },
+    {
+      "name": "version-release",
+      "files": 8,
+      "sha256": "65786ffe5820bc2a8e9f7dca1b741061db5bec0cee53bde14e67c28d4e8a2da9"
+    },
+    {
+      "name": "write-landing-docs",
+      "files": 2,
+      "sha256": "df67141ffae35c622a13e6048f22976170126d834edb476ebd977cb2ce9c6988"
+    },
+    {
+      "name": "zustand",
+      "files": 6,
+      "sha256": "0b47720c6b74dcf2ebf394a99afbdcef8ee032d3d780e29abaef691c634d281d"
+    }
+  ],
+  "rules": [
+    {
+      "name": "e2e-instructions",
+      "source": "e2e/CLAUDE.md",
+      "canonical": ".agents/etymon/rules/e2e-instructions.md",
+      "destDir": "e2e"
+    },
+    {
+      "name": "packages-model-runtime-instructions",
+      "source": "packages/model-runtime/CLAUDE.md",
+      "canonical": ".agents/etymon/rules/packages-model-runtime-instructions.md",
+      "destDir": "packages/model-runtime"
+    },
+    {
+      "name": "instructions",
+      "source": "AGENTS.md",
+      "canonical": ".agents/etymon/rules/instructions.md",
+      "destDir": "."
+    },
+    {
+      "name": "instructions-28150dec",
+      "source": "GEMINI.md",
+      "canonical": ".agents/etymon/rules/instructions-28150dec.md",
+      "destDir": "."
+    }
+  ],
+  "excluded": {
+    "path": "packages/agent-templates/src/templates/claw/AGENTS.md",
+    "reason": "Application prompt template imported by agent.ts"
+  },
+  "retired": [
+    ".agents/skills",
+    ".claude/skills",
+    ".codex/skills",
+    ".cursor/skills",
+    ".gemini/skills",
+    "e2e/CLAUDE.md",
+    "packages/model-runtime/CLAUDE.md",
+    "AGENTS.md",
+    "GEMINI.md"
+  ],
+  "checks": {
+    "completeSkillBundlesUnchanged": true,
+    "repeatImportUnchanged": true,
+    "canonicalSourceUnchangedBySync": true,
+    "unrelatedTrackedFilesUnchanged": true,
+    "claudeSync": "strict",
+    "codexOpencodeSync": "allow-lossy",
+    "repeatSyncChanges": 0,
+    "doctor": true
+  },
+  "commands": [
+    {
+      "step": "initialize",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "init",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 0
+    },
+    {
+      "step": "preview-import",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "convert",
+        "--dry-run",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 0,
+      "resources": { "skill": 50, "rule": 5 },
+      "diagnostics": { "RESOURCE_DUPLICATE": 1100 },
+      "severities": { "info": 1100 }
+    },
+    {
+      "step": "import",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "convert",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 0,
+      "resources": { "skill": 50, "rule": 5 },
+      "diagnostics": { "RESOURCE_DUPLICATE": 1100 },
+      "severities": { "info": 1100 }
+    },
+    {
+      "step": "repeat-import",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "convert",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 0,
+      "resources": { "skill": 50, "rule": 5 },
+      "diagnostics": { "RESOURCE_DUPLICATE": 1100 },
+      "severities": { "info": 1100 }
+    },
+    {
+      "step": "keep-application-template",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "rules",
+        "remove",
+        "packages-agent-templates-src-templates-claw-instructions",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 0,
+      "changes": 0,
+      "diagnostics": {},
+      "severities": {}
+    },
+    {
+      "step": "retire-imported-originals",
+      "argv": [
+        "git",
+        "rm",
+        "-r",
+        "--cached",
+        "--",
+        ".agents/skills",
+        ".claude/skills",
+        ".codex/skills",
+        ".cursor/skills",
+        ".gemini/skills",
+        "e2e/CLAUDE.md",
+        "packages/model-runtime/CLAUDE.md",
+        "AGENTS.md",
+        "GEMINI.md"
+      ],
+      "exitCode": 0,
+      "removedWorkingPaths": [
+        ".agents/skills",
+        ".claude/skills",
+        ".codex/skills",
+        ".cursor/skills",
+        ".gemini/skills",
+        "e2e/CLAUDE.md",
+        "packages/model-runtime/CLAUDE.md",
+        "AGENTS.md",
+        "GEMINI.md"
+      ]
+    },
+    {
+      "step": "sync-claude",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "sync",
+        "--harness",
+        "claude",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 0,
+      "changes": 269,
+      "diagnostics": { "NATIVE_RULE_PREREQUISITE": 1, "NATIVE_PREREQUISITE": 1 },
+      "severities": { "info": 2 }
+    },
+    {
+      "step": "strict-portability-review",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "sync",
+        "--harness",
+        "codex,opencode",
+        "--dry-run",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 1,
+      "changes": 0,
+      "diagnostics": {
+        "NATIVE_RULE_PREREQUISITE": 2,
+        "SKILL_EXTENSION_BLOCKED": 68,
+        "NATIVE_PREREQUISITE": 1
+      },
+      "severities": { "info": 3, "error": 68 }
+    },
+    {
+      "step": "review-lossy-sync",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "sync",
+        "--harness",
+        "codex,opencode",
+        "--dry-run",
+        "--allow-lossy",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 0,
+      "changes": 532,
+      "diagnostics": {
+        "NATIVE_RULE_PREREQUISITE": 2,
+        "SKILL_FIELDS_OMITTED": 68,
+        "NATIVE_PREREQUISITE": 1
+      },
+      "severities": { "info": 3, "warning": 68 }
+    },
+    {
+      "step": "sync-codex-opencode",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "sync",
+        "--harness",
+        "codex,opencode",
+        "--allow-lossy",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 0,
+      "changes": 532,
+      "diagnostics": {
+        "NATIVE_RULE_PREREQUISITE": 2,
+        "SKILL_FIELDS_OMITTED": 68,
+        "NATIVE_PREREQUISITE": 1
+      },
+      "severities": { "info": 3, "warning": 68 }
+    },
+    {
+      "step": "repeat-sync",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "sync",
+        "--harness",
+        "codex,opencode",
+        "--allow-lossy",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 0,
+      "changes": 0,
+      "diagnostics": {
+        "NATIVE_RULE_PREREQUISITE": 2,
+        "SKILL_FIELDS_OMITTED": 68,
+        "NATIVE_PREREQUISITE": 1
+      },
+      "severities": { "info": 3, "warning": 68 }
+    },
+    {
+      "step": "doctor",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "doctor",
+        "--harness",
+        "claude,codex,opencode",
+        "--allow-lossy",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 0,
+      "diagnostics": {
+        "NATIVE_RULE_PREREQUISITE": 3,
+        "NATIVE_PREREQUISITE": 2,
+        "SKILL_FIELDS_OMITTED": 68,
+        "RESOURCE_DUPLICATE": 66,
+        "COMPATIBILITY_ALIAS": 34
+      },
+      "severities": { "info": 71, "warning": 102 },
+      "ok": true
+    },
+    {
+      "step": "inventory",
+      "argv": [
+        "npx",
+        "--yes",
+        "etymon@0.1.1",
+        "list",
+        "--json",
+        "--home",
+        "$DEMO/home",
+        "--cache",
+        "$DEMO/cache"
+      ],
+      "exitCode": 0
+    }
+  ]
+}

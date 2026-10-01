@@ -38,6 +38,8 @@ Release workflow tests run the shell entry points in temporary projects with npm
 
 Release candidate **0.1.1** passed formatting, strict types, all 177 unit tests, and the production build. A fresh npm/npx installation passed the packed CLI smoke check. Archive inspection and the publication dry run confirmed the package name, version, executable, production modules, and documentation; repository fixtures and development files were excluded.
 
+The [LobeHub demo](demos/lobehub.md) runs published `etymon@0.1.1` against upstream commit `4bcb808c608ed79497713ab20bcd03ac6d8713da`. It imports 50 complete skill bundles (266 files) and five instruction files, excludes an application prompt template from contributor guidance, and verifies strict Claude sync plus reviewed lossy Codex/OpenCode sync. Repeated conversion and sync, canonical source preservation, all unrelated Git index entries, and doctor pass. The committed receipt records commands and hashes; its snapshots generate the README comparison. This is a local migration demonstration, not a LobeHub application-test or upstream-adoption claim.
+
 Inline MCP checks cover imported credential references, local configurations that work after their input JSON is removed, preservation of native extension fields, idempotent reimport, authored-edit conflicts, and rejection of file-backed or missing-connection manifest entries.
 
 ## Local runtime observations

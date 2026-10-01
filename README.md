@@ -6,6 +6,15 @@ Make your repositories portable and AI harness-agnostic with Etymon.
 
 [Website](https://landoncrabtree.github.io/etymon/) · [CLI reference](docs/CLI.md)
 
+## Use case: LobeHub
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/agent-setup-dark.svg">
+  <img src="docs/assets/agent-setup-light.svg" alt="A real local conversion of LobeHub with Etymon 0.1.1. Fifty skills and four rules move into Etymon source under .agents. The .codex and .gemini skill symlinks and root instruction files leave Git. Workflow prompts in .claude, documentation in .cursor, and .github CI remain tracked." width="1200">
+</picture>
+
+[LobeHub](https://github.com/lobehub/lobehub): **50 skills, 4 rules**, converted and synced with the published CLI. [Reproduce the demo](docs/demos/lobehub.md).
+
 ## Install
 
 ```bash
