@@ -150,8 +150,8 @@ export async function importRules(
     try {
       rules =
         source.dialect === 'plain' || /^(?:AGENTS|AGENT)\.md$/.test(basename(path))
-          ? parseInstructionFile(text, path, base)
-          : [parseRule(text, path, source.dialect, base)];
+          ? parseInstructionFile(text, path, base, source.directory ? 'modular' : undefined)
+          : [parseRule(text, path, source.dialect, base, source.directory ? 'modular' : undefined)];
     } catch (error) {
       diagnostics.push({
         code: error instanceof EtymonError ? error.code : 'INVALID_RULE',
@@ -258,6 +258,19 @@ export async function importRules(
                 if ((index === 0 && !(path === marker || path.startsWith(marker))) || index < 0)
                   return [];
                 if (!source.directory && path.slice(index) !== marker) return [];
+                // A declared config-directory alias belongs to its parent
+                // project scope. Let its specific source handle it before a
+                // generic nested filename can consume the same physical file.
+                if (
+                  !source.directory &&
+                  sources.some(
+                    (other) =>
+                      !other.directory &&
+                      other.path.length > source.path.length &&
+                      (path === other.path || (other.tree && path.endsWith('/' + other.path))),
+                  )
+                )
+                  return [];
                 return [join(workspace.root, path.slice(0, index), source.path)];
               }),
             ),

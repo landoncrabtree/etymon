@@ -298,10 +298,22 @@ async function renderStrictRules(
         });
         continue;
       }
-      const standing = spec.file?.[scope];
+      const standing = spec.file?.[scope],
+        modular = options.rulesPath ?? spec.modular?.[scope];
+      // Layout is a preference, separate from activation. Preserve independent
+      // source modules where their semantics can be represented; standing-only
+      // destinations still compose compatible guidance into their single file.
+      const preferModular =
+        !workspace.global &&
+        modular &&
+        spec.dialect &&
+        rule.layout === 'modular' &&
+        (rule.base === '.' || spec.dialect !== 'plain') &&
+        (spec.dialect !== 'amp' || rule.activation === 'glob');
       if (
         rule.activation === 'always' &&
         standing &&
+        !preferModular &&
         !Object.keys(rule.native).length &&
         (rule.base === '.' || (!workspace.global && spec.nested))
       ) {
@@ -311,7 +323,6 @@ async function renderStrictRules(
         addStanding(path, rule, resource.id);
         continue;
       }
-      const modular = options.rulesPath ?? spec.modular?.[scope];
       if (workspace.global)
         throw new EtymonError(
           'RULE_SCOPE_UNSUPPORTED',

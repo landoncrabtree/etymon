@@ -8,6 +8,102 @@ import { nativeChecks } from './native.mjs';
 const rules = async (c) => (await c.list()).authored.rule;
 const lockText = (c) => c.read('.agents/etymon.lock');
 export const handlers = {
+  async mixedCursorRules(c) {
+    const converted = await c.cli(['convert', 'cursor']);
+    assert.equal(converted.resources.filter((resource) => resource.kind === 'rule').length, 4);
+    const registrations = await rules(c),
+      original = new Map();
+    assert.deepEqual(Object.keys(registrations).sort(), ['docs', 'general', 'tests', 'types']);
+    assert.equal((await c.list()).lock.dependencies.length, 0);
+    for (const [name, registration] of Object.entries(registrations)) {
+      assert.equal(registration.destDir, '.');
+      assert.equal(registration.path, `etymon/rules/${name}.md`);
+      const text = await c.read('.agents/' + registration.path);
+      assert.match(text, /layout: modular/);
+      assert.match(
+        text,
+        new RegExp(`activation: ${['general', 'docs'].includes(name) ? 'always' : 'glob'}`),
+      );
+      original.set(name, text);
+    }
+    // The editable Etymon source must suffice after native originals are removed.
+    await c.clear(['.cursor/rules']);
+    const preview = await c.sync('claude', ['--dry-run']);
+    assert.equal(preview.changes.length, 4);
+    assert(preview.changes.every((change) => change.path.includes('/.claude/rules/')));
+    await assert.rejects(c.read('.claude/rules/general.md'), { code: 'ENOENT' });
+    await c.sync('claude');
+    assert.deepEqual((await fs.readdir(join(c.project, '.claude/rules'))).sort(), [
+      'docs.md',
+      'general.md',
+      'tests.md',
+      'types.md',
+    ]);
+    for (const name of ['general', 'docs']) {
+      const native = await c.read(`.claude/rules/${name}.md`);
+      assert(!/^paths:/m.test(native), `${name} must stay unconditional`);
+    }
+    assert.match(await c.read('.claude/rules/types.md'), /paths:\n\s+- src\/\*\*\/\*\.\{ts,tsx\}/);
+    assert.match(await c.read('.claude/rules/tests.md'), /paths:\n\s+- tests\/\*\*/);
+    await assert.rejects(c.read('AGENTS.md'), { code: 'ENOENT' });
+    await c.idempotent('claude');
+    await c.cli(['convert', 'claude']);
+    assert.equal(Object.keys(await rules(c)).length, 4);
+    for (const [name, text] of original)
+      assert.equal(await c.read(`.agents/etymon/rules/${name}.md`), text);
+    await c.idempotent('claude');
+    // Restore Cursor directly from the same source, then compose for a
+    // standing-only destination with explicit glob losses.
+    await c.sync('cursor');
+    await c.idempotent('cursor');
+    await c.sync('codex', ['--allow-lossy']);
+    const composed = await c.read('AGENTS.md');
+    for (const phrase of [
+      'Run checks',
+      'Use explicit types',
+      'Keep test data',
+      'Update command examples',
+    ])
+      assert(composed.includes(phrase));
+    await c.idempotent('codex', ['--allow-lossy']);
+    await c.cli(['rules', 'remove', 'general', '--allow-lossy']);
+    await assert.rejects(c.read('.claude/rules/general.md'), { code: 'ENOENT' });
+    assert(!(await c.read('AGENTS.md')).includes('Run checks before'));
+    assert.match(await c.read('.claude/rules/types.md'), /Use explicit types/);
+    await c.idempotent('claude,cursor,codex', ['--allow-lossy']);
+  },
+  async standaloneClaudeInstructions(c) {
+    await c.cli(['convert', 'claude']);
+    const manifest = await rules(c);
+    assert.deepEqual(Object.keys(manifest), ['instructions']);
+    assert.equal(manifest.instructions.destDir, '.');
+    const source = await c.read('.agents/etymon/rules/instructions.md');
+    assert.match(source, /layout: standing/);
+    assert.match(source, /activation: always/);
+    assert.equal((await c.list()).lock.dependencies.length, 0);
+    await c.clear(['.claude/CLAUDE.md']);
+    for (const target of ['copilot-cli', 'codex']) {
+      await c.sync(target);
+      assert.match(await c.read('AGENTS.md'), /Keep public API behavior stable/);
+      await c.idempotent(target);
+      await c.cli(['convert', target]);
+      assert.deepEqual(Object.keys(await rules(c)), ['instructions']);
+    }
+    // Clear the owned file to prove Continue does not recreate it.
+    await c.clear(['AGENTS.md']);
+    await c.sync('continue');
+    await assert.rejects(c.read('AGENTS.md'), { code: 'ENOENT' });
+    const native = await c.read('.continue/rules/instructions.md');
+    assert.match(native, /alwaysApply: true/);
+    assert.match(native, /Run the full checks/);
+    await c.idempotent('continue');
+    await c.cli(['convert', 'continue']);
+    assert.deepEqual(Object.keys(await rules(c)), ['instructions']);
+    assert.equal(await c.read('.agents/etymon/rules/instructions.md'), source);
+    await c.sync('codex,copilot-cli');
+    assert.match(await c.read('AGENTS.md'), /Keep public API behavior stable/);
+    await c.idempotent('codex,copilot-cli');
+  },
   async lossyConversions(c) {
     await c.write(
       'checks/SKILL.md',
@@ -341,6 +437,8 @@ export const handlers = {
       'Preserve APIs.',
       '--dest-dir',
       'packages/api',
+      '--layout',
+      'modular',
     ]);
     const authored = (await c.list()).authored;
     assert.deepEqual(authored.mcp.process.connection.args, ['server.js', 'two words']);
@@ -385,6 +483,7 @@ export const handlers = {
       'create-mcp-sse',
       'create-rule',
       'create-rule-glob',
+      'create-rule-modular',
       'create-rule-global',
     ])
       await ui(mode);
@@ -408,12 +507,18 @@ export const handlers = {
     assert.equal(scoped.base, 'packages/tui');
     assert.equal(scoped.activation, 'glob');
     assert.deepEqual(scoped.patterns, ['**/*.ts']);
+    assert.equal(
+      createdRules.find((resource) => resource.name === 'form-modular').rule.layout,
+      'modular',
+    );
     const personal = (await c.cli(['rule', 'list', '--global'])).resolved;
     assert.equal(personal.length, 1);
     assert.equal(personal[0].rule.base, '.');
     assert.equal(personal[0].rule.activation, 'always');
     assert.deepEqual(personal[0].rule.patterns, []);
     await c.sync('claude');
+    assert.match(await c.read('.claude/rules/form-modular.md'), /packages\/tui\/\*\*/);
+    assert.match(await c.read('.claude/rules/api.md'), /packages\/api\/\*\*/);
     await c.idempotent('claude');
     await ui('host-create');
     await ui('host-create-rule');
@@ -822,7 +927,7 @@ export const handlers = {
         (d) => d.code === 'RULE_NATIVE_FIELDS_OMITTED' && d.severity === 'warning',
       ),
     );
-    assert.match(await c.read('AGENTS.md'), /TODO/);
+    assert.match(await c.read('.cursor/rules/compound.mdc'), /TODO/);
     assert.equal(await c.read('.agents/etymon/rules/compound.md'), source);
     await c.idempotent('cursor', ['--allow-lossy']);
   },

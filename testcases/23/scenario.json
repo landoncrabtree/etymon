@@ -1,0 +1,4 @@
+{
+  "title": "Mixed Cursor modules stay separate in Claude rules and retain globs or unconditional activation",
+  "handler": "mixedCursorRules"
+}

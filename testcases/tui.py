@@ -152,7 +152,7 @@ try:
                     send("Authorization=env:MCP_AUTH")
             else:
                 send("Use when reviewing changes.\t")
-                send("Review menu-created guidance." if hosted and kind == "rule" else "Review carefully.\r\r    Preserve indentation.")
+                send("Review menu-created guidance." if hosted and kind == "rule" else "Review modular guidance.\r\r    Preserve indentation." if mode.endswith("modular") else "Review carefully.\r\r    Preserve indentation.")
                 if kind == "rule" and not mode.endswith("global"):
                     send("\t")
                     send("\x7fpackages/tui\t")
@@ -161,6 +161,8 @@ try:
                         send("\x13")
                         expect("empty glob")
                         send("**/*.ts")
+                    elif mode.endswith("modular"):
+                        send("\t\x1b[B")
             send("\x13")
             expect("Created")
             if hosted:

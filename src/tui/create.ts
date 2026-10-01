@@ -5,6 +5,7 @@ import { Creation, CreationDraft, creationSchema, creationValues } from '../serv
 import { splitGlobs } from '../providers/rules.js';
 
 const ruleModes = ['always', 'glob', 'model', 'manual', 'never'] as const;
+const ruleLayouts = ['standing', 'modular'] as const;
 const selected = (list: Widgets.ListElement) =>
   (list as Widgets.ListElement & { selected: number }).selected;
 
@@ -28,6 +29,8 @@ export function promptCreation(
   scope: { global?: boolean } = {},
 ): Promise<Creation> {
   if (kind === 'rule') {
+    if (initial.layout && !ruleLayouts.some((layout) => layout === initial.layout))
+      throw new EtymonError('INVALID_CREATION', 'Choose standing or modular output layout');
     if (initial.activation && !ruleModes.some((mode) => mode === initial.activation))
       throw new EtymonError('INVALID_CREATION', 'Choose always, glob, model, manual, or never');
     if (
@@ -136,8 +139,8 @@ export function promptCreation(
     row += multiline ? 13 : 7;
     return field;
   };
-  const select = (label: string, help: string, items: string[], index: number) => {
-    blessed.box({
+  const select = (label: string, help: string, items: string[], index: number, key?: string) => {
+    const title = blessed.box({
       parent: form,
       top: row,
       left: 2,
@@ -146,7 +149,7 @@ export function promptCreation(
       content: label,
       style: { fg: 'cyan' },
     });
-    blessed.box({
+    const hint = blessed.box({
       parent: form,
       top: row + 1,
       left: 2,
@@ -168,6 +171,7 @@ export function promptCreation(
       style: { selected: { bg: 'blue', fg: 'white' }, fg: 'white' },
     });
     list.select(index);
+    if (key) groups.set(key, [title, hint, list]);
     list.key('tab', () => form.focusNext());
     list.key('S-tab', () => form.focusPrevious());
     row += items.length + 6;
@@ -176,6 +180,7 @@ export function promptCreation(
   input('name', 'Name', 'A unique lowercase name, such as api-reviewer', initial.name);
   let transport: Widgets.ListElement | undefined;
   let activation: Widgets.ListElement | undefined;
+  let outputLayout: Widgets.ListElement | undefined;
   if (kind === 'mcp') {
     transport = select(
       'Transport',
@@ -272,6 +277,13 @@ export function promptCreation(
         'Comma-separated globs relative to the directory scope',
         initial.patterns?.join(', '),
       );
+      outputLayout = select(
+        'Output layout',
+        'Preferred output when the destination supports both formats',
+        ['Standing instructions', 'Separate rule file'],
+        ruleLayouts.indexOf(initial.layout ?? 'standing'),
+        'layout',
+      );
     }
   }
   const save = blessed.button({
@@ -335,7 +347,11 @@ export function promptCreation(
         element.top = position + index;
         glob ? element.show() : element.hide();
       });
-      save.top = cancel.top = position + (glob ? 7 : 0);
+      const layoutPosition = position + (glob ? 7 : 0);
+      groups.get('layout')!.forEach((element, index) => {
+        element.top = layoutPosition + index;
+      });
+      save.top = cancel.top = layoutPosition + 8;
       error.top = Number(save.top) + 4;
       screen.render();
     };
@@ -397,6 +413,9 @@ export function promptCreation(
             draft.destDir = scope.global ? '.' : get('destDir');
             draft.activation = activation ? ruleModes[selected(activation)] : 'always';
             draft.patterns = draft.activation === 'glob' ? splitGlobs(get('patterns')) : [];
+            draft.layout = outputLayout
+              ? ruleLayouts[selected(outputLayout)]
+              : (initial.layout ?? 'standing');
           }
         }
         const parsed = creationSchema.safeParse(draft);

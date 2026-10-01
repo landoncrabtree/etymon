@@ -1,0 +1,6 @@
+---
+globs: 'tests/**'
+alwaysApply: false
+---
+
+Keep test data isolated from user configuration.

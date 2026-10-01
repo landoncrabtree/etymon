@@ -70,7 +70,7 @@ etymon sync --harness codex --adopt
 
 Rules and instructions share one interface. Profiles distinguish standing files, modular rule directories, nesting, and supported activation modes; source count does not create a separate resource kind.
 
-Each distinct imported rule gets a manifest entry and canonical Markdown under `.agents/etymon/rules/`. For example, two always-on `.cursor/rules/*.mdc` files become two registered rules with `destDir = "."`. Syncing to Codex composes their bodies into separate managed sections in one root `AGENTS.md`. Tools with compatible individual rule files receive separate output; nested standing rules retain their directory placement. A destination that cannot preserve a rule's conditions blocks the default plan. `--allow-lossy` can broaden activation or directory scope and reports each change. Single-file output can contain multiple rules without merging their identities.
+Each distinct imported rule gets a manifest entry and canonical Markdown under `.agents/etymon/rules/`. For example, two always-on `.cursor/rules/*.mdc` files become two registered rules with `destDir = "."` and `layout: modular` in their authored Markdown. Syncing to Claude produces separate `.claude/rules/*.md` files; glob-scoped rules carry native `paths`. Syncing unconditional modules to Codex composes their bodies into separate managed sections in one root `AGENTS.md`. Standalone `.claude/CLAUDE.md` imports as standing guidance at its containing project scope and syncs to root `AGENTS.md` for Copilot or Codex. Continue receives `.continue/rules/*.md` instead. A destination that cannot preserve a rule's conditions blocks the default plan. `--allow-lossy` can broaden activation or directory scope and reports each change. Single-file output can contain multiple rules without merging their identities.
 
 `--dry-run` reports the import without writing source. Explicit configuration/rule paths use the shared options above. See [rule compatibility](RULES.md) for recognized locations, conditions, nesting, and precedence.
 
@@ -123,7 +123,7 @@ etymon mcp create
 etymon skills add
 ```
 
-The terminal form uses Tab/Shift+Tab to move between fields, Ctrl+S to save, and Ctrl+C to cancel. Validation keeps the form open for correction. Instructions are multiline. MCP fields change with transport; project rule patterns appear for glob activation. Global rule forms omit project scope and conditional activation.
+The terminal form uses Tab/Shift+Tab to move between fields, Ctrl+S to save, and Ctrl+C to cancel. Validation keeps the form open for correction. Instructions are multiline. MCP fields change with transport; project rule patterns appear for glob activation. Project rules offer standing instructions or a separate rule file as their preferred layout. Global rule forms omit project scope, conditional activation, and layout selection.
 
 Supply fields for headless use. In a terminal, `--yes` skips the form; `--json` also selects headless behavior.
 
@@ -137,6 +137,9 @@ etymon agents create --name reviewer --description "Review changes" \
 etymon rules create --name typescript --dest-dir src --activation glob \
   --pattern '**/*.ts' --body "Keep public types stable." --yes
 
+etymon rules create --name testing --layout modular \
+  --body "Run checks before committing." --yes
+
 printf 'Run project checks.\n' | etymon skills create --name checks \
   --description "Run project checks" --body-file - --json
 
@@ -147,26 +150,27 @@ etymon mcp create --name local-server --transport stdio --command node \
   --arg=server.js --arg='two words' --env TOKEN=env:MCP_TOKEN --yes
 ```
 
-| Creation option            | Applies to            | Behavior                                                                            |
-| -------------------------- | --------------------- | ----------------------------------------------------------------------------------- |
-| `--name <name>`            | All                   | Unique resource name; skill names use lowercase letters, digits, and single hyphens |
-| `--description <text>`     | Skills, agents, rules | Usage summary; required for skills, agents, and model-selected rules                |
-| `--body <text>`            | Skills, agents, rules | Instructions                                                                        |
-| `--body-file <path>`       | Skills, agents, rules | Read instructions from a file or `-` for stdin; mutually exclusive with `--body`    |
-| `--license <name>`         | Skills                | Optional license                                                                    |
-| `--compatibility <text>`   | Skills                | Optional requirements                                                               |
-| `--model <name>`           | Agents                | Optional model preference                                                           |
-| `--tools <names...>`       | Agents                | Tool allowlist; accepts comma-separated or space-separated names                    |
-| `--dest-dir <directory>`   | Rules                 | Project-relative scope; default `.`                                                 |
-| `--activation <mode>`      | Rules                 | `always`, `glob`, `model`, `manual`, or `never`; default `always`                   |
-| `--pattern <glob>`         | Rules                 | Repeatable scope-relative glob; required for `glob` activation                      |
-| `--transport <type>`       | MCP                   | `stdio`, `streamable-http`, or `sse`; command implies STDIO, URL implies HTTP       |
-| `--url <url>`              | MCP                   | HTTP/SSE endpoint                                                                   |
-| `--command <executable>`   | MCP                   | STDIO executable; pass arguments separately                                         |
-| `--arg <value>`            | MCP                   | Repeatable STDIO argument; use `--arg=-flag` for values beginning with a dash       |
-| `--server-cwd <directory>` | MCP                   | Optional STDIO working directory                                                    |
-| `--env <values...>`        | MCP                   | STDIO environment values or references                                              |
-| `--header <values...>`     | MCP                   | HTTP/SSE header values or references                                                |
+| Creation option            | Applies to            | Behavior                                                                                     |
+| -------------------------- | --------------------- | -------------------------------------------------------------------------------------------- |
+| `--name <name>`            | All                   | Unique resource name; skill names use lowercase letters, digits, and single hyphens          |
+| `--description <text>`     | Skills, agents, rules | Usage summary; required for skills, agents, and model-selected rules                         |
+| `--body <text>`            | Skills, agents, rules | Instructions                                                                                 |
+| `--body-file <path>`       | Skills, agents, rules | Read instructions from a file or `-` for stdin; mutually exclusive with `--body`             |
+| `--license <name>`         | Skills                | Optional license                                                                             |
+| `--compatibility <text>`   | Skills                | Optional requirements                                                                        |
+| `--model <name>`           | Agents                | Optional model preference                                                                    |
+| `--tools <names...>`       | Agents                | Tool allowlist; accepts comma-separated or space-separated names                             |
+| `--dest-dir <directory>`   | Rules                 | Project-relative scope; default `.`                                                          |
+| `--layout <layout>`        | Rules                 | Preferred output: `standing` (default) or `modular`; uses the destination's supported format |
+| `--activation <mode>`      | Rules                 | `always`, `glob`, `model`, `manual`, or `never`; default `always`                            |
+| `--pattern <glob>`         | Rules                 | Repeatable scope-relative glob; required for `glob` activation                               |
+| `--transport <type>`       | MCP                   | `stdio`, `streamable-http`, or `sse`; command implies STDIO, URL implies HTTP                |
+| `--url <url>`              | MCP                   | HTTP/SSE endpoint                                                                            |
+| `--command <executable>`   | MCP                   | STDIO executable; pass arguments separately                                                  |
+| `--arg <value>`            | MCP                   | Repeatable STDIO argument; use `--arg=-flag` for values beginning with a dash                |
+| `--server-cwd <directory>` | MCP                   | Optional STDIO working directory                                                             |
+| `--env <values...>`        | MCP                   | STDIO environment values or references                                                       |
+| `--header <values...>`     | MCP                   | HTTP/SSE header values or references                                                         |
 
 The same flags work on no-source `add`. New skills go to `.agents/etymon/skills/<name>/SKILL.md`, agents to `.agents/etymon/agents/<name>.json`, and rules to `.agents/etymon/rules/<name>.md`. MCP remains inline. Creation registers source without generating native output; run sync to activate it. Duplicate names do not overwrite existing source.
 

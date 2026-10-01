@@ -21,6 +21,10 @@ etymon rule remove types
 
 A rule has a Markdown body, a directory `base`, and an independent activation mode: `always`, `glob`, `model`, `manual`, `never`, or preserved `native` conditions. Glob patterns are relative to the base. Directory scope changes where guidance applies; it does not turn conditional guidance into always-on guidance.
 
+The `layout` preference records whether guidance belongs in a standing instruction file or a separate rule file. Importing `.cursor/rules/*.mdc`, `.claude/rules/*.md`, or another rule directory sets `layout: modular`; importing `AGENTS.md` or `CLAUDE.md` sets `layout: standing`. New rules default to standing instructions. Choose `--layout modular` when creating one, or select **Separate rule file** in the project form.
+
+Compatible destinations preserve modular files even when their activation is always-on. Cursor modules synced to Claude become separate `.claude/rules/*.md` files: unconditional guidance has no `paths` field, and glob-scoped guidance carries `paths`. Standing-only destinations compose compatible modules into one instruction file. Standalone `.claude/CLAUDE.md` imports at its containing project's scope and becomes `AGENTS.md` for Codex or Copilot. Continue uses `.continue/rules/*.md` for either layout. Layout never bypasses activation or scope checks.
+
 Nested [AGENTS.md](https://agents.md/) and nested [CLAUDE.md](https://code.claude.com/docs/en/memory) both exist. Their loading behavior differs across harnesses. Codex and Pi load the ancestor chain of the launch cwd; other loaders can discover instructions while reading files. Kiro includes discovered nested AGENTS.md unconditionally, so Etymon uses `fileMatch` steering to represent authored directory scopes there. VS Code's nested AGENTS discovery is experimental and disabled by default, so its default writer uses `applyTo` instructions.
 
 The manifest records placement explicitly:
@@ -33,7 +37,7 @@ path = "etymon/rules/api.md"
 destDir = "packages/api"
 ```
 
-`destDir` overrides the authored rule's `base`. Paths are project-relative directories; absolute paths, traversal, and glob characters are rejected. Changing `destDir` and syncing moves the native output and removes unchanged stale managed output. Imported nested files retain their directory automatically. Identical text at root and in a subdirectory remains two rules because their scopes differ.
+`destDir` overrides the authored rule's `base`. Paths are project-relative directories; absolute paths, traversal, and glob characters are rejected. Changing `destDir` and syncing moves the native output and removes unchanged stale managed output. Imported nested files retain their directory automatically; `packages/api/.claude/CLAUDE.md` belongs to `packages/api`, rather than its configuration folder. Identical text at root and in a subdirectory remains two rules because their scopes differ.
 
 A canonical rule file is human-editable:
 
@@ -42,6 +46,7 @@ A canonical rule file is human-editable:
 etymon: rule
 name: types
 base: packages/api
+layout: modular
 activation: glob
 patterns:
   - '**/*.{ts,tsx}'
@@ -52,7 +57,7 @@ native: {}
 Use explicit types for exported interfaces.
 ```
 
-Always-on rules with a non-root base become nested AGENTS.md where supported, or verified native file-pattern rules for the equivalent subtree. Targets with neither capability return `RULE_SCOPE_UNSUPPORTED` and write nothing by default. Conditional directory/model combinations that cannot be preserved also block. With `--allow-lossy`, unsupported activation becomes always-on, unsupported directory scope becomes project-wide, and unmapped native conditions are omitted. Each change produces a warning naming the rule, destination, and lost conditions. Directory scope is retained whenever the destination can represent it. Disabled rules are omitted when the destination cannot express them; they are never enabled as a fallback. Oversized instruction groups are omitted with warnings rather than truncated. The authored source keeps its original semantics.
+Always-on standing rules with a non-root base become nested AGENTS.md where supported, or verified native file-pattern rules for the equivalent subtree. Modular rules use equivalent native file patterns when available and otherwise fall back to supported nested instructions. Targets with neither capability return `RULE_SCOPE_UNSUPPORTED` and write nothing by default. Conditional directory/model combinations that cannot be preserved also block. With `--allow-lossy`, unsupported activation becomes always-on, unsupported directory scope becomes project-wide, and unmapped native conditions are omitted. Each change produces a warning naming the rule, destination, and lost conditions. Directory scope is retained whenever the destination can represent it. Disabled rules are omitted when the destination cannot express them; they are never enabled as a fallback. Oversized instruction groups are omitted with warnings rather than truncated. The authored source keeps its original semantics.
 
 ## Project and personal writers
 
@@ -88,11 +93,11 @@ Gemini configuration retains existing `context.fileName` entries, including the 
 
 ## Deduplication and round trips
 
-Rule identity includes body, effective scope, activation, patterns, and required native fields. Names and non-activating descriptions do not create extra guidance. Line endings and final newlines normalize; code indentation and content remain significant. Equivalent CLAUDE.md/AGENTS.md aliases become one registration with multiple `origins`. Native precedence remains relevant when their content differs.
+Rule identity includes body, effective scope, activation, patterns, and required native fields. Names, output layout, and non-activating descriptions do not create extra guidance. The first registration retains its layout when an equivalent copy is imported. Line endings and final newlines normalize; code indentation and content remain significant. Equivalent CLAUDE.md/AGENTS.md aliases become one registration with multiple `origins`. Native precedence remains relevant when their content differs.
 
 Skill deduplication compares the complete bundle, including assets and executable modes. Equivalent `.agents/skills` and `.codex/skills` definitions register once. Native skill directory symlinks within the environment boundary are readable aliases; symlinks inside a skill bundle and symlink write destinations remain rejected. Same name with differing assets produces an import collision. Equivalent locked/local imports resolve once across commands; MCP source-format labels alone do not make an otherwise identical connection conflict.
 
-Generated standing files use HTML comments to retain fragment identities; native scoped files retain a hashed scope comment so conversion can recover the original portable directory/activation. These markers do not alter the Markdown guidance. Editing native frontmatter invalidates the old saved scope and imports the new native condition. Removing one rule rebuilds shared files with their remaining fragments and owners. Manual edits to managed files still block replacement or removal.
+Generated standing files use HTML comments to retain fragment identities; native scoped files retain a hashed scope comment so conversion can recover the original portable directory, activation, and layout. These markers do not alter the Markdown guidance. Editing native frontmatter invalidates the old saved scope and imports the new native condition. Removing one rule rebuilds shared files with their remaining fragments and owners. Manual edits to managed files still block replacement or removal.
 
 Arbitrary native file includes, content predicates, tool-specific metadata, and private instruction files require explicit treatment. Etymon understands its standalone AGENTS include bridge and generated Amp references. Other standalone native include directives are reported for explicit expansion before portable import. It does not claim a complete interpreter for every harness's import syntax, interactive toggles, managed settings, or hosted rules. Unknown conditions remain native or block default translation; the diagnostic names the missing mapping. Explicit lossy sync can omit those conditions and warns about the resulting behavior.
 

@@ -156,6 +156,7 @@ it('rejects invalid creation before writing and never overwrites an authored des
     { ...draft, description: '' },
     { kind: 'rule', name: 'api', body: 'Test', destDir: '../private' },
     { kind: 'rule', name: 'api', body: 'Test', activation: 'glob' },
+    { kind: 'rule', name: 'api', body: 'Test', layout: 'unknown' },
     { kind: 'mcp', name: 'docs', connection: { transport: 'stdio', command: '' } },
   ])
     await expect(create(ws, invalid)).rejects.toMatchObject({ code: 'INVALID_CREATION' });
@@ -166,6 +167,30 @@ it('rejects invalid creation before writing and never overwrites an authored des
   await expect(create(ws, draft)).rejects.toMatchObject({ code: 'LOCAL_NAME_COLLISION' });
   expect(await fs.readFile(path, 'utf8')).toBe('Existing authored file.\n');
   await expect(fs.access(ws.manifestPath)).rejects.toMatchObject({ code: 'ENOENT' });
+});
+
+it('creates modular guidance while retaining nested scope and standing-only output', async () => {
+  const ws = await fixture();
+  const draft = {
+    kind: 'rule',
+    name: 'api',
+    body: 'Keep response formats stable.',
+    destDir: 'packages/api',
+    layout: 'modular',
+  };
+  const original = await create(ws, draft);
+  expect((await resources(ws))[0]).toMatchObject({
+    rule: { layout: 'modular', base: 'packages/api', activation: 'always' },
+  });
+  expect((await create(ws, { ...draft, name: 'equivalent', layout: 'standing' })).ids).toEqual(
+    original.ids,
+  );
+  await sync(ws, ['claude', 'codex']);
+  expect(await fs.readFile(join(ws.root, '.claude/rules/api.md'), 'utf8')).toContain(
+    'packages/api/**',
+  );
+  expect(await fs.readFile(join(ws.root, 'packages/api/AGENTS.md'), 'utf8')).toContain(draft.body);
+  expect((await sync(ws, ['claude', 'codex'])).summary).toEqual([]);
 });
 
 it('rejects duplicate registered names without changing files or the manifest', async () => {

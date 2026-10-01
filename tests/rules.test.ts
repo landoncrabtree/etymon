@@ -118,7 +118,7 @@ describe('rule formats and scope', () => {
         message: expect.stringContaining('regex'),
       }),
     );
-    expect(lossy.units[0].path).toBe(join(ws.root, 'AGENTS.md'));
+    expect(lossy.units[0].path).toBe(join(ws.root, '.claude/rules/checks.md'));
     expect(rule.activation).toBe('native');
     expect(rule.native.regex).toBe('TODO');
   });
@@ -246,6 +246,74 @@ describe('rule formats and scope', () => {
   });
 });
 describe('rule lifecycle and aliases', () => {
+  it('preserves mixed Cursor modules as separate Claude rule files and reimports without duplication', async () => {
+    const { ws } = await fixture();
+    await write(
+      join(ws.root, '.cursor/rules/general.mdc'),
+      '---\nalwaysApply: true\n---\nRun checks.',
+    );
+    await write(
+      join(ws.root, '.cursor/rules/types.mdc'),
+      '---\nalwaysApply: false\nglobs: "src/**/*.ts"\n---\nKeep types stable.',
+    );
+    await convert(ws, 'cursor');
+    const before = await resources(ws);
+    expect(before).toHaveLength(2);
+    expect(
+      before.every((resource) => resource.kind === 'rule' && resource.rule.layout === 'modular'),
+    ).toBe(true);
+    await fs.rm(join(ws.root, '.cursor'), { recursive: true });
+    await sync(ws, ['claude']);
+    expect(await exists(join(ws.root, 'AGENTS.md'))).toBe(false);
+    const general = await readOptional(join(ws.root, '.claude/rules/general.md'));
+    expect(general).toContain('Run checks.');
+    expect(general).not.toMatch(/^paths:/m);
+    const types = await readOptional(join(ws.root, '.claude/rules/types.md'));
+    expect(types).toMatch(/paths:\n\s+- src\/\*\*\/\*\.ts/);
+    expect((await sync(ws, ['claude'])).summary).toEqual([]);
+    await convert(ws, 'claude');
+    expect(await resources(ws)).toEqual(before);
+  });
+  it.each(['codex', 'copilot-cli', 'continue'])(
+    'imports .claude/CLAUDE.md at root scope and projects instructions to %s',
+    async (target) => {
+      const { ws } = await fixture();
+      await write(join(ws.root, '.claude/CLAUDE.md'), 'Keep APIs stable.');
+      await convert(ws, 'claude');
+      expect(Object.keys((await ws.manifest()).rule)).toEqual(['instructions']);
+      expect((await resources(ws))[0]).toMatchObject({ rule: { base: '.', layout: 'standing' } });
+      await fs.rm(join(ws.root, '.claude/CLAUDE.md'));
+      await sync(ws, [target]);
+      if (target === 'continue') {
+        expect(await exists(join(ws.root, 'AGENTS.md'))).toBe(false);
+        expect(await readOptional(join(ws.root, '.continue/rules/instructions.md'))).toContain(
+          'alwaysApply: true',
+        );
+      } else {
+        expect(await readOptional(join(ws.root, 'AGENTS.md'))).toContain('Keep APIs stable.');
+        expect(await exists(join(ws.root, '.claude/AGENTS.md'))).toBe(false);
+      }
+      expect((await sync(ws, [target])).summary).toEqual([]);
+      await convert(ws, target);
+      expect(Object.keys((await ws.manifest()).rule)).toEqual(['instructions']);
+    },
+  );
+  it('assigns a nested Claude config-directory alias to its containing project directory', async () => {
+    const { ws } = await fixture();
+    await write(join(ws.root, 'packages/api/.claude/CLAUDE.md'), 'Keep API responses stable.');
+    await convert(ws, 'claude');
+    expect((await resources(ws))[0]).toMatchObject({
+      rule: { base: 'packages/api', layout: 'standing' },
+    });
+    await sync(ws, ['codex']);
+    expect(await readOptional(join(ws.root, 'packages/api/AGENTS.md'))).toContain(
+      'Keep API responses stable.',
+    );
+    expect(await exists(join(ws.root, 'packages/api/.claude/AGENTS.md'))).toBe(false);
+  });
+  it('treats layout as an output preference rather than a distinct rule identity', () => {
+    expect(ruleIdentity({ ...standing, layout: 'modular' })).toBe(ruleIdentity(standing));
+  });
   it('reimports Amp references with their conditions and rejects unresolved native includes', async () => {
     const { ws } = await fixture();
     const rule = { ...standing, activation: 'glob' as const, patterns: ['src/**/*.ts'] };

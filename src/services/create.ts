@@ -58,6 +58,7 @@ export const creationSchema = z.discriminatedUnion('kind', [
       body,
       description: z.string().optional(),
       destDir: z.string().optional(),
+      layout: ruleSchema.shape.layout.optional(),
       activation: z.enum(['always', 'glob', 'model', 'manual', 'never']).optional(),
       patterns: z.array(z.string()).optional(),
     })
@@ -68,6 +69,7 @@ export const creationSchema = z.discriminatedUnion('kind', [
         prompt: draft.body,
         description: draft.description,
         base: draft.destDir,
+        layout: draft.layout,
         activation: draft.activation,
         patterns: draft.patterns,
       });
@@ -87,6 +89,7 @@ export type CreationDraft = {
   tools?: string[];
   connection?: z.infer<typeof connectionSchema>;
   destDir?: string;
+  layout?: z.infer<typeof ruleSchema>['layout'];
   activation?: z.infer<typeof ruleSchema>['activation'];
   patterns?: string[];
 };
@@ -152,6 +155,7 @@ export async function create(workspace: Workspace, input: unknown): Promise<Crea
       prompt: draft.body,
       description: draft.description,
       base: draft.destDir,
+      layout: draft.layout,
       activation: draft.activation,
       patterns: draft.patterns,
     });

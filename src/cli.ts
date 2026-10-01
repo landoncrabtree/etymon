@@ -73,6 +73,7 @@ type Options = {
   env?: string[];
   header?: string[];
   activation?: string;
+  layout?: string;
   pattern?: string[];
 };
 const program = new Command()
@@ -236,6 +237,7 @@ function creationFlags(command: Command, kind: Kind): Command {
   if (kind === 'rule')
     command
       .option('--activation <mode>', 'always, glob, model, manual, or never')
+      .option('--layout <layout>', 'preferred rule output: standing or modular')
       .option(
         '--pattern <glob>',
         'file pattern (repeatable)',
@@ -288,6 +290,7 @@ async function createResource(kind: Kind, opts: Options): Promise<void> {
     if (kind === 'rule') {
       if (opts.destDir) initial.destDir = opts.destDir;
       if (opts.activation) initial.activation = opts.activation;
+      if (opts.layout) initial.layout = opts.layout;
       if (opts.pattern?.length) initial.patterns = opts.pattern;
     }
   }
@@ -432,6 +435,7 @@ for (const kind of kinds) {
                 name: rule.name,
                 base: rule.base,
                 activation: rule.activation,
+                layout: rule.layout,
                 patterns: rule.patterns,
                 format: rule.format,
               }))

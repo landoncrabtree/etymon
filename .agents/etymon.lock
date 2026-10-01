@@ -2,7 +2,7 @@
   "version": 1,
   "toolchain": {
     "etymon": "0.1.0",
-    "adapters": "2026-09-30.2",
+    "adapters": "2026-10-01.1",
     "skills": "1.7.0"
   },
   "dependencies": [

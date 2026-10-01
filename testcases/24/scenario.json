@@ -1,0 +1,4 @@
+{
+  "title": "Standalone Claude instructions become AGENTS.md for Copilot/Codex and a Continue rule file",
+  "handler": "standaloneClaudeInstructions"
+}

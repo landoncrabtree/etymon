@@ -52,7 +52,13 @@ export function detectRuleDialect(path: string, metadata: Record<string, unknown
   if ('globs' in metadata || 'alwaysApply' in metadata) return 'cursor';
   return 'plain';
 }
-export function parseRule(text: string, path: string, dialect?: RuleDialect, base = '.'): Rule {
+export function parseRule(
+  text: string,
+  path: string,
+  dialect?: RuleDialect,
+  base = '.',
+  layout?: Rule['layout'],
+): Rule {
   // Canonical files remain human-editable Markdown; native context files are
   // plain text even when their contents happen to look like YAML frontmatter.
   const canonical = /^\uFEFF?---\r?\n(?:[^\n]*\n)*?etymon:\s*rule\s*\r?\n/.test(text);
@@ -83,6 +89,10 @@ export function parseRule(text: string, path: string, dialect?: RuleDialect, bas
     parsed.body = prompt;
   }
   const format = dialect ?? detectRuleDialect(path, metadata);
+  const instructionFile =
+    /^(?:AGENTS(?:\.override)?|AGENT|CLAUDE(?:\.local)?|GEMINI|copilot-instructions)\.md$/i.test(
+      basename(path),
+    );
   const defaultName = /^(?:AGENTS(?:\.override)?|AGENT|CLAUDE(?:\.local)?|GEMINI)\.md$/i.test(
     basename(path),
   )
@@ -167,6 +177,13 @@ export function parseRule(text: string, path: string, dialect?: RuleDialect, bas
     name: validName(typeof metadata.name === 'string' ? metadata.name : defaultName),
     prompt: parsed.body,
     base,
+    layout:
+      layout ??
+      (instructionFile
+        ? 'standing'
+        : format !== 'plain' || knownDirectory.test(path.replaceAll('\\', '/'))
+          ? 'modular'
+          : 'standing'),
     activation,
     patterns,
     description: metadata.description,
@@ -200,7 +217,12 @@ export function instructionText(rules: Rule[]): string {
       .join('\n\n') + '\n'
   );
 }
-export function parseInstructionFile(text: string, path: string, base = '.'): Rule[] {
+export function parseInstructionFile(
+  text: string,
+  path: string,
+  base = '.',
+  layout?: Rule['layout'],
+): Rule[] {
   const regex =
     /^<!-- etymon:rule ([A-Za-z0-9_-]+) -->\r?\n([\s\S]*?)\r?\n<!-- \/etymon:rule -->$/gm;
   const result: Rule[] = [];
@@ -223,7 +245,7 @@ export function parseInstructionFile(text: string, path: string, base = '.'): Ru
     .replace(/(?:\r?\n)+$/, '');
   if (remaining.includes('<!-- etymon:rule') || remaining.includes('<!-- /etymon:rule'))
     throw new EtymonError('INVALID_RULE', `Incomplete rule fragment in ${path}`);
-  if (remaining.trim()) result.push(parseRule(remaining, path, 'plain', base));
+  if (remaining.trim()) result.push(parseRule(remaining, path, 'plain', base, layout));
   return result;
 }
 function inferredBase(path: string, root: string): string {
@@ -233,6 +255,8 @@ function inferredBase(path: string, root: string): string {
       rel,
     );
   if (match) return match[1] || '.';
+  const alias = /^(.*?)\/?\.claude\/CLAUDE\.md$/.exec(rel);
+  if (alias) return alias[1] || '.';
   if (/(?:AGENTS(?:\.override)?|AGENT|CLAUDE(?:\.local)?|GEMINI)\.md$/i.test(basename(path)))
     return dirname(rel) === '.' ? '.' : dirname(rel);
   return '.';
