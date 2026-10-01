@@ -57,56 +57,56 @@
   <text class="column" x="42" y="254">Name</text>
   <text class="column" x="326" y="254">Contents</text>
   <g>
-    
+
     <use href="#folder" x="42" y="279" width="26" height="26" />
     <text class="filename" x="84" y="300">.agents</text>
     <text class="detail" x="326" y="299">Skills + helpers</text>
     <path class="line" d="M20 316h540" />
   </g>
   <g>
-    
+
     <use href="#folder" x="42" y="327" width="26" height="26" />
     <text class="filename" x="84" y="348">.claude</text>
     <text class="detail" x="326" y="347">Skills + prompts</text>
     <path class="line" d="M20 364h540" />
   </g>
   <g>
-    
+
     <use href="#folder" x="42" y="375" width="26" height="26" />
     <text class="filename" x="84" y="396">.codex</text>
     <text class="detail" x="326" y="395">Skill symlink</text>
     <path class="line" d="M20 412h540" />
   </g>
   <g>
-    
+
     <use href="#folder" x="42" y="423" width="26" height="26" />
     <text class="filename" x="84" y="444">.cursor</text>
     <text class="detail" x="326" y="443">Skills + docs</text>
     <path class="line" d="M20 460h540" />
   </g>
   <g>
-    
+
     <use href="#folder" x="42" y="471" width="26" height="26" />
     <text class="filename" x="84" y="492">.gemini</text>
     <text class="detail" x="326" y="491">Skill symlink</text>
     <path class="line" d="M20 508h540" />
   </g>
   <g>
-    
+
     <use href="#folder" x="42" y="519" width="26" height="26" />
     <text class="filename" x="84" y="540">.github</text>
     <text class="detail" x="326" y="539">CI and community</text>
     <path class="line" d="M20 556h540" />
   </g>
   <g>
-    
+
     <use href="#file" x="42" y="567" width="26" height="26" />
     <text class="filename" x="84" y="588">AGENTS.md</text>
     <text class="detail" x="326" y="587">Project instructions</text>
     <path class="line" d="M20 604h540" />
   </g>
   <g>
-    
+
     <use href="#file" x="42" y="615" width="26" height="26" />
     <text class="filename" x="84" y="636">GEMINI.md</text>
     <text class="detail" x="326" y="635">Instruction bridge</text>
@@ -134,21 +134,21 @@
     <path class="line" d="M640 316h540" />
   </g>
   <g>
-    
+
     <use href="#folder" x="662" y="327" width="26" height="26" />
     <text class="filename retained" x="704" y="348">.claude</text>
     <text class="detail" x="946" y="347">Workflow prompts</text>
     <path class="line" d="M640 364h540" />
   </g>
   <g>
-    
+
     <use href="#folder" x="662" y="375" width="26" height="26" />
     <text class="filename retained" x="704" y="396">.cursor</text>
     <text class="detail" x="946" y="395">Reference docs</text>
     <path class="line" d="M640 412h540" />
   </g>
   <g>
-    
+
     <use href="#folder" x="662" y="423" width="26" height="26" />
     <text class="filename retained" x="704" y="444">.github</text>
     <text class="detail" x="946" y="443">CI and community</text>
@@ -157,21 +157,21 @@
   <text class="breadcrumb" x="662" y="509">.agents / Etymon source</text>
   <path class="line" d="M640 532h540" />
   <g>
-    
+
     <use href="#file" x="662" y="543" width="26" height="26" />
     <text class="filename" x="704" y="564">etymon.toml</text>
     <text class="detail" x="946" y="563">Manifest</text>
     <path class="line" d="M640 580h540" />
   </g>
   <g>
-    
+
     <use href="#file" x="662" y="591" width="26" height="26" />
     <text class="filename" x="704" y="612">etymon.lock</text>
     <text class="detail" x="946" y="611">Locked sources</text>
     <path class="line" d="M640 628h540" />
   </g>
   <g>
-    
+
     <use href="#folder" x="662" y="639" width="26" height="26" />
     <text class="filename" x="704" y="660">etymon</text>
     <text class="detail" x="946" y="659">Skills + rules</text>

@@ -145,6 +145,6 @@ function render(palette) {
 mkdirSync(output, { recursive: true });
 for (const [theme, palette] of Object.entries(palettes)) {
   const filename = `agent-setup-${theme}.svg`;
-  writeFileSync(new URL(filename, output), render(palette));
+  writeFileSync(new URL(filename, output), render(palette).replace(/[\t ]+$/gm, ''));
   console.log(`Generated docs/assets/${filename}`);
 }
