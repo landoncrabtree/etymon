@@ -520,13 +520,16 @@ export class EtymonTui {
     }
   }
   private async importFlow(): Promise<void> {
-    const target = await this.choose(
-      'Import source harness',
-      profiles.map((p) => ({ label: p.label, value: p.id })),
-    );
+    const target = await this.choose('Import from', [
+      ...(!this.options.configPath && !this.options.rulesPath
+        ? [{ label: 'All detected tools', value: 'all' }]
+        : []),
+      ...profiles.map((p) => ({ label: p.label, value: p.id })),
+    ]);
     if (!target) return;
     const options = { configPath: this.options.configPath, rulesPath: this.options.rulesPath };
-    const preview = await convert(this.workspace, target, { ...options, dryRun: true });
+    const selected = target === 'all' ? undefined : target;
+    const preview = await convert(this.workspace, selected, { ...options, dryRun: true });
     this.show(
       'Import preview',
       `${preview.resources.map((r) => `${r.kind} ${r.name}\n  ${r.origin}\n  → ${r.destination}`).join('\n\n') || 'No supported resources found.'}\n\n${preview.diagnostics.map((d) => `${d.severity} [${d.code}] ${d.message}`).join('\n')}`,
@@ -538,7 +541,7 @@ export class EtymonTui {
       { label: 'Keep preview only', value: false },
     ]);
     if (applyImport) {
-      await this.mutation(() => convert(this.workspace, target, options));
+      await this.mutation(() => convert(this.workspace, selected, options));
       this.show(
         'Imported',
         `${preview.resources.length} resources imported into .agents/etymon/.\n\nChoose targets and Sync to activate.`,

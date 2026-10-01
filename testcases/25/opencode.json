@@ -1,0 +1,6 @@
+{
+  "theme": "fixture-theme",
+  "mcp": {
+    "fixture": { "type": "local", "command": ["node", "server.js"] }
+  }
+}

@@ -56,6 +56,7 @@ export async function importRules(
   p: Profile,
   workspace: Workspace,
   rulesPath?: string,
+  importedPaths?: Set<string>,
 ): Promise<{ resources: ImportedRule[]; diagnostics: Diagnostic[] }> {
   const resources: ImportedRule[] = [],
     diagnostics: Diagnostic[] = [];
@@ -70,7 +71,8 @@ export async function importRules(
       ? await tree(workspace.root, diagnostics)
       : [];
   const winners = new Map<string, { source: string; resources: ImportedRule[] }>();
-  const seenPaths = new Set<string>();
+  const seenPaths = new Set<string>(),
+    claimedPaths = new Set<string>();
   let claudeMode = 'claude-md-or-agents-md';
   if (p.id === 'claude' && !workspace.global) {
     const user = new Workspace({
@@ -91,9 +93,19 @@ export async function importRules(
     base: string,
     sourceRoot: string,
     included = false,
+    explicitScope = false,
   ) {
-    if (seenPaths.has(path)) return;
-    seenPaths.add(path);
+    const instructions =
+      source.dialect === 'plain' || /^(?:AGENTS|AGENT)\.md$/.test(basename(path));
+    // Read aliases reuse the first native interpretation. Explicit includes
+    // can load that same file at another scope or as unconditional guidance.
+    const identity = JSON.stringify([
+      path,
+      explicitScope ? base : null,
+      instructions ? 'plain' : 'native',
+    ]);
+    if (seenPaths.has(identity) || importedPaths?.has(identity)) return;
+    seenPaths.add(identity);
     const stat = await fs.lstat(path);
     if (!stat.isFile()) return;
     if (stat.size > 1024 * 1024)
@@ -115,7 +127,14 @@ export async function importRules(
         message: `${path} references AGENTS.md; importing the shared instructions once`,
       });
       const included = join(dirname(path), bridge[1]);
-      await addFile(included, { dialect: 'plain', path: included }, base, sourceRoot, true);
+      await addFile(
+        included,
+        { dialect: 'plain', path: included },
+        base,
+        sourceRoot,
+        true,
+        explicitScope || dirname(path) !== dirname(included),
+      );
       return;
     }
     if (p.id === 'amp' && source.dialect === 'plain') {
@@ -133,7 +152,7 @@ export async function importRules(
           });
           return;
         }
-        await addFile(target, { path: target, dialect: 'amp' }, base, target, true);
+        await addFile(target, { path: target, dialect: 'amp' }, base, target, true, true);
       }
       text = text.replace(/^@[^\r\n]+\r?\n?/gm, '');
       if (!text.trim()) return;
@@ -148,10 +167,9 @@ export async function importRules(
     }
     let rules: Rule[];
     try {
-      rules =
-        source.dialect === 'plain' || /^(?:AGENTS|AGENT)\.md$/.test(basename(path))
-          ? parseInstructionFile(text, path, base, source.directory ? 'modular' : undefined)
-          : [parseRule(text, path, source.dialect, base, source.directory ? 'modular' : undefined)];
+      rules = instructions
+        ? parseInstructionFile(text, path, base, source.directory ? 'modular' : undefined)
+        : [parseRule(text, path, source.dialect, base, source.directory ? 'modular' : undefined)];
     } catch (error) {
       diagnostics.push({
         code: error instanceof EtymonError ? error.code : 'INVALID_RULE',
@@ -242,6 +260,7 @@ export async function importRules(
       else winners.set(group, { source: sourceRoot, resources: candidates });
     }
     resources.push(...candidates);
+    claimedPaths.add(identity);
   }
   for (const source of sources) {
     const root = ruleLocation(source.path, workspace, p.id);
@@ -399,7 +418,7 @@ export async function importRules(
             const full = inside(configRoot, path);
             // instructions globs select source files; the loader reads their
             // entire contents unconditionally, regardless of frontmatter.
-            await addFile(full, { path: value, dialect: 'plain' }, '.', full);
+            await addFile(full, { path: value, dialect: 'plain' }, '.', full, false, true);
           }
         }
       }
@@ -428,5 +447,6 @@ export async function importRules(
     identities.set(hash, resource);
     unique.push(resource);
   }
+  for (const path of claimedPaths) importedPaths?.add(path);
   return { resources: unique, diagnostics };
 }

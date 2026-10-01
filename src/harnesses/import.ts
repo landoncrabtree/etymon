@@ -3,12 +3,14 @@ import { join } from 'node:path';
 import { parseDocument, stringify as yaml } from 'yaml';
 import {
   Agent,
+  agentSchema,
   Artifact,
   Connection,
   Diagnostic,
   EtymonError,
   json,
   McpDefinition,
+  Resource,
   Value,
   validName,
 } from '../core/model.js';
@@ -20,8 +22,10 @@ import { discoverNativeSkills } from '../providers/skills.js';
 import { agentExtension, location, Profile } from './profiles.js';
 import { readLocations } from './discovery.js';
 import { importRules, ImportedRule } from './rule-import.js';
-import { bundleIdentity } from '../core/dedup.js';
+import { bundleIdentity, resourceIdentity } from '../core/dedup.js';
 import { stable } from '../core/fs.js';
+import { skillMetadata } from '../providers/skills.js';
+import { canonicalRuleText } from '../providers/rules.js';
 
 export type Imported =
   | ImportedRule
@@ -30,6 +34,89 @@ export type Imported =
       | { kind: 'agent'; text: string; extension: string }
       | { kind: 'mcp'; definition: McpDefinition }
     ));
+
+export function importedResource(resource: Imported): Resource {
+  const common = { id: '', kind: resource.kind, name: resource.name };
+  switch (resource.kind) {
+    case 'rule':
+      return { ...common, kind: 'rule', rule: resource.rule };
+    case 'skill':
+      return {
+        ...common,
+        kind: 'skill',
+        files: resource.artifact.files,
+        metadata: skillMetadata(resource.artifact),
+      };
+    case 'agent':
+      return { ...common, kind: 'agent', agent: agentSchema.parse(JSON.parse(resource.text)) };
+    case 'mcp':
+      return { ...common, kind: 'mcp', ...resource.definition };
+  }
+}
+
+/** Read every selected profile before committing one deduplicated import. */
+export async function importHarnesses(
+  profiles: Profile[],
+  workspace: Workspace,
+  configPath?: string,
+  rulesPath?: string,
+): Promise<{ resources: Imported[]; diagnostics: Diagnostic[] }> {
+  if ((configPath || rulesPath) && profiles.length !== 1)
+    throw new EtymonError(
+      'CONFIG_PATH_SCOPE',
+      '--config-path and --rules-path require exactly one harness',
+    );
+  const resources: Imported[] = [],
+    diagnostics: Diagnostic[] = [],
+    names = new Map<string, Imported>(),
+    rules = new Map<string, Imported>(),
+    importedRulePaths = new Set<string>();
+  for (const p of profiles) {
+    // Profile order gives a native format its first interpretation. In
+    // particular, .claude/rules must not also become Copilot manual rules.
+    const imported = await importHarness(p, workspace, configPath, rulesPath, importedRulePaths);
+    diagnostics.push(...imported.diagnostics);
+    for (let resource of imported.resources) {
+      const identity = resourceIdentity(importedResource(resource));
+      const named = names.get(resource.kind + ':' + resource.name);
+      const duplicate =
+        resource.kind === 'rule'
+          ? rules.get(identity)
+          : named && resourceIdentity(importedResource(named)) === identity
+            ? named
+            : undefined;
+      if (duplicate) {
+        duplicate.origins = [
+          ...new Set([
+            ...(duplicate.origins ?? [duplicate.origin]),
+            ...(resource.origins ?? [resource.origin]),
+          ]),
+        ];
+        diagnostics.push({
+          code: 'RESOURCE_DUPLICATE',
+          severity: 'info',
+          harness: p.id,
+          message: `${resource.origin} duplicates ${duplicate.origin}; imported ${resource.kind}:${duplicate.name} once`,
+        });
+        continue;
+      }
+      if (named) {
+        if (resource.kind !== 'rule')
+          throw new EtymonError(
+            'IMPORT_COLLISION',
+            `Different imported definitions share ${resource.kind}:${resource.name}: ${named.origin} and ${resource.origin}`,
+          );
+        const name = validName(resource.name.slice(0, 53) + '-' + identity.slice(7, 15));
+        const rule = { ...resource.rule, name };
+        resource = { ...resource, name, rule, text: canonicalRuleText(rule) };
+      }
+      names.set(resource.kind + ':' + resource.name, resource);
+      if (resource.kind === 'rule') rules.set(identity, resource);
+      resources.push(resource);
+    }
+  }
+  return { resources, diagnostics };
+}
 function assertNoCredentials(value: unknown): void {
   if (Array.isArray(value)) {
     value.forEach(assertNoCredentials);
@@ -186,6 +273,7 @@ export async function importHarness(
   workspace: Workspace,
   configPath?: string,
   rulesPath?: string,
+  importedRulePaths?: Set<string>,
 ): Promise<{ resources: Imported[]; diagnostics: Diagnostic[] }> {
   const resources: Imported[] = [],
     diagnostics: Diagnostic[] = [];
@@ -292,7 +380,7 @@ export async function importHarness(
         message: `Detected ${candidate}; retained in native setup and excluded from this P0 import`,
         harness: p.id,
       });
-  const rules = await importRules(p, workspace, rulesPath);
+  const rules = await importRules(p, workspace, rulesPath, importedRulePaths);
   resources.push(...rules.resources);
   diagnostics.push(...rules.diagnostics);
   const seen = new Map<string, Imported>();

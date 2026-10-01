@@ -1,0 +1,5 @@
+---
+alwaysApply: false
+globs: src/**/*.ts
+---
+Use explicit types at module boundaries.

@@ -8,6 +8,116 @@ import { nativeChecks } from './native.mjs';
 const rules = async (c) => (await c.list()).authored.rule;
 const lockText = (c) => c.read('.agents/etymon.lock');
 export const handlers = {
+  async agnosticConvert(c) {
+    const nativePaths = [
+      'AGENTS.md',
+      'CLAUDE.md',
+      'packages/api/AGENTS.md',
+      '.claude/rules/general.md',
+      '.cursor/rules/types.mdc',
+      '.claude/agents/reviewer.md',
+      '.codex/config.toml',
+      '.mcp.json',
+      'opencode.json',
+      ...['.agents', '.codex', '.claude'].flatMap((directory) => [
+        `${directory}/skills/checks/SKILL.md`,
+        `${directory}/skills/checks/assets/check.txt`,
+      ]),
+    ];
+    const originals = new Map(
+      await Promise.all(nativePaths.map(async (path) => [path, await c.read(path)])),
+    );
+    const preview = await c.cli(['convert', '--dry-run']);
+    assert.equal(preview.resources.filter((resource) => resource.kind === 'rule').length, 4);
+    await assert.rejects(c.read('.agents/etymon.toml'), { code: 'ENOENT' });
+
+    await c.cli(['convert', '--harness', 'codex']);
+    let authored = (await c.list()).authored;
+    assert.equal(Object.keys(authored.rule).length, 2);
+    assert.deepEqual(Object.keys(authored.skill), ['checks']);
+    assert.deepEqual(Object.keys(authored.mcp), ['fixture']);
+    assert.deepEqual(Object.keys(authored.agent), []);
+
+    await c.cli(['convert']);
+    authored = (await c.list()).authored;
+    assert.equal(Object.keys(authored.rule).length, 4);
+    assert.deepEqual(Object.keys(authored.agent), ['reviewer']);
+    assert.equal(authored.skill.checks.origins.length, 3);
+    assert.equal(authored.mcp.fixture.origins.length, 3);
+    assert.equal(authored.rule.instructions.origins.length, 2);
+    const rootRules = Object.values(authored.rule).filter(
+      (registration) => registration.destDir === '.',
+    );
+    assert.equal(rootRules.length, 3);
+    assert.equal(
+      Object.values(authored.rule).filter((registration) => registration.destDir === 'packages/api')
+        .length,
+      1,
+    );
+    assert.match(await c.read('.agents/etymon/rules/general.md'), /activation: always/);
+    assert.match(await c.read('.agents/etymon/rules/types.md'), /activation: glob/);
+    const manifest = await c.read('.agents/etymon.toml'),
+      lock = await lockText(c);
+    const sources = new Map(
+      await Promise.all(
+        Object.values(authored.rule).map(async (registration) => [
+          registration.path,
+          await c.read('.agents/' + registration.path),
+        ]),
+      ),
+    );
+
+    await c.cli(['convert', '--harness', 'claude']);
+    await c.cli(['convert']);
+    assert.equal(await c.read('.agents/etymon.toml'), manifest);
+    assert.equal(await lockText(c), lock);
+    assert.equal((await c.list()).lock.dependencies.length, 0);
+    for (const [path, text] of sources) assert.equal(await c.read('.agents/' + path), text);
+    for (const [path, text] of originals) assert.equal(await c.read(path), text);
+
+    const executable = fileURLToPath(new URL('../bin/etymon.js', import.meta.url));
+    await c.exec('python3', [
+      fileURLToPath(new URL('./tui.py', import.meta.url)),
+      process.execPath,
+      executable,
+      c.project,
+      c.home,
+      join(c.directory, 'cache'),
+      'host-import',
+    ]);
+    assert.equal(await c.read('.agents/etymon.toml'), manifest);
+
+    const invalid = await c.cli(['convert', '--config-path', '.mcp.json'], { expectedCode: 1 });
+    assert.equal(invalid.error.code, 'CONFIG_PATH_SCOPE');
+    const ambiguous = await c.cli(['convert', 'codex', '--harness', 'claude'], { expectedCode: 1 });
+    assert.equal(ambiguous.error.code, 'INVALID_OPTIONS');
+    await c.clear([
+      'AGENTS.md',
+      'CLAUDE.md',
+      'packages/api/AGENTS.md',
+      '.claude',
+      '.codex',
+      '.cursor',
+      '.mcp.json',
+      'opencode.json',
+      '.agents/skills',
+    ]);
+    await c.sync('claude');
+    assert.equal(
+      (await c.read('AGENTS.md')).split('Run checks and preserve public API behavior.').length - 1,
+      1,
+    );
+    assert.match(
+      await c.read('packages/api/AGENTS.md'),
+      /Run checks and preserve public API behavior/,
+    );
+    assert.equal(
+      await c.read('.claude/skills/checks/assets/check.txt'),
+      originals.get('.agents/skills/checks/assets/check.txt'),
+    );
+    assert.match(await c.read('.claude/rules/types.md'), /src\/\*\*\/\*\.ts/);
+    await c.idempotent('claude');
+  },
   async mixedCursorRules(c) {
     const converted = await c.cli(['convert', 'cursor']);
     assert.equal(converted.resources.filter((resource) => resource.kind === 'rule').length, 4);

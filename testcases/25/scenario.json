@@ -1,0 +1,4 @@
+{
+  "title": "Codex filter → all native tools → Claude filter deduplicates shared rules, skills, and MCPs",
+  "handler": "agnosticConvert"
+}

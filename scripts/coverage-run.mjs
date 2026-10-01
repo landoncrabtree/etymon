@@ -29,6 +29,7 @@ for (const [command, args] of [
       '22',
       '23',
       '24',
+      '25',
     ],
   ],
 ]) {

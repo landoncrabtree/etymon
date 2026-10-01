@@ -80,7 +80,18 @@ def wait_exit(expected_code=0):
 
 
 try:
-    if mode == "lossy-remove":
+    if mode == "host-import":
+        expect("Import native setup")
+        send("jjjjjj\r")
+        expect("All detected tools")
+        send("\r")
+        expect("Import these resources")
+        send("\r")
+        expect("resources imported")
+        send("q")
+        wait_exit()
+        print(json.dumps({"mode": mode, "exitCode": process.returncode}))
+    elif mode == "lossy-remove":
         expect("Remove resource")
         send("jjjjjjjj\r")
         expect("conditional (authored)")

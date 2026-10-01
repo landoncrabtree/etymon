@@ -3,8 +3,8 @@
 Standing instructions and conditional rules share the `rule` resource kind. CLI, TUI, `convert`, `sync`, `update`, `remove`, and `doctor` share the same normalized rule pipeline. Research baseline: October 1, 2026. Native rule locations and loaders change frequently; each harness profile carries its primary sources and prerequisites in `etymon harnesses --json`.
 
 ```bash
-etymon convert codex --dry-run
-etymon convert codex
+etymon convert --harness codex --dry-run
+etymon convert --harness codex
 etymon sync --harness claude,cursor --dry-run
 etymon sync --harness claude,cursor --adopt
 

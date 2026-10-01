@@ -27,8 +27,8 @@ import { discoverAgents, parseAgent } from '../providers/agents.js';
 import { discoverSkills, skillMetadata } from '../providers/skills.js';
 import { mcpArtifact, resolveDependency, restoreDependency } from '../providers/index.js';
 import { parseResourceSource } from '../providers/source.js';
-import { importHarness, Imported } from '../harnesses/import.js';
-import { profile } from '../harnesses/profiles.js';
+import { importHarnesses, importedResource, Imported } from '../harnesses/import.js';
+import { profile, profiles } from '../harnesses/profiles.js';
 import { render, RenderOptions, Unit } from '../harnesses/render.js';
 import { inspectNative } from '../harnesses/inspect.js';
 import {
@@ -409,14 +409,21 @@ export async function sync(
 }
 export async function convert(
   workspace: Workspace,
-  target: string,
+  target?: string | string[],
   options: { dryRun?: boolean; configPath?: string; rulesPath?: string } = {},
 ): Promise<{
   resources: { kind: string; name: string; origin: string; destination: string }[];
   diagnostics: Diagnostic[];
 }> {
-  const imported = await importHarness(
-      profile(target),
+  const selected = target === undefined ? profiles.map((p) => p.id) : [target].flat();
+  const ids = new Set(
+    selected
+      .flatMap((id) => id.split(','))
+      .filter(Boolean)
+      .map((id) => profile(id).id),
+  );
+  const imported = await importHarnesses(
+      profiles.filter((p) => ids.has(p.id) && !(workspace.global && p.projectOnly)),
       workspace,
       options.configPath,
       options.rulesPath,
@@ -438,30 +445,16 @@ export async function convert(
       );
     let key = resource.name;
     if (resource.kind !== 'rule') {
-      const normalized: Resource =
-        resource.kind === 'mcp'
-          ? { id: '', kind: 'mcp', name: resource.name, ...resource.definition }
-          : resource.kind === 'skill'
-            ? {
-                id: '',
-                kind: 'skill',
-                name: resource.name,
-                files: resource.artifact.files,
-                metadata: skillMetadata(resource.artifact),
-              }
-            : {
-                id: '',
-                kind: 'agent',
-                name: resource.name,
-                agent: agentSchema.parse(JSON.parse(resource.text)),
-              };
+      const normalized = importedResource(resource);
       const duplicate = existingResources.find(
         (value) =>
           value.kind === normalized.kind &&
           value.name === normalized.name &&
           resourceIdentity(value) === resourceIdentity(normalized),
       );
-      if (duplicate && !duplicate.id.startsWith(resource.kind + ':local/')) {
+      if (duplicate?.id.startsWith(resource.kind + ':local/'))
+        key = duplicate.id.slice((resource.kind + ':local/').length);
+      else if (duplicate) {
         imported.diagnostics.push({
           code: 'RESOURCE_DUPLICATE',
           severity: 'info',
@@ -483,6 +476,18 @@ export async function convert(
           message: `${resource.origin} is already locked as ${duplicate.id}; no duplicate authored rule created`,
         });
         continue;
+      } else {
+        const existing = manifest.rule[key];
+        const origins = resource.origins ?? [resource.origin];
+        if (
+          existing?.origin &&
+          !(existing.origins ?? [existing.origin]).some((origin) => origins.includes(origin))
+        ) {
+          key = validName(key.slice(0, 53) + '-' + ruleIdentity(resource.rule).slice(7, 15));
+          resource.name = key;
+          resource.rule = { ...resource.rule, name: key };
+          resource.text = canonicalRuleText(resource.rule);
+        }
       }
     }
     const existing = manifest[resource.kind][key];
@@ -501,7 +506,7 @@ export async function convert(
       const existingMcp = manifest.mcp[key];
       if (
         existingMcp &&
-        ((existingMcp.name && existingMcp.name !== key) ||
+        ((existingMcp.name && existingMcp.name !== resource.name) ||
           resourceIdentity({ id: '', kind: 'mcp', name: key, ...mcpDefinition(existingMcp) }) !==
             resourceIdentity({ id: '', kind: 'mcp', name: key, ...resource.definition }))
       )
@@ -514,8 +519,10 @@ export async function convert(
         resource.kind === 'skill'
           ? bundleIdentity(await bundle(destination)) === bundleIdentity(resource.artifact)
           : resource.kind === 'rule'
-            ? ruleIdentity(parseRule((await readOptional(destination))!, destination)) ===
-              ruleIdentity(resource.rule)
+            ? ruleIdentity({
+                ...parseRule((await readOptional(destination))!, destination),
+                ...(manifest.rule[key]?.destDir ? { base: manifest.rule[key].destDir } : {}),
+              }) === ruleIdentity(resource.rule)
             : (await readOptional(destination)) === resource.text;
       if (!identical)
         throw new EtymonError(
@@ -542,6 +549,7 @@ export async function convert(
       if (resource.kind === 'mcp') {
         manifest.mcp[key] = {
           ...(manifest.mcp[key] ? mcpDefinition(manifest.mcp[key]) : resource.definition),
+          ...(manifest.mcp[key]?.name ? { name: manifest.mcp[key].name } : {}),
           origin: manifest.mcp[key]?.origin ?? resource.origin,
           origins: [
             ...new Set([
@@ -571,6 +579,7 @@ export async function convert(
         });
       manifest[resource.kind][key] = {
         path: relative(workspace.agents, destination).replaceAll('\\', '/'),
+        ...(manifest[resource.kind][key]?.name ? { name: manifest[resource.kind][key].name } : {}),
         origin: manifest[resource.kind][key]?.origin ?? resource.origin,
         origins: [
           ...new Set([

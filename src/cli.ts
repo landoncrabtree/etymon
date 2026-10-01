@@ -580,16 +580,21 @@ program
     reportPlan(await mutate(ws, opts.dryRun, () => sync(ws, ids, syncOptions(opts))), opts);
   });
 program
-  .command('convert <harness>')
+  .command('convert [harness]')
   .description(
-    'Import native skills, agents, MCP, and rules into editable source; leave originals untouched',
+    'Import all detected native resources, or filter with --harness; leave originals untouched',
   )
   .option('--dry-run', 'inspect import without writing source')
-  .action(async (target: string, _options, command: Command) => {
+  .action(async (target: string | undefined, _options, command: Command) => {
     const opts = options(command),
       ws = workspace(opts);
+    if (target && opts.harness?.length)
+      throw new EtymonError(
+        'INVALID_OPTIONS',
+        'Choose a positional harness or --harness, not both',
+      );
     const result = await mutate(ws, opts.dryRun, () =>
-      convert(ws, profile(target).id, syncOptions(opts)),
+      convert(ws, target ?? opts.harness, syncOptions(opts)),
     );
     output(result, opts);
     if (result.diagnostics.some((d) => d.severity === 'error')) process.exitCode = 1;

@@ -44,7 +44,7 @@ etymon sync
 
 ```bash
 etymon init
-etymon convert claude
+etymon convert
 etymon sync --harness codex,opencode
 ```
 
@@ -66,6 +66,7 @@ etymon agents add augmnt/agents/api-designer.md
 etymon rules add ./guidance.md --dest-dir src/api
 etymon mcp add ./mcp.json
 etymon mcp create
+etymon convert --harness claude # Import one tool
 
 etymon list
 etymon update             # Choose newer external versions

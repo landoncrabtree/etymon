@@ -1,0 +1,6 @@
+# Preserve unrelated settings and comments.
+model = "fixture-model"
+
+[mcp_servers.fixture]
+command = "node"
+args = ["server.js"]

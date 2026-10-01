@@ -10,20 +10,20 @@ Without a command, Etymon opens its terminal UI when stdin and stdout are termin
 
 Options may appear before or after subcommands.
 
-| Option                         | Behavior                                                      |
-| ------------------------------ | ------------------------------------------------------------- |
-| `--cwd <path>`                 | Project directory; defaults to the current directory          |
-| `-g`, `--global`               | Use your personal environment instead of the project          |
-| `--home <path>`                | Override the home directory for isolated profiles             |
-| `--cache <path>`               | Override the artifact cache directory                         |
-| `--offline`                    | Use cached external resources; remote resolution/search fails |
-| `--json`                       | Machine-readable output; skips interactive prompts            |
-| `-y`, `--yes`                  | Skip interactive prompts and use noninteractive defaults      |
-| `--debug`                      | Provider command details and error stack traces               |
-| `-H`, `--harness <targets...>` | Destination IDs, comma-separated or space-separated           |
-| `--config-path <path>`         | Explicit native MCP configuration path; one destination       |
-| `--rules-path <path>`          | Explicit project instruction directory; one destination       |
-| `-V`, `--version`              | Installed package version                                     |
+| Option                         | Behavior                                                        |
+| ------------------------------ | --------------------------------------------------------------- |
+| `--cwd <path>`                 | Project directory; defaults to the current directory            |
+| `-g`, `--global`               | Use your personal environment instead of the project            |
+| `--home <path>`                | Override the home directory for isolated profiles               |
+| `--cache <path>`               | Override the artifact cache directory                           |
+| `--offline`                    | Use cached external resources; remote resolution/search fails   |
+| `--json`                       | Machine-readable output; skips interactive prompts              |
+| `-y`, `--yes`                  | Skip interactive prompts and use noninteractive defaults        |
+| `--debug`                      | Provider command details and error stack traces                 |
+| `-H`, `--harness <targets...>` | Tool IDs, comma-separated or space-separated; filters `convert` |
+| `--config-path <path>`         | Explicit native MCP configuration path; one destination         |
+| `--rules-path <path>`          | Explicit project instruction directory; one destination         |
+| `-V`, `--version`              | Installed package version                                       |
 
 `skill`/`skills`, `agent`/`agents`, and `rule`/`rules` are equivalent command groups. `ls` aliases `list`; `rm` aliases a resource group's `remove`.
 
@@ -60,13 +60,20 @@ Review adoption or force plans before applying them. Deleted managed output can 
 ## Import an existing setup
 
 ```bash
-etymon convert claude
-etymon convert opencode --dry-run
+etymon convert
+etymon convert --dry-run
+etymon convert --harness codex
+etymon convert --harness claude,opencode --dry-run
+etymon convert --harness opencode --config-path ./custom-opencode.json
 etymon sync --harness codex --dry-run
 etymon sync --harness codex --adopt
 ```
 
-`convert <harness>` imports native skills, agents, MCP settings, and recognized rules into editable Etymon source. It leaves originals in place. Equivalent aliases merge into one registration; differing skill assets or rule scopes do not deduplicate. Native extensions stay associated with their original format.
+`convert` scans the supported native locations for every tool in the current project. `--harness` limits discovery to the selected tools. `--global` scans user locations instead, excluding project rule folders. Discovery does not depend on installed executables or saved sync destinations. The TUI offers the same all-tools import with a preview.
+
+Skills, agents, MCP settings, and recognized rules become editable Etymon source. Originals stay in place. Shared rule files use the first native interpretation. Explicit includes can also register a file at another scope or load its full text as unconditional instructions. Equivalent copies merge their source paths into one registration, including across repeated filtered and unfiltered conversions. Different rule scopes and activation conditions remain distinct. Different rules with the same name receive separate names; conflicting skill, agent, or MCP definitions stop the import before source is written. Native extensions stay associated with their original format, and edits to previously imported source remain protected.
+
+`convert <harness>` also selects one tool. Choose that form or `--harness`, not both. `--config-path` and `--rules-path` require exactly one selected tool. Use `--dry-run` to review detected resources and diagnostics without writing files.
 
 Rules and instructions share one interface. Profiles distinguish standing files, modular rule directories, nesting, and supported activation modes; source count does not create a separate resource kind.
 
