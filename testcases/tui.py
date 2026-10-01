@@ -15,16 +15,18 @@ mode = sys.argv[6] if len(sys.argv) > 6 else "rule"
 master, slave = pty.openpty()
 fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 38, 140, 0, 0))
 environment = dict(os.environ, TERM="xterm-256color")
-if mode.startswith("create-"):
+if mode == "add-local-mcp":
+    command = ["mcp", "add", "local-server.json"]
+elif mode.startswith("create-"):
     kind = mode.split("-")[1]
     command = [kind, "add" if kind == "skill" else "create"]
-elif mode in ("rule", "host-create"):
+elif mode == "rule" or mode.startswith(("host-", "lossy-sync", "lossy-remove")):
     command = ["tui"]
 else:
     command = ["uninstall"]
 process = subprocess.Popen(
     [node, executable, *command, "--cwd", project, "--home", home,
-     "--cache", cache, "--harness", "codex"],
+     "--cache", cache, "--harness", "codex", *(["--global"] if mode.endswith("global") else [])],
     cwd=project, env=environment, stdin=slave, stdout=slave, stderr=slave,
 )
 os.close(slave)
@@ -78,23 +80,61 @@ def wait_exit(expected_code=0):
 
 
 try:
-    if mode.startswith("create-") or mode == "host-create":
-        kind = mode.split("-")[1] if mode != "host-create" else "skill"
-        if mode == "host-create":
-            expect("Add skill")
-            send("j\r")
-            expect("Add skill:")
+    if mode == "lossy-remove":
+        expect("Remove resource")
+        send("jjjjjjjj\r")
+        expect("conditional (authored)")
+        send("\r")
+        expect("Preview lossy conversion")
+        send("\r")
+        expect("always-on")
+        expect("Cancel")
+        send("\r")
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline:
+            with open(os.path.join(project, ".agents/etymon.toml")) as manifest:
+                if "[rule.conditional]" not in manifest.read():
+                    break
+            if select.select([master], [], [], 0.1)[0]:
+                output.extend(os.read(master, 65536))
+        else:
+            raise AssertionError("Lossy rule removal did not apply")
+        send("q")
+        wait_exit()
+        print(json.dumps({"mode": mode, "exitCode": process.returncode}))
+    elif mode.startswith("lossy-sync"):
+        expect("Sync / preview")
+        send("jjjjj\r")
+        expect("Preview lossy conversion")
+        send("\r")
+        if mode.endswith("adopt"):
+            expect("Preview taking ownership")
             send("\r")
-        expect("Instructions" if mode == "host-create" else f"Create {kind}")
+        expect("RULE_CONDITIONS_DROPPED")
+        expect("Apply native changes")
+        send("\r")
+        expect("changes applied")
+        send("q")
+        wait_exit()
+        print(json.dumps({"mode": mode, "exitCode": process.returncode}))
+    elif mode.startswith("create-") or mode.startswith("host-create"):
+        hosted = mode.startswith("host-create")
+        kind = mode.split("-")[1] if not hosted else "rule" if mode.endswith("rule") else "skill"
+        if hosted:
+            expect("Rules & Instructions" if kind == "rule" else "Add " + kind)
+            send(("jjjj" if kind == "rule" else "j") + "\r")
+            expect("Add " + kind + ":")
+            send("\r")
+        expect("Instructions" if hosted else f"Create {kind}")
         if mode.endswith("cancel"):
             send("cancelled-resource\x03")
             wait_exit(130)
         else:
             # Invalid save must leave the form and values available for correction.
-            if kind == "skill" and mode != "host-create":
+            if kind == "skill" and not hosted:
                 send("\x13")
                 expect("name:")
-            name = "host-checks" if mode == "host-create" else "form-checks" if kind == "skill" else "form-reviewer" if kind == "agent" else "form-" + mode.split("-")[-1]
+            name = "host-" + ("rule" if kind == "rule" else "checks") if hosted else "form-checks" if kind == "skill" else "form-reviewer" if kind == "agent" else "form-" + mode.split("-")[-1]
             send(name + "\t")
             if kind == "mcp":
                 transport = mode.split("-")[-1]
@@ -112,15 +152,34 @@ try:
                     send("Authorization=env:MCP_AUTH")
             else:
                 send("Use when reviewing changes.\t")
-                send("Review carefully.\r\r    Preserve indentation.")
+                send("Review menu-created guidance." if hosted and kind == "rule" else "Review carefully.\r\r    Preserve indentation.")
+                if kind == "rule" and not mode.endswith("global"):
+                    send("\t")
+                    send("\x7fpackages/tui\t")
+                    if mode.endswith("glob"):
+                        send("\x1b[B\t")
+                        send("\x13")
+                        expect("empty glob")
+                        send("**/*.ts")
             send("\x13")
             expect("Created")
-            if mode == "host-create":
+            if hosted:
                 send("q")
             wait_exit()
         print(json.dumps({"mode": mode, "exitCode": process.returncode}))
+    elif mode in ("add-local-mcp", "host-add-mcp"):
+        if mode == "host-add-mcp":
+            expect("Add MCP")
+            send("jj\r")
+            expect("Find MCP:")
+            send("local-server.json\r")
+        expect("mcp:local/local-server")
+        if mode == "host-add-mcp":
+            send("q")
+        wait_exit()
+        print(json.dumps({"mode": mode, "exitCode": process.returncode}))
     elif mode == "rule":
-        expect("Add rule")
+        expect("Rules & Instructions")
         send("jjjj\r")
         expect("Add rule:")
         send("./style.md\r")

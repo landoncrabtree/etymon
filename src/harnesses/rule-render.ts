@@ -13,6 +13,7 @@ import {
 import type { Profile } from './profiles.js';
 import type { RenderOptions, RenderResult, Unit } from './render.js';
 import { ruleLocation } from './rule-profiles.js';
+import { isConversionLimit, omittedResource } from './loss.js';
 
 function patterns(rule: Rule): string[] {
   if (rule.activation === 'always') return [rule.base + '/**'];
@@ -165,6 +166,76 @@ export async function renderRules(
   workspace: Workspace,
   options: RenderOptions,
 ): Promise<RenderResult> {
+  if (!options.allowLossy) return renderStrictRules(input, p, workspace, options);
+  // Adapt copies only. Recompose the complete batch after each change so shared
+  // instruction files and native loader checks follow the ordinary renderer.
+  let projected = structuredClone(input);
+  const losses: Diagnostic[] = [];
+  for (;;) {
+    const result = await renderStrictRules(projected, p, workspace, options);
+    let changed = false;
+    for (const diagnostic of result.diagnostics) {
+      if (diagnostic.severity !== 'error' || !isConversionLimit(diagnostic.code)) continue;
+      const resource = projected.find((item) => item.id === diagnostic.resource);
+      if (!resource || resource.kind !== 'rule') continue;
+      const rule = resource.rule;
+      let loss: Diagnostic | undefined;
+      if (
+        rule.activation !== 'never' &&
+        diagnostic.code !== 'RULE_SIZE_LIMIT' &&
+        diagnostic.code !== 'CAPABILITY_UNSUPPORTED' &&
+        !workspace.global
+      ) {
+        if (Object.keys(rule.native).length) {
+          loss = {
+            ...diagnostic,
+            code: 'RULE_NATIVE_FIELDS_OMITTED',
+            severity: 'warning',
+            message: `${rule.name}: omitted ${rule.format} fields ${Object.keys(rule.native).join(', ')} from ${p.id}; their conditions and behavior no longer apply`,
+          };
+          rule.native = {};
+          if (rule.activation === 'native') {
+            loss.message += `; native activation becomes always-on within ${rule.base}`;
+            rule.activation = 'always';
+            rule.patterns = [];
+          }
+        } else if (rule.activation !== 'always') {
+          loss = {
+            ...diagnostic,
+            code: 'RULE_CONDITIONS_DROPPED',
+            severity: 'warning',
+            message: `${rule.name}: ${rule.activation} activation${rule.patterns.length ? ` (${rule.patterns.join(', ')})` : ''} becomes always-on within ${rule.base} for ${p.id}`,
+          };
+          rule.activation = 'always';
+          rule.patterns = [];
+        } else if (rule.base !== '.') {
+          loss = {
+            ...diagnostic,
+            code: 'RULE_SCOPE_BROADENED',
+            severity: 'warning',
+            message: `${rule.name}: directory scope ${rule.base} becomes project-wide guidance for ${p.id}`,
+          };
+          rule.base = '.';
+        }
+      }
+      if (!loss) {
+        projected = projected.filter((item) => item.id !== resource.id);
+        loss = omittedResource(diagnostic);
+      }
+      losses.push(loss);
+      changed = true;
+    }
+    // Each retry clears native fields, broadens activation/base, or removes a
+    // resource. No retry can restore an earlier state.
+    if (!changed) return { units: result.units, diagnostics: [...losses, ...result.diagnostics] };
+  }
+}
+async function renderStrictRules(
+  input: Resource[],
+  p: Profile,
+  workspace: Workspace,
+  options: RenderOptions,
+): Promise<RenderResult> {
   const units: Unit[] = [],
     diagnostics: Diagnostic[] = [];
   const resources = deduplicateResources(
@@ -203,7 +274,7 @@ export async function renderRules(
       if (!native)
         throw new EtymonError(
           'RULE_NATIVE_FIELDS_BLOCKED',
-          `${rule.name} has unmapped ${rule.format} fields: ${Object.keys(rule.native).join(', ')}. Rule conditions are never dropped, including with --allow-lossy`,
+          `${rule.name} has unmapped ${rule.format} fields: ${Object.keys(rule.native).join(', ')}. Use --allow-lossy to review omitting them`,
         );
       if (rule.base !== '.' && ['manual', 'model', 'never'].includes(rule.activation))
         throw new EtymonError(
@@ -312,12 +383,14 @@ export async function renderRules(
       instructionText(sorted) +
       (group.suffix.length ? '\n' + [...new Set(group.suffix)].sort().join('\n') + '\n' : '');
     if (p.id === 'windsurf' && content.length > (workspace.global ? 6000 : 12000)) {
-      diagnostics.push({
-        code: 'RULE_SIZE_LIMIT',
-        severity: 'error',
-        harness: p.id,
-        message: `Cascade ${workspace.global ? 'global' : 'project'} guidance exceeds its character limit at ${path}`,
-      });
+      for (const id of new Set(group.ids))
+        diagnostics.push({
+          code: 'RULE_SIZE_LIMIT',
+          severity: 'error',
+          harness: p.id,
+          resource: id,
+          message: `Cascade ${workspace.global ? 'global' : 'project'} guidance exceeds its character limit at ${path}; this instruction group cannot be written`,
+        });
       continue;
     }
     units.push({

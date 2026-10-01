@@ -1,0 +1,4 @@
+{
+  "title": "Repository skill variants follow the pinned upstream CLI and restore immutable assets",
+  "handler": "repositorySkillVariants"
+}

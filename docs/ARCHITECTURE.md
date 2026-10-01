@@ -6,7 +6,11 @@ User-facing installation and team workflows are in the [README](../README.md). R
 
 The resource pipeline is shared by the neo-blessed TUI, Commander CLI, and exported SDK.
 
-`services/create.ts` validates custom resources against one creation schema and writes source plus manifest through the journaled transaction. Skills become `SKILL.md` bundles, agents become canonical JSON, rules become canonical Markdown, and MCP connections remain inline. Authored files are not registered as generated output. `tui/create.ts` presents the schema in a scrolling form with native text editors, transport selection, save/cancel controls, and validation before submission. CLI flags and stdin bodies use the same service; no-source `add` and explicit `create` share this entry point.
+`services/create.ts` validates custom resources against one creation schema and writes source plus manifest through the journaled transaction. Skills become `SKILL.md` bundles, agents become canonical JSON, rules become canonical Markdown, and MCP connections remain inline. Authored files are not registered as generated output. `tui/create.ts` presents the schema in a scrolling form with native text editors, transport/activation selection, save/cancel controls, and validation before submission. Rule patterns appear only for glob activation; the global form omits project scopes and conditional activation. CLI flags and stdin bodies use the same service; no-source `add` and explicit `create` share this entry point.
+
+`providers/source.ts` supplies the shared classification policy for the CLI, TUI, and service. Existing local paths win over Git shorthand or MCP registry IDs. Explicit local paths stop when missing, and filesystem/validation failures never trigger remote fallback. Explicit URLs and Git URIs stay remote. MCP accepts local JSON definitions or registry IDs; its classification does not add Git-backed definitions or treat an endpoint URL as a registry ID. The terminal inspection flow pins a chosen local path to its absolute location before registration.
+
+Repository contribution skills and an always-on root rule are authored under `.agents/etymon/` through the same creation commands. Their registrations are project-scoped, with no external lock dependencies. `sync` generates ignored native copies; [CONTRIBUTING.md](CONTRIBUTING.md) is the human-facing version of these expectations.
 
 Project initialization creates the manifest and lockfile without replacing existing contents. `harnesses/gitignore.ts` derives native output and read-alias ignore paths from the profiles, adds explicit authoritative-file exceptions, and updates one owned block in `.gitignore`. Global initialization does not create a user `.gitignore`. `testcases/.gitignore` keeps native fixture sources trackable under the repository's generated-output patterns.
 
@@ -40,14 +44,15 @@ Local files / native importer ────────> authored TOML + editable
 | `src/providers/rules.ts`         | Rule formats, activation normalization, canonical Markdown, recoverable native scopes    |
 | `src/providers/index.ts`         | External dependency resolution, artifact integrity and restoration                       |
 | `src/harnesses/profiles.ts`      | Declarative paths, scopes, dialects, prerequisites and source evidence                   |
-| `src/harnesses/render.ts`        | Native projections, tool mappings, conservative conversion gates, env launchers          |
+| `src/harnesses/render.ts`        | Native projections, tool mappings, conversion diagnostics, env launchers                 |
+| `src/harnesses/loss.ts`          | Eligible conversion limits and resource omission diagnostics                             |
 | `src/harnesses/import.ts`        | Native resource extraction, credential externalization and phase diagnostics             |
 | `src/harnesses/inspect.ts`       | Read-only compatibility alias, precedence and discovery diagnostics                      |
 | `src/harnesses/discovery.ts`     | Verified read aliases kept separate from preferred native write paths                    |
 | `src/harnesses/gitignore.ts`     | Profile-derived project ignores with authoritative-source exceptions                     |
 | `src/harnesses/rule-profiles.ts` | Rule locations, scope capabilities, native prerequisite notes and primary sources        |
 | `src/harnesses/rule-import.ts`   | Bounded nested discovery, native precedence, condition preservation, merged origins      |
-| `src/harnesses/rule-render.ts`   | Standing fragment composition, scoped native output and fail-closed activation gates     |
+| `src/harnesses/rule-render.ts`   | Standing composition, scoped output, strict gates and explicit lossy projections         |
 | `src/services/environment.ts`    | Add, environment assembly, sync, conversion, update, remove, doctor                      |
 | `src/services/create.ts`         | Direct custom creation, shared validation, source/manifest transactions                  |
 | `src/tui/create.ts`              | Visible creation forms with multiline instructions and transport-specific fields         |
@@ -59,11 +64,11 @@ Local files / native importer ────────> authored TOML + editable
 
 Normalize a requested resource into `Dependency`, write bounded artifacts to `Cache`, and retain enough immutable provenance to recreate those exact bytes. Implement resolution separately from restoration. `sync` must restore the locked resolution and verify the digest; only `update` changes it. Add provider-specific tests for immutable restoration and malformed metadata. Do not start arbitrary MCP implementations during installation.
 
-Skills are resolved through a pinned upstream CLI and then rendered by Etymon. The CLI stages with `universal`, `--copy`, explicit skill names, telemetry disabled, and a temporary working directory. Original source paths and Git commits are retained for restoration. Upstream installation state is discarded.
+Skills are resolved through a pinned upstream CLI and then rendered by Etymon. The CLI stages with `universal`, `--copy`, explicit skill names, telemetry disabled, and a temporary working directory. Repository variant selection follows upstream discovery rather than rejecting differing native copies before staging. Every staged file and executable bit must match a bounded, validated source bundle; upstream-excluded files need not be present in the installed artifact. The selected original path, artifact digest, and Git commit are retained for restoration. Upstream installation state is discarded. Local discovery and native conversion retain strict collision checks.
 
 ## Add a harness
 
-Start with a primary-source profile and an explicit scope. Declare only verified write paths. Reuse an existing dialect only when its semantics match; otherwise add a renderer and importer. Return `Unit` values rather than writing files directly. Required semantics must fail before activation. Optional adaptations produce diagnostics. Add native round-trip fixtures and a real loader check when that runtime is available.
+Start with a primary-source profile and an explicit scope. Declare only verified write paths. Reuse an existing dialect only when its semantics match; otherwise add a renderer and importer. Return `Unit` values rather than writing files directly. Unsupported semantics block default activation. Explicit --allow-lossy conversion adapts a copy, reports every lost condition, restriction, or omitted resource, and leaves canonical source intact. Invalid input, ownership conflicts, filesystem errors, and disabled or shadowed loaders remain errors. Add native round-trip fixtures and a real loader check when that runtime is available.
 
 `Unit` represents a complete generated file or one structured map entry. The planner deduplicates identical multi-target units and rejects incompatible bytes at a shared path. It retains owners for unselected targets and prevents changing shared output without syncing those targets together.
 
@@ -79,6 +84,6 @@ Authored and imported MCP definitions are embedded in `etymon.toml`, including c
 
 ## MVP boundaries
 
-This release implements the supported core of skills, MCP, agents, and rules. It does not synthesize executable agent bridges, convert hooks/plugins, modify hosted settings, or migrate authentication. Rule conditions without a verified mapping block activation, even with optional lossy adaptation. User rules deliberately exclude project/module scopes. Native import reads declared locations and verified aliases; inline agents and arbitrary editor profiles are not a complete environment inventory. Advanced native extensions remain attached to their original dialect and cannot silently become portable.
+This release implements the supported core of skills, MCP, agents, and rules. It does not synthesize executable agent bridges, convert hooks/plugins, modify hosted settings, or migrate authentication. Rule conditions without a verified mapping block default activation. Explicit --allow-lossy may broaden conditions or omit settings/resources with warnings; canonical source retains the original semantics. Validation, ownership, and native loader failures remain blocking. User rules deliberately exclude project/module scopes. Native import reads declared locations and verified aliases; inline agents and arbitrary editor profiles are not a complete environment inventory. Advanced native extensions remain attached to their original dialect and cannot silently become portable.
 
 The artifact lock covers source commits, imported bytes, registry metadata, and provider/adapter versions. MCP runners pin top-level versions but do not freeze their transitive dependency graph. OCI tags and hosted services remain mutable; strict runtime materialization is future work. Unsupported formats or required capabilities result in actionable diagnostics.

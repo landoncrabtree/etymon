@@ -9,6 +9,25 @@ afterEach(async () => {
   for (const dir of directories.splice(0)) await fs.rm(dir, { recursive: true, force: true });
 });
 const cli = resolve('src/cli.ts');
+it('documents MCP find as the primary command and inspects local JSON without registration', async () => {
+  const root = await fs.mkdtemp(join(tmpdir(), 'etymon-cli-mcp-'));
+  directories.push(root);
+  const invoke = (args: string[]) =>
+    run(process.execPath, ['--import', 'tsx', cli, '--cwd', root, ...args]);
+  expect(await invoke(['mcp', '--help'])).toContain('find|search');
+  const connection = { transport: 'stdio', command: 'node', args: ['server.js'], env: {} };
+  await fs.writeFile(join(root, 'mcp.json'), JSON.stringify(connection));
+  expect(
+    JSON.parse(await invoke(['mcp', 'add', 'mcp.json', '--list', '--offline', '--json'])),
+  ).toEqual(connection);
+  await expect(fs.stat(join(root, '.agents/etymon.toml'))).rejects.toMatchObject({
+    code: 'ENOENT',
+  });
+  for (const command of ['find', 'search'])
+    await expect(invoke(['mcp', command, 'anything', '--offline'])).rejects.toThrow(
+      /OFFLINE_SEARCH/,
+    );
+}, 30000);
 it('runs scriptable commands, accepts options after subcommands, and keeps the TUI opt-in without a terminal', async () => {
   const root = await fs.mkdtemp(join(tmpdir(), 'etymon-cli-test-'));
   directories.push(root);

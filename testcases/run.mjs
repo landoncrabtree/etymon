@@ -180,8 +180,8 @@ try {
       async sync(targets, extra = []) {
         return context.cli(['sync', '--harness', targets, ...extra]);
       },
-      async idempotent(targets) {
-        const plan = await context.sync(targets);
+      async idempotent(targets, extra = []) {
+        const plan = await context.sync(targets, extra);
         assert.deepEqual(plan.changes, [], 'Repeated sync changed native files');
       },
       async gitCommit(cwd = project) {

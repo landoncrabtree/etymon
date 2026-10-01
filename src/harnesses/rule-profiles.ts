@@ -324,7 +324,7 @@ export const ruleProfiles: Record<string, RuleProfile> = {
       'https://docs.continue.dev/guides/configuring-models-rules-tools',
     ],
     notes: [
-      'Continue rules use Markdown frontmatter. regex and combined model/glob activation remain native; cross-harness conversion blocks when those semantics cannot be expressed.',
+      'Continue rules use Markdown frontmatter. regex and combined model/glob activation remain native; default cross-harness conversion blocks unmapped semantics; --allow-lossy reports omitted conditions.',
     ],
   },
   windsurf: {

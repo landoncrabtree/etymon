@@ -60,6 +60,7 @@ export async function discoverNativeSkills(
 export async function discoverSkills(
   root: string,
   names: string[] = [],
+  options: { keepVariants?: boolean } = {},
 ): Promise<{ path: string; name: string; artifact: Artifact }[]> {
   const isFile = (await fs.stat(root)).isFile();
   const directory = isFile ? dirname(root) : root;
@@ -78,6 +79,7 @@ export async function discoverSkills(
     if (name !== '*' && !found.some((f) => f.name === name))
       throw new EtymonError('SKILL_NOT_FOUND', `No skill named ${name} in source`);
   if (!found.length) throw new EtymonError('NO_SKILLS', 'No SKILL.md definitions found');
+  if (options.keepVariants) return found;
   const unique = new Map<string, (typeof found)[number]>();
   for (const skill of found) {
     const prior = unique.get(skill.name);
@@ -89,6 +91,38 @@ export async function discoverSkills(
     if (!prior) unique.set(skill.name, skill);
   }
   return [...unique.values()];
+}
+
+/** Let the pinned upstream CLI select repository variants, then verify their origin. */
+export async function stageRepositorySkills(
+  root: string,
+  names: string[],
+  workspace: Workspace,
+  version?: string,
+): Promise<{ path: string; name: string; artifact: Artifact }[]> {
+  // Bound and validate source before the upstream copier can follow any links.
+  const candidates = await discoverSkills(root, names, { keepVariants: true });
+  const staged = await stageWithSkills(root, names, workspace, version);
+  return staged.map((skill) => {
+    const paths = new Set(skill.artifact.files.map((file) => file.path));
+    const identity = bundleIdentity(skill.artifact);
+    const source = candidates.find(
+      (candidate) =>
+        candidate.name === skill.name &&
+        bundleIdentity({
+          version: 1,
+          files: candidate.artifact.files.filter((file) => paths.has(file.path)),
+        }) === identity,
+    );
+    // Upstream excludes documentation/build files; every installed byte and mode
+    // must still match a validated source bundle from this immutable checkout.
+    if (!source)
+      throw new EtymonError(
+        'SKILL_STAGING_MISMATCH',
+        `Staged skill ${skill.name} does not match a source bundle`,
+      );
+    return { ...skill, path: source.path };
+  });
 }
 export async function stageWithSkills(
   root: string,

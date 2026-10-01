@@ -1,0 +1,1 @@
+Lossy conversion preview and activation across interfaces.

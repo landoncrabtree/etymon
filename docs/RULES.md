@@ -1,6 +1,6 @@
-# Portable rules
+# Rules and instructions
 
-Rules are the fourth Etymon resource kind. CLI, TUI, `convert`, `sync`, `update`, `remove`, and `doctor` share the same normalized rule pipeline. Research baseline: September 30, 2026. Native rule locations and loaders change frequently; each harness profile carries its primary sources and prerequisites in `etymon harnesses --json`.
+Standing instructions and conditional rules share the `rule` resource kind. CLI, TUI, `convert`, `sync`, `update`, `remove`, and `doctor` share the same normalized rule pipeline. Research baseline: October 1, 2026. Native rule locations and loaders change frequently; each harness profile carries its primary sources and prerequisites in `etymon harnesses --json`.
 
 ```bash
 etymon convert codex --dry-run
@@ -52,7 +52,7 @@ native: {}
 Use explicit types for exported interfaces.
 ```
 
-Always-on rules with a non-root base become nested AGENTS.md where supported, or verified native file-pattern rules for the equivalent subtree. Targets with neither capability return `RULE_SCOPE_UNSUPPORTED` and write nothing. Conditional directory/model combinations that cannot be preserved also block. `--allow-lossy` never drops rule activation, directory boundaries, mode conditions, or unknown native requirements.
+Always-on rules with a non-root base become nested AGENTS.md where supported, or verified native file-pattern rules for the equivalent subtree. Targets with neither capability return `RULE_SCOPE_UNSUPPORTED` and write nothing by default. Conditional directory/model combinations that cannot be preserved also block. With `--allow-lossy`, unsupported activation becomes always-on, unsupported directory scope becomes project-wide, and unmapped native conditions are omitted. Each change produces a warning naming the rule, destination, and lost conditions. Directory scope is retained whenever the destination can represent it. Disabled rules are omitted when the destination cannot express them; they are never enabled as a fallback. Oversized instruction groups are omitted with warnings rather than truncated. The authored source keeps its original semantics.
 
 ## Project and personal writers
 
@@ -94,6 +94,6 @@ Skill deduplication compares the complete bundle, including assets and executabl
 
 Generated standing files use HTML comments to retain fragment identities; native scoped files retain a hashed scope comment so conversion can recover the original portable directory/activation. These markers do not alter the Markdown guidance. Editing native frontmatter invalidates the old saved scope and imports the new native condition. Removing one rule rebuilds shared files with their remaining fragments and owners. Manual edits to managed files still block replacement or removal.
 
-Arbitrary native file includes, content predicates, tool-specific metadata, and private instruction files require explicit treatment. Etymon understands its standalone AGENTS include bridge and generated Amp references. Other standalone native include directives are reported for explicit expansion before portable import. It does not claim a complete interpreter for every harness's import syntax, interactive toggles, managed settings, or hosted rules. Unknown conditions remain native or block translation; the actionable diagnostic names the missing mapping.
+Arbitrary native file includes, content predicates, tool-specific metadata, and private instruction files require explicit treatment. Etymon understands its standalone AGENTS include bridge and generated Amp references. Other standalone native include directives are reported for explicit expansion before portable import. It does not claim a complete interpreter for every harness's import syntax, interactive toggles, managed settings, or hosted rules. Unknown conditions remain native or block default translation; the diagnostic names the missing mapping. Explicit lossy sync can omit those conditions and warns about the resulting behavior.
 
 See [executable scenarios](../testcases/README.md) and [verification](VERIFICATION.md) for tested behavior and native discovery coverage.

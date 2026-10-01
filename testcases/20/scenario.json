@@ -1,0 +1,4 @@
+{
+  "title": "Local paths take precedence over remote shorthand across all interfaces",
+  "handler": "localSources"
+}

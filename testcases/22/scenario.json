@@ -1,0 +1,4 @@
+{
+  "title": "Lossy CLI/TUI conversion reports behavior changes, preserves source, and respects output ownership",
+  "handler": "lossyConversions"
+}

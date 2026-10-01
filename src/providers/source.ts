@@ -1,17 +1,66 @@
 import { promises as fs } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { homedir } from 'node:os';
 import { exists, fetchText, inside, noSymlink, run, safeRelative, temporary } from '../core/fs.js';
-import { EtymonError } from '../core/model.js';
+import { EtymonError, Kind } from '../core/model.js';
 import { Workspace } from '../core/workspace.js';
 
 export type Source =
   | { type: 'local'; path: string }
   | { type: 'url'; url: string }
   | { type: 'git'; repository: string; ref?: string; subpath?: string };
-export async function parseSource(input: string, cwd: string, ref?: string): Promise<Source> {
+export type ResourceSource = Source | { type: 'registry'; id: string };
+const remoteSource = /^(?:https?:\/\/|git@|ssh:\/\/|git:\/\/|git\+(?:https?|file):\/\/)/;
+
+/** Existing local paths win over shorthand. Explicit local intent never falls back remotely. */
+export async function localSource(
+  input: string,
+  cwd: string,
+  home = homedir(),
+): Promise<Extract<Source, { type: 'local' }> | undefined> {
   if (!input || input.startsWith('-'))
     throw new EtymonError('INVALID_SOURCE', 'A non-option source is required');
+  if (remoteSource.test(input)) return undefined;
+  const fileUrl = input.startsWith('file:');
+  const path = fileUrl
+    ? fileURLToPath(input)
+    : input.startsWith('~/')
+      ? resolve(home, input.slice(2))
+      : resolve(cwd, input);
+  if (await exists(path)) return { type: 'local', path };
+  if (fileUrl || /^(\.{1,2}[\\/]|\/|~[\\/]|[A-Za-z]:[\\/])/.test(input))
+    throw new EtymonError('SOURCE_NOT_FOUND', `Local source does not exist: ${input}`);
+  return undefined;
+}
+
+/** All add/inspection entry points use the same local-first source policy. */
+export async function parseResourceSource(
+  kind: Kind,
+  input: string,
+  cwd: string,
+  ref?: string,
+  home = homedir(),
+): Promise<ResourceSource> {
+  if (kind !== 'mcp') return parseSource(input, cwd, ref, home);
+  const local = await localSource(input, cwd, home);
+  if (local) return local;
+  if (remoteSource.test(input))
+    throw new EtymonError(
+      'INVALID_SOURCE',
+      'MCP sources must be local JSON definitions or registry IDs. Use mcp create --url for an endpoint.',
+    );
+  return { type: 'registry', id: input };
+}
+
+export async function parseSource(
+  input: string,
+  cwd: string,
+  ref?: string,
+  home = homedir(),
+): Promise<Source> {
+  const local = await localSource(input, cwd, home);
+  if (local) return local;
   if (/^(?:git\+)?https?:\/\//.test(input)) {
     const url = new URL(input.replace(/^git\+/, ''));
     if (
@@ -26,10 +75,6 @@ export async function parseSource(input: string, cwd: string, ref?: string): Pro
         'Use credential helpers or environment variables instead of credentials in source URLs',
       );
   }
-  const local = input.startsWith('file://') ? fileURLToPath(input) : resolve(cwd, input);
-  if (await exists(local)) return { type: 'local', path: local };
-  if (/^(\.{1,2}\/|\/|~\/|[A-Za-z]:[\\/])/.test(input))
-    throw new EtymonError('SOURCE_NOT_FOUND', `Local source does not exist: ${input}`);
   if (/^(git@|ssh:\/\/|git:\/\/|git\+(?:https?|file):\/\/)/.test(input)) {
     const [repo, fragment] = input.replace(/^git\+/, '').split('#');
     const [gitRef, subpath] = (fragment ?? '').split(':');

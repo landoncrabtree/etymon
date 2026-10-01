@@ -1,4 +1,4 @@
 {
-  "title": "Continue compound conditions remain native and block unsafe adaptation",
+  "title": "Continue compound conditions remain native unless lossy conversion is requested",
   "handler": "nativeConditions"
 }

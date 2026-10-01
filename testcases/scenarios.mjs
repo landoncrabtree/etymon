@@ -8,6 +8,207 @@ import { nativeChecks } from './native.mjs';
 const rules = async (c) => (await c.list()).authored.rule;
 const lockText = (c) => c.read('.agents/etymon.lock');
 export const handlers = {
+  async lossyConversions(c) {
+    await c.write(
+      'checks/SKILL.md',
+      '---\nname: checks\ndescription: Run checks\nargument-hint: "[file]"\n---\nRun tests.\n',
+    );
+    await c.write(
+      'reviewer.md',
+      '---\nname: reviewer\ndescription: Review code\ntools: Read\nhooks: {}\n---\nReview changes.\n',
+    );
+    await c.cli(['skills', 'add', './checks']);
+    await c.cli(['agents', 'add', './reviewer.md']);
+    await c.cli([
+      'rules',
+      'create',
+      '--name',
+      'types',
+      '--body',
+      'Keep types stable.',
+      '--dest-dir',
+      'packages/api',
+      '--activation',
+      'glob',
+      '--pattern',
+      '**/*.ts',
+    ]);
+    await c.write(
+      'mcp.json',
+      JSON.stringify({
+        connection: { transport: 'streamable-http', url: 'https://example.com/mcp', headers: {} },
+        format: 'copilot-cli',
+        native: { tools: ['read'] },
+      }),
+    );
+    await c.cli(['mcp', 'add', './mcp.json']);
+    const manifest = await c.read('.agents/etymon.toml'),
+      lock = await lockText(c),
+      rule = await c.read('.agents/etymon/rules/types.md');
+    const strict = await c.cli(['sync', '--harness', 'codex'], { expectedCode: 1 });
+    assert.equal(strict.error.code, 'PLAN_BLOCKED');
+    await assert.rejects(c.read('.codex/config.toml'), { code: 'ENOENT' });
+    const preview = await c.sync('codex', ['--allow-lossy', '--dry-run']);
+    for (const code of [
+      'SKILL_FIELDS_OMITTED',
+      'NATIVE_FIELD_OMITTED',
+      'TOOL_RESTRICTION_OMITTED',
+      'MCP_FIELDS_OMITTED',
+      'RULE_CONDITIONS_DROPPED',
+    ])
+      assert(
+        preview.diagnostics.some((d) => d.code === code && d.severity === 'warning'),
+        code,
+      );
+    await assert.rejects(c.read('packages/api/AGENTS.md'), { code: 'ENOENT' });
+    await c.sync('codex', ['--allow-lossy']);
+    assert.match(await c.read('packages/api/AGENTS.md'), /Keep types stable/);
+    assert(!(await c.read('.agents/skills/checks/SKILL.md')).includes('argument-hint'));
+    assert.equal(await c.read('.agents/etymon.toml'), manifest);
+    assert.equal(await lockText(c), lock);
+    assert.equal(await c.read('.agents/etymon/rules/types.md'), rule);
+    await c.idempotent('codex', ['--allow-lossy']);
+    await c.cli(['doctor', '--harness', 'codex', '--allow-lossy']);
+    const pi = await c.sync('pi', ['--allow-lossy']);
+    assert(
+      pi.diagnostics.some((d) => d.code === 'RESOURCE_OMITTED' && d.resource.startsWith('agent:')),
+    );
+    const zed = await c.sync('zed', ['--allow-lossy']);
+    assert(zed.diagnostics.some((d) => d.code === 'RULE_SCOPE_BROADENED'));
+    await c.write('AGENTS.md', (await c.read('AGENTS.md')) + '\nManual edit.\n');
+    const drift = await c.cli(['sync', '--harness', 'zed', '--allow-lossy'], { expectedCode: 1 });
+    assert.equal(drift.error.code, 'MANAGED_DRIFT');
+    // A separate project proves real keyboard review of losses before activation.
+    for (const mode of ['lossy-sync', 'lossy-sync-adopt']) {
+      const terminalProject = join(c.directory, mode);
+      await fs.mkdir(terminalProject);
+      await c.cli([
+        'rules',
+        'create',
+        '--name',
+        'conditional',
+        '--body',
+        'Terminal rule.',
+        '--activation',
+        'glob',
+        '--pattern',
+        'src/**',
+        '--cwd',
+        terminalProject,
+      ]);
+      if (mode.endsWith('adopt'))
+        await fs.writeFile(join(terminalProject, 'AGENTS.md'), 'Unmanaged instructions.');
+      await c.exec('python3', [
+        fileURLToPath(new URL('./tui.py', import.meta.url)),
+        process.execPath,
+        fileURLToPath(new URL('../bin/etymon.js', import.meta.url)),
+        terminalProject,
+        c.home,
+        join(c.directory, 'cache'),
+        mode,
+      ]);
+      assert.match(await fs.readFile(join(terminalProject, 'AGENTS.md'), 'utf8'), /Terminal rule/);
+      if (mode === 'lossy-sync') {
+        await c.cli([
+          'rules',
+          'create',
+          '--name',
+          'remaining',
+          '--body',
+          'Remaining rule.',
+          '--activation',
+          'glob',
+          '--pattern',
+          'src/**',
+          '--cwd',
+          terminalProject,
+        ]);
+        await c.cli(['sync', '--harness', 'codex', '--allow-lossy', '--cwd', terminalProject]);
+        await c.exec('python3', [
+          fileURLToPath(new URL('./tui.py', import.meta.url)),
+          process.execPath,
+          fileURLToPath(new URL('../bin/etymon.js', import.meta.url)),
+          terminalProject,
+          c.home,
+          join(c.directory, 'cache'),
+          'lossy-remove',
+        ]);
+        const content = await fs.readFile(join(terminalProject, 'AGENTS.md'), 'utf8');
+        assert.match(content, /Remaining rule/);
+        assert(!content.includes('Terminal rule'));
+      }
+    }
+  },
+  async repositorySkillVariants(c) {
+    const source = join(c.project, 'source'),
+      uri = 'git+file://' + source;
+    await c.exec('git', ['init', '-q'], { cwd: source });
+    await c.gitCommit(source);
+    const inspected = await c.cli(['skills', 'add', uri, '--list']);
+    assert.equal(inspected.length, 1);
+    assert.match(inspected[0].path, /\.agents\/skills\/palette$/);
+    await c.cli(['skills', 'add', uri]);
+    const before = await lockText(c),
+      dependency = (await c.list()).lock.dependencies[0];
+    assert.equal(dependency.artifacts[0].path, '.agents/skills/palette');
+    await c.sync('codex,copilot-cli');
+    assert.equal(await c.read('.agents/skills/palette/assets/palette.txt'), 'SHARED_PALETTE_v1\n');
+    // New upstream commits and an empty cache must not change locked bytes.
+    await c.write('source/.agents/skills/palette/assets/palette.txt', 'SHARED_PALETTE_v2\n');
+    await c.gitCommit(source);
+    await c.clear(['.agents/skills/palette', '.github/skills/palette']);
+    await c.cli([
+      'sync',
+      '--harness',
+      'codex,copilot-cli',
+      '--cache',
+      join(c.directory, 'fresh-cache'),
+    ]);
+    assert.equal(await c.read('.agents/skills/palette/assets/palette.txt'), 'SHARED_PALETTE_v1\n');
+    assert.equal(await lockText(c), before);
+    await c.idempotent('codex,copilot-cli');
+    // The external-provider policy must not hide conflicting local imports.
+    const invalid = await c.cli(['skills', 'add', './source', '--offline'], { expectedCode: 1 });
+    assert.equal(invalid.error.code, 'SKILL_NAME_COLLISION');
+    assert.equal(await lockText(c), before);
+  },
+  async localSources(c) {
+    const body = '---\nname: local-checks\ndescription: Run local checks\n---\nRun tests.\n';
+    for (const [kind, source, file, text] of [
+      ['skill', 'skills/checks', 'skills/checks/SKILL.md', body],
+      [
+        'agent',
+        'augmnt/agents/api-designer.md',
+        'augmnt/agents/api-designer.md',
+        body.replace('local-checks', 'local-reviewer'),
+      ],
+      ['rule', 'abc/abc/abc', 'abc/abc/abc/AGENTS.md', 'Keep public interfaces stable.\n'],
+      [
+        'mcp',
+        'io.example/server',
+        'io.example/server',
+        JSON.stringify({ transport: 'stdio', command: 'node', args: ['server.js'], env: {} }),
+      ],
+    ]) {
+      await c.write(file, text);
+      await c.cli([kind, 'add', source, '--list', '--offline']);
+      await c.cli([kind, 'add', source, '--offline']);
+      assert.equal((await c.cli([kind, 'list'])).resolved.length, 1);
+      assert.equal((await c.list()).lock.dependencies.length, 0);
+      const before = await c.read('.agents/etymon.toml');
+      for (const missing of ['./missing/source', '~/missing/source']) {
+        const result = await c.cli([kind, 'add', missing, '--offline'], { expectedCode: 1 });
+        assert.equal(result.error.code, 'SOURCE_NOT_FOUND');
+        assert.equal(await c.read('.agents/etymon.toml'), before);
+      }
+    }
+    await c.sync('codex,copilot-cli,opencode');
+    await c.idempotent('codex,copilot-cli,opencode');
+    assert.match(await c.read('.codex/config.toml'), /server\.js/);
+    // Inline MCP settings no longer depend on their imported JSON.
+    await c.clear(['io.example/server']);
+    await c.idempotent('codex,copilot-cli,opencode');
+  },
   async initializedTracking(c) {
     await c.cli(['init']);
     const first = await c.read('.gitignore');
@@ -167,13 +368,24 @@ export const handlers = {
       assert.equal(result.exitCode, mode.endsWith('cancel') ? 130 : 0);
     };
     await ui('create-agent-cancel');
+    await ui('create-rule-cancel');
     assert.equal(await c.read('.agents/etymon.toml'), before);
+    await c.write(
+      'local-server.json',
+      JSON.stringify({ transport: 'stdio', command: 'node', args: [], env: {} }),
+    );
+    await ui('add-local-mcp');
+    await ui('host-add-mcp');
+    assert.equal((await c.list()).authored.mcp['local-server'].connection.command, 'node');
     for (const mode of [
       'create-skill',
       'create-agent',
       'create-mcp-stdio',
       'create-mcp-http',
       'create-mcp-sse',
+      'create-rule',
+      'create-rule-glob',
+      'create-rule-global',
     ])
       await ui(mode);
     const list = await c.list();
@@ -187,10 +399,26 @@ export const handlers = {
       ).agent.prompt,
       'Review carefully.\n\n    Preserve indentation.',
     );
+    const createdRules = (await c.cli(['rule', 'list'])).resolved;
+    assert.equal(
+      createdRules.find((resource) => resource.name === 'form-rule').rule.base,
+      'packages/tui',
+    );
+    const scoped = createdRules.find((resource) => resource.name === 'form-glob').rule;
+    assert.equal(scoped.base, 'packages/tui');
+    assert.equal(scoped.activation, 'glob');
+    assert.deepEqual(scoped.patterns, ['**/*.ts']);
+    const personal = (await c.cli(['rule', 'list', '--global'])).resolved;
+    assert.equal(personal.length, 1);
+    assert.equal(personal[0].rule.base, '.');
+    assert.equal(personal[0].rule.activation, 'always');
+    assert.deepEqual(personal[0].rule.patterns, []);
     await c.sync('claude');
     await c.idempotent('claude');
     await ui('host-create');
+    await ui('host-create-rule');
     assert((await c.list()).authored.skill['host-checks']);
+    assert((await c.list()).authored.rule['host-rule']);
     await c.sync('claude');
     await c.idempotent('claude');
   },
@@ -405,9 +633,16 @@ export const handlers = {
     if (c.options.skipRegistry)
       return { skip: 'localhost sockets unavailable; registry scenario explicitly excluded' };
     const payload = JSON.parse(await c.read('registry.json'));
+    const searches = [];
     const server = createServer((req, res) => {
-      assert.match(req.url, /^\/v0\.1\/servers\//);
+      const url = new URL(req.url, 'http://localhost');
       res.setHeader('Content-Type', 'application/json');
+      if (url.pathname === '/v0.1/servers') {
+        searches.push(Object.fromEntries(url.searchParams));
+        res.end(JSON.stringify({ servers: [payload], metadata: { nextCursor: 'next' } }));
+        return;
+      }
+      assert.match(req.url, /^\/v0\.1\/servers\//);
       res.end(JSON.stringify(payload));
     });
     await new Promise((resolve, reject) => {
@@ -415,6 +650,30 @@ export const handlers = {
       server.listen(0, '127.0.0.1', resolve);
     });
     try {
+      for (const command of ['find', 'search']) {
+        const found = await c.cli([
+          'mcp',
+          command,
+          'local fixture',
+          '--registry',
+          `http://127.0.0.1:${server.address().port}`,
+          '--cursor',
+          'current',
+          '--limit',
+          '3',
+        ]);
+        assert.equal(found.servers[0].name, payload.server.name);
+        assert.equal(found.nextCursor, 'next');
+      }
+      assert.deepEqual(
+        searches,
+        Array(2).fill({
+          search: 'local fixture',
+          version: 'latest',
+          limit: '3',
+          cursor: 'current',
+        }),
+      );
       await c.cli([
         'mcp',
         'add',
@@ -490,11 +749,21 @@ export const handlers = {
     assert.match(await c.read('.claude/rules/types.md'), /src\/\*\*\/\*\.\{ts,tsx\}/);
     assert.match(await c.read('.github/instructions/types.instructions.md'), /applyTo:/);
     await c.idempotent('claude,copilot-cli');
-    const blocked = await c.cli(['sync', '--harness', 'codex', '--allow-lossy'], {
+    const blocked = await c.cli(['sync', '--harness', 'codex'], {
       expectedCode: 1,
     });
     assert.equal(blocked.error.code, 'PLAN_BLOCKED');
     assert(blocked.error.details.some((d) => d.code === 'RULE_SCOPE_UNSUPPORTED'));
+    const source = await c.read('.agents/etymon/rules/types.md');
+    const lossy = await c.sync('codex', ['--allow-lossy']);
+    assert(
+      lossy.diagnostics.some(
+        (d) => d.code === 'RULE_CONDITIONS_DROPPED' && d.severity === 'warning',
+      ),
+    );
+    assert.match(await c.read('AGENTS.md'), /Use explicit types/);
+    assert.equal(await c.read('.agents/etymon/rules/types.md'), source);
+    await c.idempotent('codex', ['--allow-lossy']);
   },
   async sharedRemoval(c) {
     await c.cli(['rule', 'add', './checks.md']);
@@ -541,11 +810,21 @@ export const handlers = {
     await c.sync('continue', ['--adopt']);
     await c.idempotent('continue');
     assert.match(await c.read('.continue/rules/compound.md'), /regex: TODO/);
-    const blocked = await c.cli(['sync', '--harness', 'cursor', '--allow-lossy', '--dry-run'], {
+    const blocked = await c.cli(['sync', '--harness', 'cursor', '--dry-run'], {
       expectedCode: 1,
     });
     assert(blocked.diagnostics.some((d) => d.code === 'RULE_NATIVE_FIELDS_BLOCKED'));
     assert.deepEqual(blocked.changes, []);
+    const source = await c.read('.agents/etymon/rules/compound.md');
+    const lossy = await c.sync('cursor', ['--allow-lossy']);
+    assert(
+      lossy.diagnostics.some(
+        (d) => d.code === 'RULE_NATIVE_FIELDS_OMITTED' && d.severity === 'warning',
+      ),
+    );
+    assert.match(await c.read('AGENTS.md'), /TODO/);
+    assert.equal(await c.read('.agents/etymon/rules/compound.md'), source);
+    await c.idempotent('cursor', ['--allow-lossy']);
   },
   async relocatedRules(c) {
     await c.cli(['rule', 'add', './style.md', '--dest-dir', 'packages/api']);

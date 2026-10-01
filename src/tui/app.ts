@@ -1,15 +1,15 @@
 import blessed from 'neo-blessed';
 import type { Widgets } from 'blessed';
-import { resolve } from 'node:path';
 import { Workspace } from '../core/workspace.js';
 import { errorMessage, EtymonError, Kind, kinds, Request } from '../core/model.js';
 import { apply, readState, recover } from '../core/transaction.js';
-import { exists } from '../core/fs.js';
 import { add, buildPlan, convert, doctor, remove, update } from '../services/environment.js';
 import { profile, profiles } from '../harnesses/profiles.js';
 import { McpRegistry } from '../providers/mcp.js';
 import { create } from '../services/create.js';
 import { promptCreation } from './create.js';
+import { localSource, parseResourceSource } from '../providers/source.js';
+import { isConversionLimit } from '../harnesses/loss.js';
 
 type TuiOptions = { harness?: string[]; configPath?: string; rulesPath?: string; debug?: boolean };
 type Choice<T> = { label: string; value: T };
@@ -33,7 +33,7 @@ export class EtymonTui {
     'Add skill',
     'Add MCP server',
     'Add agent',
-    'Add rule',
+    'Rules & Instructions',
     'Sync / preview',
     'Import native setup',
     'Update dependencies',
@@ -331,13 +331,17 @@ export class EtymonTui {
   private async addResource(kind: Kind): Promise<void> {
     let source: string | undefined;
     if (kind === 'mcp') {
-      const query = await this.ask('Search official MCP registry (or enter an exact server ID)');
+      const query = await this.ask('Find MCP: local JSON, registry ID, or search (blank: create)');
       if (query === undefined) return;
       if (!query) {
         await this.createResource(kind);
         return;
       }
-      if (query.includes('/')) source = query;
+      if (
+        (await localSource(query, this.workspace.cwd, this.workspace.home)) ||
+        query.includes('/')
+      )
+        source = query;
       else {
         const result = await new McpRegistry().search(query);
         if (!result.servers.length) {
@@ -354,7 +358,7 @@ export class EtymonTui {
       }
     } else
       source = await this.ask(
-        `Add ${kind}: owner/repo[/path], Git URL, direct file URL, or local path`,
+        `Add ${kind}: local path, owner/repo[/path], or URL (leave blank to create)`,
       );
     if (source === undefined) return;
     if (!source) {
@@ -362,6 +366,14 @@ export class EtymonTui {
       return;
     }
     const request: Request = { source, names: [] };
+    const parsed = await parseResourceSource(
+      kind,
+      source,
+      this.workspace.cwd,
+      undefined,
+      this.workspace.home,
+    );
+    if (parsed.type === 'local') request.source = parsed.path;
     if (kind !== 'mcp') {
       const names = await this.ask(`${kind} names, comma-separated (leave empty for all)`);
       if (names === undefined) return;
@@ -369,7 +381,7 @@ export class EtymonTui {
         .split(',')
         .map((n) => n.trim())
         .filter(Boolean);
-    } else if (!(await exists(resolve(this.workspace.cwd, source)))) {
+    } else if (parsed.type === 'registry') {
       const server = await new McpRegistry().get(source);
       const implementations: Choice<{ package?: string; remote?: number }>[] = [
         ...(server.packages ?? []).map((p) => ({
@@ -429,47 +441,51 @@ export class EtymonTui {
       force?: boolean;
       allowLossy?: boolean;
     } = { configPath: this.options.configPath, rulesPath: this.options.rulesPath };
-    let plan;
-    try {
-      plan = await buildPlan(this.workspace, this.selected, options);
-    } catch (error) {
-      if (
-        !(error instanceof EtymonError) ||
-        !['UNMANAGED_CONFLICT', 'MANAGED_DRIFT'].includes(error.code)
-      )
-        throw error;
-      this.show('Ownership conflict', error.message);
-      const accepted = await this.choose('Review a plan resolving this conflict?', [
-        {
-          label:
-            error.code === 'UNMANAGED_CONFLICT'
-              ? 'Preview taking ownership of existing output'
-              : 'Preview replacing edits to managed output',
-          value: true,
-        },
-        { label: 'Cancel and preserve current files', value: false },
-      ]);
-      if (!accepted) return;
-      if (error.code === 'UNMANAGED_CONFLICT') options.adopt = true;
-      else options.force = true;
-      plan = await buildPlan(this.workspace, this.selected, options);
-    }
-    if (
-      plan.diagnostics.some((d) =>
-        ['NATIVE_FIELD_UNMAPPED', 'MODEL_MAPPING_REQUIRED'].includes(d.code),
-      )
-    ) {
+    const reviewedPlan = async () => {
+      for (;;) {
+        try {
+          return await buildPlan(this.workspace, this.selected, options);
+        } catch (error) {
+          if (
+            !(error instanceof EtymonError) ||
+            !['UNMANAGED_CONFLICT', 'MANAGED_DRIFT'].includes(error.code)
+          )
+            throw error;
+          this.show('Ownership conflict', error.message);
+          const accepted = await this.choose('Review a plan resolving this conflict?', [
+            {
+              label:
+                error.code === 'UNMANAGED_CONFLICT'
+                  ? 'Preview taking ownership of existing output'
+                  : 'Preview replacing edits to managed output',
+              value: true,
+            },
+            { label: 'Cancel and preserve current files', value: false },
+          ]);
+          if (!accepted) return undefined;
+          if (error.code === 'UNMANAGED_CONFLICT') options.adopt = true;
+          else options.force = true;
+        }
+      }
+    };
+    let plan = await reviewedPlan();
+    if (!plan) return;
+    if (plan.diagnostics.some((d) => d.severity === 'error' && isConversionLimit(d.code))) {
       this.show(
-        'Optional adaptation',
+        'Lossy conversion',
         plan.diagnostics.map((d) => `${d.code}: ${d.message}`).join('\n'),
       );
-      const accepted = await this.choose('Review optional metadata / model adaptation?', [
-        { label: 'Preview optional adaptation', value: true },
-        { label: 'Keep source semantics; cancel', value: false },
-      ]);
+      const accepted = await this.choose(
+        'Review a conversion that may change behavior or omit resources?',
+        [
+          { label: 'Preview lossy conversion and its warnings', value: true },
+          { label: 'Keep source semantics; cancel', value: false },
+        ],
+      );
       if (!accepted) return;
       options.allowLossy = true;
-      plan = await buildPlan(this.workspace, this.selected, options);
+      plan = await reviewedPlan();
+      if (!plan) return;
     }
     this.show(
       'Sync preview',
@@ -494,7 +510,7 @@ export class EtymonTui {
   private async createResource(kind: Kind): Promise<void> {
     this.modal = true;
     try {
-      const draft = await promptCreation(kind, {}, this.screen);
+      const draft = await promptCreation(kind, {}, this.screen, { global: this.workspace.global });
       const result = await this.mutation(() => create(this.workspace, draft));
       this.show('Created', `${result.names.join(', ')}\n\n${result.path}\n\nRun Sync to activate.`);
     } finally {
@@ -550,7 +566,27 @@ export class EtymonTui {
     }
     const selection = await this.choose('Remove resource', choices);
     if (!selection) return;
-    const preview = await remove(this.workspace, selection.kind, selection.id, { dryRun: true });
+    const options: { dryRun?: boolean; allowLossy?: boolean } = { dryRun: true };
+    let preview;
+    try {
+      preview = await remove(this.workspace, selection.kind, selection.id, options);
+    } catch (error) {
+      if (
+        !(error instanceof EtymonError) ||
+        error.code !== 'REMOVE_BLOCKED' ||
+        !Array.isArray(error.details) ||
+        !error.details.some((d) => isConversionLimit(d.code))
+      )
+        throw error;
+      this.show('Lossy conversion', error.details.map((d) => `${d.code}: ${d.message}`).join('\n'));
+      const lossy = await this.choose('Review lossy conversion of the remaining rules?', [
+        { label: 'Preview lossy conversion and its warnings', value: true },
+        { label: 'Cancel', value: false },
+      ]);
+      if (!lossy) return;
+      options.allowLossy = true;
+      preview = await remove(this.workspace, selection.kind, selection.id, options);
+    }
     this.show(
       'Removal preview',
       `Remove ${selection.id}\n\n${preview.plan.summary.map((c) => `${c.action} ${c.path}`).join('\n')}\n\nAuthored source files stay in place.\n${preview.plan.diagnostics.map((d) => `${d.severity}: ${d.message}`).join('\n')}`,
@@ -561,7 +597,9 @@ export class EtymonTui {
       { label: 'Cancel', value: false },
     ]);
     if (accepted) {
-      await this.mutation(() => remove(this.workspace, selection.kind, selection.id));
+      await this.mutation(() =>
+        remove(this.workspace, selection.kind, selection.id, { ...options, dryRun: false }),
+      );
       await this.dashboard();
     }
   }

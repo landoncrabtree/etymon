@@ -14,6 +14,8 @@ import { digest, exists, fileArtifact, textFile } from '../core/fs.js';
 import { Workspace } from '../core/workspace.js';
 import { AgentDialect, agentExtension, location, Profile } from './profiles.js';
 import { renderRules } from './rule-render.js';
+import { frontmatter } from '../providers/agents.js';
+import { isConversionLimit, omittedResource } from './loss.js';
 
 export type Unit = {
   path: string;
@@ -164,7 +166,7 @@ export function renderAgent(
   ];
   if (!same)
     for (const key of Object.keys(agent.native)) {
-      if (dangerous.includes(key))
+      if (dangerous.includes(key) && !options.allowLossy)
         throw new EtymonError(
           'REQUIRED_SEMANTICS_BLOCKED',
           `Agent ${agent.name} has ${agent.format} field ${key}; no verified mapping to ${p.id}`,
@@ -180,12 +182,12 @@ export function renderAgent(
       if (!options.allowLossy)
         throw new EtymonError(
           'NATIVE_FIELD_UNMAPPED',
-          `Agent ${agent.name} field ${key} is native to ${agent.format}; review with --allow-lossy to omit optional metadata`,
+          `Agent ${agent.name} field ${key} is native to ${agent.format}; review with --allow-lossy to omit it`,
         );
       diagnostics.push({
         code: 'NATIVE_FIELD_OMITTED',
         severity: 'warning',
-        message: `Omitted ${agent.format} field ${key} for ${p.id}`,
+        message: `Agent ${agent.name}: omitted ${agent.format} field ${key} for ${p.id}; its behavior and restrictions no longer apply`,
       });
     }
   let model = agent.model;
@@ -208,7 +210,18 @@ export function renderAgent(
     description: agent.description,
   };
   if (model && model !== 'inherit') metadata.model = model;
-  const tools = translateTools(agent, dialect);
+  let tools: unknown;
+  try {
+    tools = translateTools(agent, dialect);
+  } catch (error) {
+    if (!(error instanceof EtymonError) || !options.allowLossy || !isConversionLimit(error.code))
+      throw error;
+    diagnostics.push({
+      code: 'TOOL_RESTRICTION_OMITTED',
+      severity: 'warning',
+      message: `Agent ${agent.name}: omitted tool allowlist ${JSON.stringify(agent.tools)} for ${p.id}; the destination's default tool permissions apply (${error.code}: ${error.message})`,
+    });
+  }
   if (dialect === 'codex')
     return { text: toml({ ...metadata, developer_instructions: agent.prompt }), diagnostics };
   if (dialect === 'kiro')
@@ -348,15 +361,17 @@ export async function render(
     const destination = location(p, resource.kind, workspace, options.configPath);
     const owner = { resources: [resource.id], harnesses: [p.id] };
     if (!destination) {
-      diagnostics.push({
+      const diagnostic: Diagnostic = {
         code: 'CAPABILITY_UNSUPPORTED',
         severity: 'error',
         message: `${p.label} has no verified ${workspace.global ? 'global' : 'project'} ${resource.kind} writer. ${p.notes?.join(' ') ?? ''}`,
         resource: resource.id,
         harness: p.id,
-      });
+      };
+      diagnostics.push(options.allowLossy ? omittedResource(diagnostic) : diagnostic);
       continue;
     }
+    const start = units.length;
     try {
       if (resource.kind === 'skill') {
         const special = Object.keys(resource.metadata).filter(
@@ -370,18 +385,40 @@ export async function render(
               'allowed-tools',
             ].includes(k),
         );
-        if (special.length && p.id !== 'claude')
-          throw new EtymonError(
-            'SKILL_EXTENSION_BLOCKED',
-            `Skill ${resource.name} uses native fields ${special.join(', ')}; review its target semantics before exporting`,
-          );
-        for (const file of resource.files)
+        const omitExtensions = special.length > 0 && p.id !== 'claude';
+        if (omitExtensions) {
+          if (!options.allowLossy)
+            throw new EtymonError(
+              'SKILL_EXTENSION_BLOCKED',
+              `Skill ${resource.name} uses native fields ${special.join(', ')}; review with --allow-lossy to omit them`,
+            );
+          diagnostics.push({
+            code: 'SKILL_FIELDS_OMITTED',
+            severity: 'warning',
+            message: `Skill ${resource.name}: omitted native fields ${special.join(', ')} from ${p.id}; their behavior and restrictions no longer apply`,
+            resource: resource.id,
+            harness: p.id,
+          });
+        }
+        for (const file of resource.files) {
+          let content = Buffer.from(file.content, 'base64');
+          if (omitExtensions && file.path === 'SKILL.md') {
+            const text = content.toString('utf8'),
+              parsed = frontmatter(text);
+            for (const key of special) delete parsed.metadata[key];
+            const body = text.replace(
+              /^\uFEFF?---\s*\r?\n[\s\S]*?\r?\n---[^\S\r\n]*(?:\r?\n|$)/,
+              '',
+            );
+            content = Buffer.from(`---\n${yaml(parsed.metadata, { lineWidth: 0 })}---\n${body}`);
+          }
           units.push({
             path: join(destination, resource.name, file.path),
-            content: Buffer.from(file.content, 'base64'),
+            content,
             mode: file.executable ? 0o755 : 0o644,
             ...owner,
           });
+        }
       } else if (resource.kind === 'agent') {
         const result = renderAgent(resource.agent, p, options);
         diagnostics.push(
@@ -405,11 +442,20 @@ export async function render(
             resource: resource.id,
             harness: p.id,
           });
-        if (resource.native && Object.keys(resource.native).length && resource.format !== p.id)
-          throw new EtymonError(
-            'MCP_NATIVE_FIELDS_BLOCKED',
-            `MCP ${resource.name} has unmapped ${resource.format} configuration fields: ${Object.keys(resource.native).join(', ')}`,
-          );
+        if (resource.native && Object.keys(resource.native).length && resource.format !== p.id) {
+          if (!options.allowLossy)
+            throw new EtymonError(
+              'MCP_NATIVE_FIELDS_BLOCKED',
+              `MCP ${resource.name} has unmapped ${resource.format} configuration fields: ${Object.keys(resource.native).join(', ')}`,
+            );
+          diagnostics.push({
+            code: 'MCP_FIELDS_OMITTED',
+            severity: 'warning',
+            message: `MCP ${resource.name}: omitted ${resource.format} fields ${Object.keys(resource.native).join(', ')} from ${p.id}; their behavior and restrictions no longer apply`,
+            resource: resource.id,
+            harness: p.id,
+          });
+        }
         let connection = resource.connection;
         if (runtimeNeeded(connection) && connection.transport === 'stdio') {
           const path = join(
@@ -462,13 +508,17 @@ export async function render(
       }
     } catch (e) {
       if (!(e instanceof EtymonError)) throw e;
-      diagnostics.push({
+      units.splice(start);
+      const diagnostic: Diagnostic = {
         code: e.code,
         severity: 'error',
         message: e.message,
         resource: resource.id,
         harness: p.id,
-      });
+      };
+      diagnostics.push(
+        options.allowLossy && isConversionLimit(e.code) ? omittedResource(diagnostic) : diagnostic,
+      );
     }
   }
   diagnostics.push(

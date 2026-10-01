@@ -106,11 +106,21 @@ describe('rule formats and scope', () => {
       parseRule(native.units[0].content!.toString(), native.units[0].path, 'continue'),
     ).toEqual(rule);
     expect(
-      (await renderRules([resource(rule)], profile('claude'), ws, { allowLossy: true }))
-        .diagnostics,
+      (await renderRules([resource(rule)], profile('claude'), ws, {})).diagnostics,
     ).toContainEqual(
       expect.objectContaining({ severity: 'error', code: 'RULE_NATIVE_FIELDS_BLOCKED' }),
     );
+    const lossy = await renderRules([resource(rule)], profile('claude'), ws, { allowLossy: true });
+    expect(lossy.diagnostics).toContainEqual(
+      expect.objectContaining({
+        severity: 'warning',
+        code: 'RULE_NATIVE_FIELDS_OMITTED',
+        message: expect.stringContaining('regex'),
+      }),
+    );
+    expect(lossy.units[0].path).toBe(join(ws.root, 'AGENTS.md'));
+    expect(rule.activation).toBe('native');
+    expect(rule.native.regex).toBe('TODO');
   });
   it('rejects malformed, unsafe, and ambiguous conditions', () => {
     for (const text of [
@@ -217,13 +227,21 @@ describe('rule formats and scope', () => {
     const { ws } = await fixture();
     for (const activation of ['model', 'manual'] as const) {
       const rule = { ...standing, activation, description: 'When reviewing code' };
-      const result = await renderRules([resource(rule)], profile('codex'), ws, {
-        allowLossy: true,
-      });
+      const result = await renderRules([resource(rule)], profile('codex'), ws, {});
       expect(result.units).toEqual([]);
       expect(result.diagnostics).toContainEqual(
         expect.objectContaining({ code: 'RULE_SCOPE_UNSUPPORTED', severity: 'error' }),
       );
+      const lossy = await renderRules([resource(rule)], profile('codex'), ws, { allowLossy: true });
+      expect(lossy.units[0].content!.toString()).toContain(rule.prompt);
+      expect(lossy.diagnostics).toContainEqual(
+        expect.objectContaining({
+          code: 'RULE_CONDITIONS_DROPPED',
+          severity: 'warning',
+          message: expect.stringContaining(activation),
+        }),
+      );
+      expect(rule.activation).toBe(activation);
     }
   });
 });

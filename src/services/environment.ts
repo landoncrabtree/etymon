@@ -26,7 +26,7 @@ import { apply, planUnits, Plan, readState, recover } from '../core/transaction.
 import { discoverAgents, parseAgent } from '../providers/agents.js';
 import { discoverSkills, skillMetadata } from '../providers/skills.js';
 import { mcpArtifact, resolveDependency, restoreDependency } from '../providers/index.js';
-import { parseSource } from '../providers/source.js';
+import { parseResourceSource } from '../providers/source.js';
 import { importHarness, Imported } from '../harnesses/import.js';
 import { profile } from '../harnesses/profiles.js';
 import { render, RenderOptions, Unit } from '../harnesses/render.js';
@@ -155,14 +155,15 @@ export async function add(
   kind: Kind,
   request: Request,
 ): Promise<{ ids: string[]; names: string[] }> {
+  const source = await parseResourceSource(
+    kind,
+    request.source,
+    workspace.cwd,
+    request.ref,
+    workspace.home,
+  );
   await workspace.init();
-  const source =
-    kind === 'mcp'
-      ? (await exists(resolve(workspace.cwd, request.source)))
-        ? { type: 'local' as const, path: resolve(workspace.cwd, request.source) }
-        : undefined
-      : await parseSource(request.source, workspace.cwd, request.ref);
-  if (source?.type === 'local') {
+  if (source.type === 'local') {
     const manifest = await workspace.manifest();
     const ids: string[] = [],
       names: string[] = [];
@@ -644,7 +645,7 @@ export async function remove(
   workspace: Workspace,
   kind: Kind,
   selector: string,
-  options: { dryRun?: boolean } = {},
+  options: { dryRun?: boolean; allowLossy?: boolean } = {},
 ): Promise<{ removed: string; plan: Plan }> {
   const lock = await workspace.lock(),
     manifest = await workspace.manifest(),
@@ -672,6 +673,7 @@ export async function remove(
     (u) => !u.resources.some((id) => id === selected.id || id.startsWith(selected.id + '/')),
   );
   const units: Unit[] = [];
+  const diagnostics: Diagnostic[] = [];
   // Reconstruct unchanged owned output for retention without re-rendering native differences.
   for (const owned of keep) {
     const bytes = await fs.readFile(owned.path);
@@ -690,13 +692,14 @@ export async function remove(
     const remaining = await resources(workspace, { manifest, lock });
     const affected = state.units.filter((unit) => !keep.includes(unit));
     for (const target of state.targets) {
-      const rendered = await renderRules(remaining, profile(target), workspace, {});
+      const rendered = await renderRules(remaining, profile(target), workspace, options);
       if (rendered.diagnostics.some((diagnostic) => diagnostic.severity === 'error'))
         throw new EtymonError(
           'REMOVE_BLOCKED',
           'Remaining rule output cannot be rendered safely',
           rendered.diagnostics,
         );
+      diagnostics.push(...rendered.diagnostics);
       units.push(
         ...rendered.units.filter((unit) =>
           affected.some(
@@ -721,6 +724,7 @@ export async function remove(
     }
   }
   const plan = await planUnits(workspace, units, state.targets);
+  plan.diagnostics.push(...diagnostics);
   plan.state.units = plan.state.units.filter((unit) => unit.resources.length > 0);
   const path = selected.type === 'external' ? workspace.lockPath : workspace.manifestPath;
   plan.changes.push({

@@ -1,4 +1,4 @@
 {
-  "title": "Conditional rules preserve globs; unsupported targets cannot broaden them",
+  "title": "Conditional rules preserve globs; lossy conversion explicitly broadens them",
   "handler": "conditionalRules"
 }

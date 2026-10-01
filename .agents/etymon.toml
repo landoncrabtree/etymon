@@ -1,6 +1,29 @@
 version = 1
 
-[skill]
+[skill.coding]
+path = "etymon/skills/coding"
+
+[skill.testing]
+path = "etymon/skills/testing"
+
+[skill.creating-new-interface]
+path = "etymon/skills/creating-new-interface"
+
+[skill.creating-new-harness]
+path = "etymon/skills/creating-new-harness"
+
+[skill.resource-lifecycle]
+path = "etymon/skills/resource-lifecycle"
+
+[skill.adding-skill]
+path = "etymon/skills/adding-skill"
+
+[skill.releasing]
+path = "etymon/skills/releasing"
+
 [agent]
-[rule]
+[rule.project-context]
+path = "etymon/rules/project-context.md"
+destDir = "."
+
 [mcp]

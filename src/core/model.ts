@@ -69,8 +69,8 @@ export const agentSchema = z
   })
   .strict();
 export type Agent = z.infer<typeof agentSchema>;
-// Activation is separate from the directory scope. A conditional rule must never
-// become always-on just because a target cannot express its condition.
+// Activation is separate from directory scope. A target may broaden either only
+// when explicitly requested through lossy conversion; canonical source stays intact.
 const directorySchema = z
   .string()
   .refine(

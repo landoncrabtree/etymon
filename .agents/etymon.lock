@@ -5,5 +5,51 @@
     "adapters": "2026-09-30.2",
     "skills": "1.7.0"
   },
-  "dependencies": []
+  "dependencies": [
+    {
+      "id": "skill:external/5b16c897321bde6d",
+      "kind": "skill",
+      "request": {
+        "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/tree/main/.claude/skills",
+        "names": [
+          "ui-ux-pro-max"
+        ]
+      },
+      "resolved": {
+        "provider": "git",
+        "repository": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git",
+        "commit": "09170eec67eefd46a7ae85de61b40c194020f997",
+        "subpath": ".claude/skills",
+        "skillsCli": "1.7.0"
+      },
+      "artifacts": [
+        {
+          "name": "ui-ux-pro-max",
+          "digest": "sha256:b4881a2232fb8bf08c23f3aae0a0c858e1fbd02ad77efebfea4c43e86a7b8324",
+          "path": "ui-ux-pro-max"
+        }
+      ]
+    },
+    {
+      "id": "skill:external/f97ad62558041de5",
+      "kind": "skill",
+      "request": {
+        "source": "pbakaus/impeccable",
+        "names": []
+      },
+      "resolved": {
+        "provider": "git",
+        "repository": "https://github.com/pbakaus/impeccable.git",
+        "commit": "c74755d920985f7a92cef691ca970ba95f90126e",
+        "skillsCli": "1.7.0"
+      },
+      "artifacts": [
+        {
+          "name": "impeccable",
+          "digest": "sha256:8c944b74fad6aa5038e542ad32c2e684a9f7d375de6bba5b396bfb5411ff98e1",
+          "path": ".agents/skills/impeccable"
+        }
+      ]
+    }
+  ]
 }

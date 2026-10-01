@@ -20,8 +20,8 @@ import { add, convert, doctor, remove, resources, sync, update } from './service
 import { discoverRules } from './providers/rules.js';
 import { McpRegistry } from './providers/mcp.js';
 import { discoverAgents } from './providers/agents.js';
-import { discoverSkills } from './providers/skills.js';
-import { parseSource, withSource } from './providers/source.js';
+import { discoverSkills, stageRepositorySkills } from './providers/skills.js';
+import { parseResourceSource, withSource } from './providers/source.js';
 import { inspectUninstall, uninstall } from './services/uninstall.js';
 import { create, creationValues, CreationDraft } from './services/create.js';
 
@@ -293,7 +293,9 @@ async function createResource(kind: Kind, opts: Options): Promise<void> {
   }
   const ws = workspace(opts);
   const draft = interactive(opts)
-    ? await (await import('./tui/create.js')).promptCreation(kind, initial as CreationDraft)
+    ? await (
+        await import('./tui/create.js')
+      ).promptCreation(kind, initial as CreationDraft, undefined, { global: ws.global })
     : { kind, ...initial };
   const result = await mutate(ws, false, () => create(ws, draft));
   output(
@@ -407,15 +409,24 @@ for (const kind of kinds) {
       return;
     }
     let req = request(source, opts, kind);
+    const parsed = await parseResourceSource(kind, source, ws.cwd, opts.ref, ws.home);
+    if (parsed.type === 'local') req.source = parsed.path;
     if (opts.list) {
-      if (kind === 'mcp') {
-        output(await new McpRegistry(opts.registry).get(source, opts.version), opts);
+      if (parsed.type === 'registry') {
+        output(await new McpRegistry(opts.registry).get(parsed.id, opts.version), opts);
         return;
       }
-      const parsed = await parseSource(source, ws.cwd, opts.ref);
+      if (kind === 'mcp' && parsed.type === 'local') {
+        output(JSON.parse(await readFile(parsed.path, 'utf8')), opts);
+        return;
+      }
       const listing = await withSource(parsed, ws, async (root) =>
         kind === 'skill'
-          ? (await discoverSkills(root, req.names)).map((s) => ({ name: s.name, path: s.path }))
+          ? (
+              await (parsed.type === 'local'
+                ? discoverSkills(root, req.names)
+                : stageRepositorySkills(root, req.names, ws))
+            ).map((s) => ({ name: s.name, path: s.path }))
           : kind === 'rule'
             ? (await discoverRules(root, req.names)).map(({ rule }) => ({
                 name: rule.name,
@@ -433,7 +444,12 @@ for (const kind of kinds) {
       output(listing, opts);
       return;
     }
-    if (kind === 'mcp' && !req.package && req.remote === undefined && interactive(opts)) {
+    if (
+      parsed.type === 'registry' &&
+      !req.package &&
+      req.remote === undefined &&
+      interactive(opts)
+    ) {
       const server = await new McpRegistry(opts.registry).get(source, opts.version);
       const choices = [
         ...(server.packages ?? []).map((p) => ({
@@ -466,6 +482,7 @@ for (const kind of kinds) {
     .alias('rm')
     .description('Remove a registration and unchanged owned native output; keep authored source')
     .option('--dry-run', 'preview removal')
+    .option('--allow-lossy', 'allow lossy conversion when rebuilding remaining rule output')
     .action(async (selector: string, _options, command: Command) => {
       const opts = options(command),
         ws = workspace(opts);
@@ -492,8 +509,8 @@ for (const kind of kinds) {
     });
   if (kind === 'mcp') {
     group
-      .command('search <query>')
-      .alias('find')
+      .command('find <query>')
+      .alias('search')
       .description('Search the official MCP registry')
       .option('--registry <url>', 'registry base URL')
       .option('--cursor <cursor>', 'next-page cursor')
@@ -550,7 +567,7 @@ program
   .option('--force', 'replace edits to already-owned output')
   .option(
     '--allow-lossy',
-    'omit reviewed optional native metadata/model mappings; never drop tool restrictions',
+    'allow behavior changes or omitted resources with explicit conversion warnings',
   )
   .action(async (_options, command: Command) => {
     const opts = options(command),
@@ -600,7 +617,7 @@ program
 program
   .command('doctor')
   .description('Inspect ownership, compatibility, environment references, and prerequisites')
-  .option('--allow-lossy', 'assess optional adaptation')
+  .option('--allow-lossy', 'assess conversion with behavior changes or omitted resources')
   .action(async (_options, command: Command) => {
     const opts = options(command),
       ws = workspace(opts);

@@ -18,7 +18,8 @@ export {
   ruleIdentity,
   bundleIdentity,
 } from './core/dedup.js';
-export { parseSource } from './providers/source.js';
+export { parseSource, parseResourceSource, localSource } from './providers/source.js';
+export type { Source, ResourceSource } from './providers/source.js';
 export { McpRegistry, resolveServer, serverSchema } from './providers/mcp.js';
 export { resolveDependency, restoreDependency } from './providers/index.js';
 export {

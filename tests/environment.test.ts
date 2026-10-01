@@ -272,9 +272,21 @@ describe('native environment lifecycle', () => {
       renderAgent(
         agent,
         profiles.find((p) => p.id === 'codex')!,
-        { allowLossy: true },
       ),
     ).toThrow(/allowlist/);
+    const lossy = renderAgent(
+      agent,
+      profiles.find((p) => p.id === 'codex')!,
+      { allowLossy: true },
+    );
+    expect(lossy.text).toContain('Read only.');
+    expect(lossy.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: 'TOOL_RESTRICTION_OMITTED',
+        severity: 'warning',
+        message: expect.stringContaining('default tool permissions'),
+      }),
+    );
     const hooks = parseAgent(
       '---\nname: gate\ndescription: Gate\nhooks: {}\n---\nCheck.',
       'gate.md',
@@ -283,9 +295,21 @@ describe('native environment lifecycle', () => {
       renderAgent(
         hooks,
         profiles.find((p) => p.id === 'opencode')!,
-        { allowLossy: true },
       ),
     ).toThrow(/hooks/);
+    expect(
+      renderAgent(
+        hooks,
+        profiles.find((p) => p.id === 'opencode')!,
+        { allowLossy: true },
+      ).diagnostics,
+    ).toContainEqual(
+      expect.objectContaining({
+        code: 'NATIVE_FIELD_OMITTED',
+        severity: 'warning',
+        message: expect.stringContaining('hooks'),
+      }),
+    );
   });
   it('keeps project and global environments separate', async () => {
     const { ws, home, dir } = await fixture();

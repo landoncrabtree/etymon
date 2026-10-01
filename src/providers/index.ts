@@ -5,7 +5,7 @@ import { Artifact, Dependency, EtymonError, Kind, Request } from '../core/model.
 import { Workspace } from '../core/workspace.js';
 import { discoverAgents } from './agents.js';
 import { McpRegistry, resolveServer, sanitizeRegistry, serverName } from './mcp.js';
-import { discoverSkills, stageWithSkills } from './skills.js';
+import { stageRepositorySkills } from './skills.js';
 import { parseSource, Source, withGit, withSource } from './source.js';
 import { discoverRules } from './rules.js';
 
@@ -39,7 +39,7 @@ export async function resolveDependency(
       artifacts: [{ name, digest: await workspace.cache.put(artifact), path: 'resource.json' }],
     };
   }
-  const source = await parseSource(request.source, workspace.cwd, request.ref);
+  const source = await parseSource(request.source, workspace.cwd, request.ref, workspace.home);
   if (source.type === 'local')
     throw new EtymonError('LOCAL_SOURCE', 'Local sources belong in the authored manifest');
   return withSource(source, workspace, async (root, commit) => {
@@ -67,13 +67,12 @@ async function sourceArtifacts(
   skillsVersion?: string,
 ): Promise<Dependency['artifacts']> {
   if (kind === 'skill') {
-    const original = await discoverSkills(root, request.names);
-    const staged = await stageWithSkills(root, request.names, workspace, skillsVersion);
+    const staged = await stageRepositorySkills(root, request.names, workspace, skillsVersion);
     return await Promise.all(
       staged.map(async (s) => ({
         name: s.name,
         digest: await workspace.cache.put(s.artifact),
-        path: relative(root, original.find((x) => x.name === s.name)!.path) || '.',
+        path: relative(root, s.path) || '.',
       })),
     );
   }

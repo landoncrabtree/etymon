@@ -4,6 +4,10 @@ import { Kind, EtymonError } from '../core/model.js';
 import { Creation, CreationDraft, creationSchema, creationValues } from '../services/create.js';
 import { splitGlobs } from '../providers/rules.js';
 
+const ruleModes = ['always', 'glob', 'model', 'manual', 'never'] as const;
+const selected = (list: Widgets.ListElement) =>
+  (list as Widgets.ListElement & { selected: number }).selected;
+
 function values(text: string) {
   if (!text.trim()) return {};
   return text.trim().startsWith('{')
@@ -21,7 +25,24 @@ export function promptCreation(
   kind: Kind,
   initial: CreationDraft = {},
   host?: Widgets.Screen,
+  scope: { global?: boolean } = {},
 ): Promise<Creation> {
+  if (kind === 'rule') {
+    if (initial.activation && !ruleModes.some((mode) => mode === initial.activation))
+      throw new EtymonError('INVALID_CREATION', 'Choose always, glob, model, manual, or never');
+    if (
+      scope.global &&
+      ((initial.destDir && initial.destDir !== '.') ||
+        (initial.activation && initial.activation !== 'always') ||
+        initial.patterns?.length)
+    )
+      throw new EtymonError(
+        'GLOBAL_RULE_SCOPE_UNSUPPORTED',
+        'Global rules must be unscoped, always-on user guidance',
+      );
+    if (initial.patterns?.length && initial.activation !== 'glob')
+      throw new EtymonError('INVALID_CREATION', 'File patterns require glob activation');
+  }
   const programOptions: Widgets.IScreenOptions & {
     extended: boolean;
     buffer: boolean;
@@ -115,39 +136,57 @@ export function promptCreation(
     row += multiline ? 13 : 7;
     return field;
   };
-  input('name', 'Name', 'A unique lowercase name, such as api-reviewer', initial.name);
-  let transport: Widgets.ListElement | undefined;
-  if (kind === 'mcp') {
+  const select = (label: string, help: string, items: string[], index: number) => {
     blessed.box({
       parent: form,
       top: row,
       left: 2,
+      right: 2,
       height: 1,
-      content: 'Transport',
+      content: label,
       style: { fg: 'cyan' },
     });
-    transport = blessed.list({
+    blessed.box({
       parent: form,
       top: row + 1,
       left: 2,
       right: 2,
-      height: 5,
+      height: 1,
+      content: help,
+      style: { fg: 'gray' },
+    });
+    const list = blessed.list({
+      parent: form,
+      top: row + 2,
+      left: 2,
+      right: 2,
+      height: items.length + 2,
       border: 'line',
       keys: true,
       mouse: true,
-      items: ['STDIO', 'HTTP', 'SSE'],
+      items,
       style: { selected: { bg: 'blue', fg: 'white' }, fg: 'white' },
     });
-    transport.select(
+    list.select(index);
+    list.key('tab', () => form.focusNext());
+    list.key('S-tab', () => form.focusPrevious());
+    row += items.length + 6;
+    return list;
+  };
+  input('name', 'Name', 'A unique lowercase name, such as api-reviewer', initial.name);
+  let transport: Widgets.ListElement | undefined;
+  let activation: Widgets.ListElement | undefined;
+  if (kind === 'mcp') {
+    transport = select(
+      'Transport',
+      'Choose how the tool connects to this server',
+      ['STDIO', 'HTTP', 'SSE'],
       initial.connection?.transport === 'streamable-http'
         ? 1
         : initial.connection?.transport === 'sse'
           ? 2
           : 0,
     );
-    transport.key(['tab'], () => form.focusNext());
-    transport.key(['S-tab'], () => form.focusPrevious());
-    row += 7;
     const connection = initial.connection;
     input(
       'command',
@@ -190,7 +229,9 @@ export function promptCreation(
       'description',
       'Description',
       kind === 'rule'
-        ? 'Optional, unless activation uses agent selection'
+        ? scope.global
+          ? 'Optional summary of your personal guidance'
+          : 'Optional, unless activation uses agent selection'
         : 'When should this resource be used?',
       initial.description,
     );
@@ -212,23 +253,23 @@ export function promptCreation(
     } else if (kind === 'skill') {
       input('license', 'License', 'Optional license name', initial.license);
       input('compatibility', 'Compatibility', 'Optional requirements', initial.compatibility);
-    } else {
+    } else if (!scope.global) {
       input(
         'destDir',
         'Directory scope',
         'Project-relative directory, for example packages/api',
         initial.destDir ?? '.',
       );
-      input(
-        'activation',
+      activation = select(
         'Activation',
-        'always, glob, model, manual, or never',
-        initial.activation ?? 'always',
+        'When should this rule be included?',
+        ['Always', 'Matching files (glob)', 'Agent selection (model)', 'Manual', 'Never'],
+        ruleModes.indexOf((initial.activation ?? 'always') as (typeof ruleModes)[number]),
       );
       input(
         'patterns',
         'File patterns',
-        'Comma-separated globs, when activation is glob',
+        'Comma-separated globs relative to the directory scope',
         initial.patterns?.join(', '),
       );
     }
@@ -267,8 +308,8 @@ export function promptCreation(
   });
   if (transport) {
     const layout = () => {
-      const stdio = (transport as Widgets.ListElement & { selected: number }).selected === 0;
-      let position = Number(transport!.top) + 6;
+      const stdio = selected(transport!) === 0;
+      let position = Number(transport!.top) + 7;
       for (const key of ['command', 'args', 'cwd', 'env', 'url', 'headers']) {
         const visible = stdio === !['url', 'headers'].includes(key);
         groups.get(key)!.forEach((element, index) => {
@@ -284,6 +325,21 @@ export function promptCreation(
       screen.render();
     };
     transport.on('select item', layout);
+    layout();
+  }
+  if (activation) {
+    const layout = () => {
+      const glob = ruleModes[selected(activation!)] === 'glob';
+      const position = Number(activation!.top) + 9;
+      groups.get('patterns')!.forEach((element, index) => {
+        element.top = position + index;
+        glob ? element.show() : element.hide();
+      });
+      save.top = cancel.top = position + (glob ? 7 : 0);
+      error.top = Number(save.top) + 4;
+      screen.render();
+    };
+    activation.on('select item', layout);
     layout();
   }
   const get = (key: string) => fields.get(key)?.getValue() ?? '';
@@ -307,7 +363,7 @@ export function promptCreation(
       try {
         const draft: Record<string, unknown> = { kind, name: get('name').trim() };
         if (kind === 'mcp') {
-          const index = (transport as Widgets.ListElement & { selected: number }).selected;
+          const index = selected(transport!);
           draft.connection =
             index === 0
               ? {
@@ -338,9 +394,9 @@ export function promptCreation(
                 .filter(Boolean);
           }
           if (kind === 'rule') {
-            draft.destDir = get('destDir');
-            draft.activation = get('activation');
-            draft.patterns = splitGlobs(get('patterns'));
+            draft.destDir = scope.global ? '.' : get('destDir');
+            draft.activation = activation ? ruleModes[selected(activation)] : 'always';
+            draft.patterns = draft.activation === 'glob' ? splitGlobs(get('patterns')) : [];
           }
         }
         const parsed = creationSchema.safeParse(draft);
