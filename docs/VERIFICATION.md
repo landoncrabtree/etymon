@@ -36,6 +36,8 @@ CLI tests execute the actual TypeScript entry point with options after commands,
 
 Release workflow tests run the shell entry points in temporary projects with npm stubbed through an isolated PATH. They verify selection from the highest published stable version, repeated builds that reuse a pending version, synchronized package/lock metadata, publication previews of the selected archive, duplicate and mismatched-version rejection, and registry/check failures that leave versions unchanged. They never publish a real package.
 
+Release candidate **0.1.1** passed formatting, strict types, all 177 unit tests, and the production build. A fresh npm/npx installation passed the packed CLI smoke check. Archive inspection and the publication dry run confirmed the package name, version, executable, production modules, and documentation; repository fixtures and development files were excluded.
+
 Inline MCP checks cover imported credential references, local configurations that work after their input JSON is removed, preservation of native extension fields, idempotent reimport, authored-edit conflicts, and rejection of file-backed or missing-connection manifest entries.
 
 ## Local runtime observations
