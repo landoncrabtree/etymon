@@ -36,8 +36,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "check": "npm run format:check && npm run typecheck && npm test && npm run build",
     "prepack": "npm run build",
-    "format": "prettier --write src tests testcases bin scripts package.json tsconfig.json README.md docs .github",
-    "format:check": "prettier --check src tests testcases bin scripts package.json tsconfig.json README.md docs .github",
+    "format": "prettier --write src tests testcases bin scripts package.json tsconfig.json vitest.config.ts README.md docs .github",
+    "format:check": "prettier --check src tests testcases bin scripts package.json tsconfig.json vitest.config.ts README.md docs .github",
     "smoke": "node scripts/smoke.mjs",
     "release:build": "bash scripts/npm_build.sh",
     "release:publish": "bash scripts/npm_publish"
