@@ -38,6 +38,8 @@ type Options = {
   configPath?: string;
   rulesPath?: string;
   dryRun?: boolean;
+  exclude?: string[];
+  onConflict?: 'error' | 'rename';
   adopt?: boolean;
   force?: boolean;
   allowLossy?: boolean;
@@ -585,6 +587,13 @@ program
     'Import all detected native resources, or filter with --harness; leave originals untouched',
   )
   .option('--dry-run', 'inspect import without writing source')
+  .option(
+    '--exclude <glob>',
+    'exclude a project-relative native source (repeatable)',
+    (value, prior: string[]) => [...prior, value],
+    [],
+  )
+  .option('--on-conflict <policy>', 'error or rename conflicting MCP connections', 'error')
   .action(async (target: string | undefined, _options, command: Command) => {
     const opts = options(command),
       ws = workspace(opts);

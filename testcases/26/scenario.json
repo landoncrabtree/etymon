@@ -1,0 +1,4 @@
+{
+  "title": "Deep monorepos, broken aliases, bridge provenance, template exclusions, and explicit MCP conflict resolution",
+  "handler": "nativeImportGaps"
+}

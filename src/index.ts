@@ -4,6 +4,7 @@ export type { ContextOptions } from './core/workspace.js';
 export { Cache } from './core/fs.js';
 export { profiles, profile } from './harnesses/profiles.js';
 export type { Profile } from './harnesses/profiles.js';
+export type { ImportOptions } from './harnesses/native-discovery.js';
 export { render, renderAgent, renderMcp } from './harnesses/render.js';
 export type { RenderOptions, Unit, RenderResult } from './harnesses/render.js';
 export { parseAgent, frontmatter, discoverAgents } from './providers/agents.js';

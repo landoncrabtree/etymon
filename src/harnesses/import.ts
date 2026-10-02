@@ -26,6 +26,7 @@ import { bundleIdentity, resourceIdentity } from '../core/dedup.js';
 import { stable } from '../core/fs.js';
 import { skillMetadata } from '../providers/skills.js';
 import { canonicalRuleText } from '../providers/rules.js';
+import { ImportOptions, NativeDiscovery } from './native-discovery.js';
 
 export type Imported =
   | ImportedRule
@@ -60,6 +61,7 @@ export async function importHarnesses(
   workspace: Workspace,
   configPath?: string,
   rulesPath?: string,
+  options: ImportOptions = {},
 ): Promise<{ resources: Imported[]; diagnostics: Diagnostic[] }> {
   if ((configPath || rulesPath) && profiles.length !== 1)
     throw new EtymonError(
@@ -70,11 +72,19 @@ export async function importHarnesses(
     diagnostics: Diagnostic[] = [],
     names = new Map<string, Imported>(),
     rules = new Map<string, Imported>(),
-    importedRulePaths = new Set<string>();
+    importedRulePaths = new Map<string, ImportedRule[]>(),
+    discovery = new NativeDiscovery(workspace, options);
   for (const p of profiles) {
     // Profile order gives a native format its first interpretation. In
     // particular, .claude/rules must not also become Copilot manual rules.
-    const imported = await importHarness(p, workspace, configPath, rulesPath, importedRulePaths);
+    const imported = await importHarness(
+      p,
+      workspace,
+      configPath,
+      rulesPath,
+      importedRulePaths,
+      discovery,
+    );
     diagnostics.push(...imported.diagnostics);
     for (let resource of imported.resources) {
       const identity = resourceIdentity(importedResource(resource));
@@ -101,21 +111,59 @@ export async function importHarnesses(
         continue;
       }
       if (named) {
-        if (resource.kind !== 'rule')
+        if (
+          resource.kind !== 'rule' &&
+          !(resource.kind === 'mcp' && options.onConflict === 'rename')
+        )
           throw new EtymonError(
             'IMPORT_COLLISION',
-            `Different imported definitions share ${resource.kind}:${resource.name}: ${named.origin} and ${resource.origin}`,
+            `Different imported definitions share ${resource.kind}:${resource.name}: ${named.origin} and ${resource.origin}. Filter with --harness or --exclude${resource.kind === 'mcp' ? ', or use --on-conflict rename to keep both MCP connections' : ''}.`,
           );
         const name = validName(resource.name.slice(0, 53) + '-' + identity.slice(7, 15));
-        const rule = { ...resource.rule, name };
-        resource = { ...resource, name, rule, text: canonicalRuleText(rule) };
+        if (resource.kind === 'rule') {
+          const rule = { ...resource.rule, name };
+          resource = { ...resource, name, rule, text: canonicalRuleText(rule) };
+        } else {
+          diagnostics.push({
+            code: 'IMPORT_RESOURCE_RENAMED',
+            severity: 'warning',
+            harness: p.id,
+            message: `Kept conflicting MCP ${resource.name} from ${resource.origin} as ${name}; connection settings are unchanged`,
+          });
+          resource = { ...resource, name };
+          const renamed = names.get('mcp:' + name);
+          if (renamed && resourceIdentity(importedResource(renamed)) !== identity)
+            throw new EtymonError(
+              'IMPORT_COLLISION',
+              `Conflicting MCP rename ${name}; rename a native entry before import`,
+            );
+          if (renamed) {
+            renamed.origins = [
+              ...new Set([
+                ...(renamed.origins ?? [renamed.origin]),
+                ...(resource.origins ?? [resource.origin]),
+              ]),
+            ];
+            continue;
+          }
+        }
       }
       names.set(resource.kind + ':' + resource.name, resource);
       if (resource.kind === 'rule') rules.set(identity, resource);
       resources.push(resource);
     }
   }
-  return { resources, diagnostics };
+  return {
+    resources,
+    diagnostics: [
+      ...new Map(
+        [...diagnostics, ...discovery.diagnostics].map((diagnostic) => [
+          stable(diagnostic),
+          diagnostic,
+        ]),
+      ).values(),
+    ],
+  };
 }
 function assertNoCredentials(value: unknown): void {
   if (Array.isArray(value)) {
@@ -273,25 +321,31 @@ export async function importHarness(
   workspace: Workspace,
   configPath?: string,
   rulesPath?: string,
-  importedRulePaths?: Set<string>,
+  importedRulePaths?: Map<string, ImportedRule[]>,
+  discovery = new NativeDiscovery(workspace),
 ): Promise<{ resources: Imported[]; diagnostics: Diagnostic[] }> {
   const resources: Imported[] = [],
     diagnostics: Diagnostic[] = [];
   for (const skills of readLocations(p, 'skill', workspace))
-    if (await exists(skills)) {
-      for (const skill of await discoverNativeSkills(skills, workspace.root))
+    if (!discovery.excluded(skills) && (await exists(skills))) {
+      for (const skill of await discoverNativeSkills(skills, workspace.root, {
+        diagnostics,
+        excluded: (path) => discovery.excluded(path),
+      }))
         resources.push({
           kind: 'skill',
           name: skill.name,
           artifact: skill.artifact,
           origin: skill.path,
+          origins: skill.origins,
         });
     }
   const agents = location(p, 'agent', workspace);
-  if (agents && (await exists(agents))) {
+  if (agents && !discovery.excluded(agents) && (await exists(agents))) {
     for (const path of await walk(agents))
       if (path.endsWith(agentExtension(p))) {
         const full = join(agents, path);
+        if (discovery.excluded(full)) continue;
         const text = await fs.readFile(full, 'utf8');
         const agent = safeAgent(parseAgent(text, full, p.agentDialect));
         resources.push({
@@ -311,7 +365,7 @@ export async function importHarness(
     (await exists(config.replace(/\.json$/, '.jsonc')))
   )
     config = config.replace(/\.json$/, '.jsonc');
-  if (config && (await exists(config))) {
+  if (config && !discovery.excluded(config) && (await exists(config))) {
     if (p.mcpDialect === 'continue') {
       for (const path of await walk(config))
         if (/\.ya?ml$/.test(path)) {
@@ -380,7 +434,7 @@ export async function importHarness(
         message: `Detected ${candidate}; retained in native setup and excluded from this P0 import`,
         harness: p.id,
       });
-  const rules = await importRules(p, workspace, rulesPath, importedRulePaths);
+  const rules = await importRules(p, workspace, rulesPath, importedRulePaths, discovery);
   resources.push(...rules.resources);
   diagnostics.push(...rules.diagnostics);
   const seen = new Map<string, Imported>();

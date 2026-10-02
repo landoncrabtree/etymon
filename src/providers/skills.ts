@@ -1,7 +1,7 @@
 import { promises as fs } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { bundle, exists, inside, run, temporary, walk } from '../core/fs.js';
-import { Artifact, EtymonError, SKILLS_VERSION } from '../core/model.js';
+import { Artifact, Diagnostic, EtymonError, SKILLS_VERSION } from '../core/model.js';
 import { Workspace } from '../core/workspace.js';
 import { bundleIdentity } from '../core/dedup.js';
 import { frontmatter } from './agents.js';
@@ -31,27 +31,71 @@ export function skillMetadata(artifact: Artifact): Record<string, unknown> {
 export async function discoverNativeSkills(
   root: string,
   boundary: string,
-): Promise<{ path: string; name: string; artifact: Artifact }[]> {
-  const result: { path: string; name: string; artifact: Artifact }[] = [],
+  options: { diagnostics?: Diagnostic[]; excluded?: (path: string) => boolean } = {},
+): Promise<{ path: string; origins: string[]; name: string; artifact: Artifact }[]> {
+  const result: { path: string; origins: string[]; name: string; artifact: Artifact }[] = [],
     seen = new Set<string>();
   const realBoundary = await fs.realpath(boundary);
-  async function visit(path: string, depth: number) {
+  async function visit(path: string, depth: number, aliases: string[] = []) {
+    if (options.excluded?.(path)) return;
     if (!depth)
       throw new EtymonError('SOURCE_LIMIT', 'Skill discovery exceeds 16 directory levels');
-    const real = await fs.realpath(path);
+    let real: string;
+    try {
+      real = await fs.realpath(path);
+    } catch (error) {
+      if (['ENOENT', 'ELOOP'].includes((error as NodeJS.ErrnoException).code ?? '')) {
+        options.diagnostics?.push({
+          code: 'SKILL_SYMLINK_SKIPPED',
+          severity: 'warning',
+          message: `Skipped broken skill alias ${path}`,
+        });
+        return;
+      }
+      throw error;
+    }
     inside(realBoundary, relative(realBoundary, real));
-    if (seen.has(real)) return;
+    if (options.excluded?.(join(boundary, relative(realBoundary, real)))) return;
+    if ((await fs.lstat(path)).isSymbolicLink()) aliases = [...aliases, path];
+    if (seen.has(real)) {
+      const prior = result.find((skill) =>
+        skill.origins.includes(join(boundary, relative(realBoundary, real))),
+      );
+      if (prior) prior.origins = [...new Set([...prior.origins, path, ...aliases])];
+      return;
+    }
     seen.add(real);
     if (await exists(join(real, 'SKILL.md'))) {
       const artifact = await bundle(real);
-      result.push({ path, name: String(skillMetadata(artifact).name), artifact });
+      result.push({
+        path,
+        origins: [...new Set([path, join(boundary, relative(realBoundary, real)), ...aliases])],
+        name: String(skillMetadata(artifact).name),
+        artifact,
+      });
       return;
     }
     for (const entry of await fs.readdir(real, { withFileTypes: true })) {
       if (['.git', 'node_modules', '.etymon'].includes(entry.name)) continue;
       const child = join(path, entry.name);
-      if (entry.isDirectory() || (entry.isSymbolicLink() && (await fs.stat(child)).isDirectory()))
-        await visit(child, depth - 1);
+      if (entry.isDirectory() || entry.isSymbolicLink()) {
+        if (entry.isSymbolicLink()) {
+          try {
+            if (!(await fs.stat(child)).isDirectory()) continue;
+          } catch (error) {
+            if (['ENOENT', 'ELOOP'].includes((error as NodeJS.ErrnoException).code ?? '')) {
+              options.diagnostics?.push({
+                code: 'SKILL_SYMLINK_SKIPPED',
+                severity: 'warning',
+                message: `Skipped broken skill alias ${child}`,
+              });
+              continue;
+            }
+            throw error;
+          }
+        }
+        await visit(child, depth - 1, aliases);
+      }
     }
   }
   await visit(root, 16);

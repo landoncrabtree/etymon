@@ -1,0 +1,4 @@
+[mcp_servers.fixture]
+command="node"
+args=["server.js"]
+cwd="/old/checkout"

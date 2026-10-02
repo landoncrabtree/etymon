@@ -10,6 +10,7 @@ import { create } from '../services/create.js';
 import { promptCreation } from './create.js';
 import { localSource, parseResourceSource } from '../providers/source.js';
 import { isConversionLimit } from '../harnesses/loss.js';
+import type { ImportOptions } from '../harnesses/native-discovery.js';
 
 type TuiOptions = { harness?: string[]; configPath?: string; rulesPath?: string; debug?: boolean };
 type Choice<T> = { label: string; value: T };
@@ -527,25 +528,57 @@ export class EtymonTui {
       ...profiles.map((p) => ({ label: p.label, value: p.id })),
     ]);
     if (!target) return;
-    const options = { configPath: this.options.configPath, rulesPath: this.options.rulesPath };
+    const options: ImportOptions & { configPath?: string; rulesPath?: string } = {
+      configPath: this.options.configPath,
+      rulesPath: this.options.rulesPath,
+    };
     const selected = target === 'all' ? undefined : target;
-    const preview = await convert(this.workspace, selected, { ...options, dryRun: true });
-    this.show(
-      'Import preview',
-      `${preview.resources.map((r) => `${r.kind} ${r.name}\n  ${r.origin}\n  → ${r.destination}`).join('\n\n') || 'No supported resources found.'}\n\n${preview.diagnostics.map((d) => `${d.severity} [${d.code}] ${d.message}`).join('\n')}`,
-    );
-    if (preview.diagnostics.some((d) => d.severity === 'error') || !preview.resources.length)
-      return;
-    const applyImport = await this.choose('Create editable source? Originals stay in place.', [
-      { label: 'Import these resources', value: true },
-      { label: 'Keep preview only', value: false },
-    ]);
-    if (applyImport) {
-      await this.mutation(() => convert(this.workspace, selected, options));
+    for (;;) {
+      let preview;
+      try {
+        preview = await convert(this.workspace, selected, { ...options, dryRun: true });
+      } catch (error) {
+        if (!(error instanceof EtymonError) || error.code !== 'IMPORT_COLLISION') throw error;
+        this.show('Import conflict', error.message);
+        const choice = await this.choose('Resolve import conflict', [
+          { label: 'Keep preview only', value: 'cancel' },
+          { label: 'Exclude a source path', value: 'exclude' },
+          { label: 'Keep conflicting MCPs under separate names', value: 'rename' },
+        ]);
+        if (!choice || choice === 'cancel') return;
+        if (choice === 'rename') options.onConflict = 'rename';
+        else {
+          const glob = await this.ask('Exclude a project-relative source glob');
+          if (!glob) return;
+          options.exclude = [...(options.exclude ?? []), glob];
+        }
+        continue;
+      }
       this.show(
-        'Imported',
-        `${preview.resources.length} resources imported into .agents/etymon/.\n\nChoose targets and Sync to activate.`,
+        'Import preview',
+        `${preview.resources.map((r) => `${r.kind} ${r.name}\n  ${r.origin}\n  → ${r.destination}`).join('\n\n') || 'No supported resources found.'}\n\n${preview.diagnostics.map((d) => `${d.severity} [${d.code}] ${d.message}`).join('\n')}`,
       );
+      const canApply =
+        preview.resources.length > 0 && !preview.diagnostics.some((d) => d.severity === 'error');
+      const applyImport = await this.choose('Create editable source? Originals stay in place.', [
+        ...(canApply ? [{ label: 'Import these resources', value: 'apply' }] : []),
+        { label: 'Keep preview only', value: 'cancel' },
+        { label: 'Exclude a source path and preview again', value: 'exclude' },
+      ]);
+      if (applyImport === 'exclude') {
+        const glob = await this.ask('Exclude a project-relative source glob');
+        if (!glob) return;
+        options.exclude = [...(options.exclude ?? []), glob];
+        continue;
+      }
+      if (applyImport === 'apply') {
+        await this.mutation(() => convert(this.workspace, selected, options));
+        this.show(
+          'Imported',
+          `${preview.resources.length} resources imported into .agents/etymon/.\n\nChoose targets and Sync to activate.`,
+        );
+      }
+      return;
     }
   }
   private async removeFlow(): Promise<void> {

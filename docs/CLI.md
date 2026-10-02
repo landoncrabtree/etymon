@@ -62,6 +62,8 @@ Review adoption or force plans before applying them. Deleted managed output can 
 ```bash
 etymon convert
 etymon convert --dry-run
+etymon convert --exclude "templates/**"
+etymon convert --on-conflict rename
 etymon convert --harness codex
 etymon convert --harness claude,opencode --dry-run
 etymon convert --harness opencode --config-path ./custom-opencode.json
@@ -71,9 +73,13 @@ etymon sync --harness codex --adopt
 
 `convert` scans the supported native locations for every tool in the current project. `--harness` limits discovery to the selected tools. `--global` scans user locations instead, excluding project rule folders. Discovery does not depend on installed executables or saved sync destinations. The TUI offers the same all-tools import with a preview.
 
-Skills, agents, MCP settings, and recognized rules become editable Etymon source. Originals stay in place. Shared rule files use the first native interpretation. Explicit includes can also register a file at another scope or load its full text as unconditional instructions. Equivalent copies merge their source paths into one registration, including across repeated filtered and unfiltered conversions. Different rule scopes and activation conditions remain distinct. Different rules with the same name receive separate names; conflicting skill, agent, or MCP definitions stop the import before source is written. Native extensions stay associated with their original format, and edits to previously imported source remain protected.
+Skills, agents, MCP settings, and recognized rules become editable Etymon source. Originals stay in place. Shared rule files use the first native interpretation. Explicit includes can also register a file at another scope or load its full text as unconditional instructions. Equivalent copies merge their source paths into one registration, including across repeated filtered and unfiltered conversions. Different rule scopes and activation conditions remain distinct. Different rules with the same name receive separate names; conflicting skill, agent, or MCP definitions stop the import before source is written. `--on-conflict rename` keeps conflicting MCP connections under separate, stable names without merging their settings. Skills and agents still require a source choice or an explicit native rename. Native extensions stay associated with their original format, and edits to previously imported source remain protected.
 
 `convert <harness>` also selects one tool. Choose that form or `--harness`, not both. `--config-path` and `--rules-path` require exactly one selected tool. Use `--dry-run` to review detected resources and diagnostics without writing files.
+
+`--exclude <glob>` is repeatable and applies before parsing native sources. Patterns are relative to the project root (or home in global scope); excluding a folder also excludes its descendants. Use it for product templates, fixture guidance, or a native configuration you intend to keep separately. Exclusions affect import only and do not delete files or change existing registrations. The TUI can revise exclusions and preview again, including after an import conflict. Its MCP conflict option preserves both definitions under separate names.
+
+Instruction discovery shares one inventory across tools and remains bounded at 128 directory levels and 100,000 entries. Use exclusions to narrow an oversized tree. Broken native skill aliases produce warnings; links outside the workspace remain blocked. Resolved skill aliases retain their bundle, modes, and provenance. Instruction symlinks within the workspace and simple AGENTS.md include bridges preserve their origins and effective directory scope.
 
 Rules and instructions share one interface. Profiles distinguish standing files, modular rule directories, nesting, and supported activation modes; source count does not create a separate resource kind.
 

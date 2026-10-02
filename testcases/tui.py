@@ -80,7 +80,24 @@ def wait_exit(expected_code=0):
 
 
 try:
-    if mode == "host-import":
+    if mode == "host-import-conflict":
+        expect("Import native setup")
+        send("jjjjjj\r")
+        expect("All detected tools")
+        send("\r")
+        expect("import conflict")
+        send("j\r")
+        expect("source glob")
+        send("product/templates/**\r")
+        expect("import conflict")
+        send("jj\r")
+        expect("Import these resources")
+        send("\r")
+        expect("resources imported")
+        send("q")
+        wait_exit()
+        print(json.dumps({"mode": mode, "exitCode": process.returncode}))
+    elif mode == "host-import":
         expect("Import native setup")
         send("jjjjjj\r")
         expect("All detected tools")

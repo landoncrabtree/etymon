@@ -28,6 +28,7 @@ import { discoverSkills, skillMetadata } from '../providers/skills.js';
 import { mcpArtifact, resolveDependency, restoreDependency } from '../providers/index.js';
 import { parseResourceSource } from '../providers/source.js';
 import { importHarnesses, importedResource, Imported } from '../harnesses/import.js';
+import type { ImportOptions } from '../harnesses/native-discovery.js';
 import { profile, profiles } from '../harnesses/profiles.js';
 import { render, RenderOptions, Unit } from '../harnesses/render.js';
 import { inspectNative } from '../harnesses/inspect.js';
@@ -410,7 +411,7 @@ export async function sync(
 export async function convert(
   workspace: Workspace,
   target?: string | string[],
-  options: { dryRun?: boolean; configPath?: string; rulesPath?: string } = {},
+  options: ImportOptions & { dryRun?: boolean; configPath?: string; rulesPath?: string } = {},
 ): Promise<{
   resources: { kind: string; name: string; origin: string; destination: string }[];
   diagnostics: Diagnostic[];
@@ -427,6 +428,7 @@ export async function convert(
       workspace,
       options.configPath,
       options.rulesPath,
+      options,
     ),
     manifest = await workspace.manifest();
   const existingResources = await resources(workspace);
@@ -444,6 +446,19 @@ export async function convert(
         'Global rules must be unscoped, always-on user guidance',
       );
     let key = resource.name;
+    if (resource.kind === 'mcp' && options.onConflict === 'rename') {
+      const prior = existingResources.find((value) => value.kind === 'mcp' && value.name === key);
+      const identity = resourceIdentity(importedResource(resource));
+      if (prior && resourceIdentity(prior) !== identity) {
+        key = validName(key.slice(0, 53) + '-' + identity.slice(7, 15));
+        imported.diagnostics.push({
+          code: 'IMPORT_RESOURCE_RENAMED',
+          severity: 'warning',
+          message: `Kept conflicting MCP ${resource.name} from ${resource.origin} as ${key}; connection settings are unchanged`,
+        });
+        resource.name = key;
+      }
+    }
     if (resource.kind !== 'rule') {
       const normalized = importedResource(resource);
       const duplicate = existingResources.find(

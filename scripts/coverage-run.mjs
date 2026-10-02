@@ -30,6 +30,7 @@ for (const [command, args] of [
       '23',
       '24',
       '25',
+      '26',
     ],
   ],
 ]) {

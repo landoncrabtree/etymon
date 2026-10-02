@@ -1,6 +1,6 @@
 # Executable scenarios
 
-`testcases/1` through `testcases/25` are editable starting states. Each folder contains a `scenario.json` and ordinary native/source files. `scenarios.mjs` defines the operations and assertions; `native.mjs` contains checks against the actual installed harnesses.
+`testcases/1` through `testcases/26` are editable starting states. Each folder contains a `scenario.json` and ordinary native/source files. `scenarios.mjs` defines the operations and assertions; `native.mjs` contains checks against the actual installed harnesses.
 
 Run from any directory:
 
@@ -44,6 +44,7 @@ The runner builds Etymon, copies each fixture into a fresh temporary Git reposit
 | 23   | Four Cursor modules with mixed always/glob activation → separate Claude rules → repeat sync/reimport → Cursor round trip → lossy Codex composition and removal      |
 | 24   | Standalone `.claude/CLAUDE.md` → root standing registration → Copilot/Codex AGENTS.md → Continue rule file → stable reimport and restoration                        |
 | 25   | Codex filter → all tools → Claude filter; shared instructions, complete skill bundles, and MCP connections register once; scopes and activation survive restoration |
+| 26   | Deep nested guidance, broken skill aliases, bridge provenance, product-template exclusions, and explicit MCP conflict renaming                                      |
 
 Cases 3 and 21 use `npx skills@1.7.0`; first use needs npm access. `--skills-cli /absolute/path/to/skills/bin/cli.mjs` can use a preinstalled **real** 1.7.0 CLI in a restricted environment. The wrapper forwards the upstream command and checks its requested version; it does not simulate installation. Case 4 needs localhost sockets; `--skip-registry` explicitly reports that case as skipped. Case 9 is skipped unless `--native` selects installed loaders. Missing selected CLIs fail the scenario.
 

@@ -29,36 +29,37 @@ Local files / native importer ────────> authored TOML + editable
 
 ## Modules
 
-| Module                           | Responsibility                                                                           |
-| -------------------------------- | ---------------------------------------------------------------------------------------- |
-| `src/core/model.ts`              | Validated schemas, discriminated resources, value references, diagnostic codes           |
-| `src/core/dedup.ts`              | Semantic rule identities and complete skill bundle comparison, independent of origins    |
-| `src/core/fs.ts`                 | Bounded file bundles/downloads, content hashing/cache, process execution, path safety    |
-| `src/core/workspace.ts`          | Project/global roots, authoritative files, operation mutex                               |
-| `src/core/documents.ts`          | Duplicate detection, JSONC edits, native TOML table edits                                |
-| `src/core/transaction.ts`        | Whole-plan composition, drift/adoption, atomic file replacements, journal/recovery       |
-| `src/providers/source.ts`        | Local, Git/forge URL parsing and pinned Git checkout                                     |
-| `src/providers/skills.ts`        | Agent Skills validation and isolated pinned skills CLI staging                           |
-| `src/providers/mcp.ts`           | Official v0.1 registry API, explicit implementation resolution and input handling        |
-| `src/providers/agents.ts`        | Frontmatter parsing, agent discovery and native dialect detection                        |
-| `src/providers/rules.ts`         | Rule formats, activation normalization, canonical Markdown, recoverable native scopes    |
-| `src/providers/index.ts`         | External dependency resolution, artifact integrity and restoration                       |
-| `src/harnesses/profiles.ts`      | Declarative paths, scopes, dialects, prerequisites and source evidence                   |
-| `src/harnesses/render.ts`        | Native projections, tool mappings, conversion diagnostics, env launchers                 |
-| `src/harnesses/loss.ts`          | Eligible conversion limits and resource omission diagnostics                             |
-| `src/harnesses/import.ts`        | Native resource extraction, credential externalization and phase diagnostics             |
-| `src/harnesses/inspect.ts`       | Read-only compatibility alias, precedence and discovery diagnostics                      |
-| `src/harnesses/discovery.ts`     | Verified read aliases kept separate from preferred native write paths                    |
-| `src/harnesses/gitignore.ts`     | Profile-derived project ignores with authoritative-source exceptions                     |
-| `src/harnesses/rule-profiles.ts` | Rule locations, scope capabilities, native prerequisite notes and primary sources        |
-| `src/harnesses/rule-import.ts`   | Bounded nested discovery, native precedence, condition preservation, merged origins      |
-| `src/harnesses/rule-render.ts`   | Standing composition, scoped output, strict gates and explicit lossy projections         |
-| `src/services/environment.ts`    | Add, environment assembly, sync, conversion, update, remove, doctor                      |
-| `src/services/create.ts`         | Direct custom creation, shared validation, source/manifest transactions                  |
-| `src/tui/create.ts`              | Visible creation forms with multiline instructions and transport-specific fields         |
-| `src/tui/app.ts`                 | Library widgets and user interaction; no terminal renderer or business logic duplication |
-| `src/cli.ts`                     | Scriptable command interface and TUI launch                                              |
-| `src/index.ts`                   | Programmatic extension surface                                                           |
+| Module                              | Responsibility                                                                           |
+| ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| `src/core/model.ts`                 | Validated schemas, discriminated resources, value references, diagnostic codes           |
+| `src/core/dedup.ts`                 | Semantic rule identities and complete skill bundle comparison, independent of origins    |
+| `src/core/fs.ts`                    | Bounded file bundles/downloads, content hashing/cache, process execution, path safety    |
+| `src/core/workspace.ts`             | Project/global roots, authoritative files, operation mutex                               |
+| `src/core/documents.ts`             | Duplicate detection, JSONC edits, native TOML table edits                                |
+| `src/core/transaction.ts`           | Whole-plan composition, drift/adoption, atomic file replacements, journal/recovery       |
+| `src/providers/source.ts`           | Local, Git/forge URL parsing and pinned Git checkout                                     |
+| `src/providers/skills.ts`           | Agent Skills validation and isolated pinned skills CLI staging                           |
+| `src/providers/mcp.ts`              | Official v0.1 registry API, explicit implementation resolution and input handling        |
+| `src/providers/agents.ts`           | Frontmatter parsing, agent discovery and native dialect detection                        |
+| `src/providers/rules.ts`            | Rule formats, activation normalization, canonical Markdown, recoverable native scopes    |
+| `src/providers/index.ts`            | External dependency resolution, artifact integrity and restoration                       |
+| `src/harnesses/profiles.ts`         | Declarative paths, scopes, dialects, prerequisites and source evidence                   |
+| `src/harnesses/render.ts`           | Native projections, tool mappings, conversion diagnostics, env launchers                 |
+| `src/harnesses/loss.ts`             | Eligible conversion limits and resource omission diagnostics                             |
+| `src/harnesses/import.ts`           | Native resource extraction, credential externalization and phase diagnostics             |
+| `src/harnesses/inspect.ts`          | Read-only compatibility alias, precedence and discovery diagnostics                      |
+| `src/harnesses/native-discovery.ts` | Shared bounded instruction inventory, pre-parse exclusions, and safe instruction aliases |
+| `src/harnesses/discovery.ts`        | Verified read aliases kept separate from preferred native write paths                    |
+| `src/harnesses/gitignore.ts`        | Profile-derived project ignores with authoritative-source exceptions                     |
+| `src/harnesses/rule-profiles.ts`    | Rule locations, scope capabilities, native prerequisite notes and primary sources        |
+| `src/harnesses/rule-import.ts`      | Bounded nested discovery, native precedence, condition preservation, merged origins      |
+| `src/harnesses/rule-render.ts`      | Standing composition, scoped output, strict gates and explicit lossy projections         |
+| `src/services/environment.ts`       | Add, environment assembly, sync, conversion, update, remove, doctor                      |
+| `src/services/create.ts`            | Direct custom creation, shared validation, source/manifest transactions                  |
+| `src/tui/create.ts`                 | Visible creation forms with multiline instructions and transport-specific fields         |
+| `src/tui/app.ts`                    | Library widgets and user interaction; no terminal renderer or business logic duplication |
+| `src/cli.ts`                        | Scriptable command interface and TUI launch                                              |
+| `src/index.ts`                      | Programmatic extension surface                                                           |
 
 ## Add a provider
 
@@ -78,7 +79,7 @@ Before apply, native destinations are read and compared with the previous owned 
 
 Apply stores a private journal before writing, records each attempted write, checks for concurrent edits, and atomically replaces each file. Ownership state is the final write. On failure or explicit `recover`, safe applied changes are rolled back. Subsequent unrelated edits are preserved and reported as recovery conflicts. Filesystem operations across multiple files are recoverable, not a single global filesystem transaction.
 
-Conversion discovers all supported native locations unless a tool filter is supplied. Selected profiles are read in their declared order, and successfully imported rule paths and instruction/native interpretations are shared between readers so an alias cannot reinterpret a native file's activation or widen its directory scope. Explicit includes retain their own scope and interpretation instead of being treated as read aliases. The complete inventory is deduplicated before one transaction: rules compare content, effective scope and conditions; other resources compare their name and full semantic identity. Provenance paths merge, independent rules receive distinct names, and conflicting executable resources block the entire import. Existing authored registrations and external lock dependencies participate in deduplication. Discovery does not use saved sync targets or require installed tool executables.
+Conversion discovers all supported native locations unless a tool filter is supplied. One bounded project inventory is shared across instruction readers; 128 directory levels and 100,000 entries allow ordinary deep monorepos while retaining hard limits. Repeatable project-relative exclusions prune discovery before parsing. Broken skill aliases report warnings, while out-of-bound skill links remain errors. Whole-directory skill aliases and resolved instruction symlinks retain provenance. Simple AGENTS.md include bridges merge the wrapper origin into the scoped rule. Default executable-resource collisions remain errors; explicit MCP conflict renaming retains each complete connection under a stable hash-suffixed name. Existing authored registrations participate in this resolution, so filtered reimports remain stable. Selected profiles are read in their declared order, and successfully imported rule paths and instruction/native interpretations are shared between readers so an alias cannot reinterpret a native file's activation or widen its directory scope. Explicit includes retain their own scope and interpretation instead of being treated as read aliases. The complete inventory is deduplicated before one transaction: rules compare content, effective scope and conditions; other resources compare their name and full semantic identity. Provenance paths merge, independent rules receive distinct names, and conflicting executable resources block the entire import. Existing authored registrations and external lock dependencies participate in deduplication. Discovery does not use saved sync targets or require installed tool executables.
 
 Conversion uses the transaction machinery but does not acquire ongoing ownership of authored source or the native originals. Equivalent source can be reimported across aliases and harnesses; differing authored content blocks. The ignored operation mutex prevents concurrent CLI/TUI mutations; a crash can leave a mutex requiring manual removal after confirming no operation is active.
 

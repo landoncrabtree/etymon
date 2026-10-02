@@ -8,6 +8,7 @@ import { Workspace } from '../core/workspace.js';
 import { canonicalRuleText, parseInstructionFile, parseRule } from '../providers/rules.js';
 import type { Profile } from './profiles.js';
 import { ruleLocation, RuleSource } from './rule-profiles.js';
+import { NativeDiscovery } from './native-discovery.js';
 
 export type ImportedRule = {
   kind: 'rule';
@@ -18,45 +19,12 @@ export type ImportedRule = {
   extension: '.md';
   rule: Rule;
 };
-/** Scan for instruction filenames without following unrelated project symlinks. */
-async function tree(root: string, diagnostics: Diagnostic[]): Promise<string[]> {
-  const result: string[] = [];
-  let entries = 0;
-  async function visit(path: string, depth: number) {
-    if (!depth) throw new EtymonError('SOURCE_LIMIT', 'Rule discovery exceeds 16 directory levels');
-    for (const item of (await fs.readdir(path, { withFileTypes: true })).sort((a, b) =>
-      a.name.localeCompare(b.name),
-    )) {
-      if (
-        ['.git', 'node_modules', '.etymon', 'dist', 'build', 'vendor', '.cache'].includes(item.name)
-      )
-        continue;
-      const full = join(path, item.name),
-        rel = relative(root, full).replaceAll('\\', '/');
-      if (rel === '.agents/etymon' || rel === '.agents/etymon-output') continue;
-      if (++entries > 25000)
-        throw new EtymonError('SOURCE_LIMIT', 'Rule discovery exceeds 25000 entries');
-      if (item.isSymbolicLink()) {
-        if (/^(?:AGENTS|AGENT|CLAUDE|GEMINI)/.test(item.name))
-          diagnostics.push({
-            code: 'RULE_SYMLINK_SKIPPED',
-            severity: 'warning',
-            message: `Skipped ${full}; register its resolved source explicitly to import symlinked instructions`,
-          });
-        continue;
-      }
-      if (item.isDirectory()) await visit(full, depth - 1);
-      else if (item.isFile()) result.push(rel);
-    }
-  }
-  await visit(root, 16);
-  return result;
-}
 export async function importRules(
   p: Profile,
   workspace: Workspace,
   rulesPath?: string,
-  importedPaths?: Set<string>,
+  importedPaths?: Map<string, ImportedRule[]>,
+  discovery = new NativeDiscovery(workspace),
 ): Promise<{ resources: ImportedRule[]; diagnostics: Diagnostic[] }> {
   const resources: ImportedRule[] = [],
     diagnostics: Diagnostic[] = [];
@@ -68,11 +36,11 @@ export async function importRules(
     sources.push({ path: rulesPath, directory: true, dialect: p.rule.dialect ?? 'plain' });
   const all =
     !workspace.global && sources.some((source) => source.tree)
-      ? await tree(workspace.root, diagnostics)
+      ? await discovery.tree(workspace.root)
       : [];
   const winners = new Map<string, { source: string; resources: ImportedRule[] }>();
   const seenPaths = new Set<string>(),
-    claimedPaths = new Set<string>();
+    claimedPaths = new Map<string, ImportedRule[]>();
   let claudeMode = 'claude-md-or-agents-md';
   if (p.id === 'claude' && !workspace.global) {
     const user = new Workspace({
@@ -104,17 +72,23 @@ export async function importRules(
       explicitScope ? base : null,
       instructions ? 'plain' : 'native',
     ]);
+    if (discovery.excluded(path)) return;
     if (seenPaths.has(identity) || importedPaths?.has(identity)) return;
     seenPaths.add(identity);
     const stat = await fs.lstat(path);
-    if (!stat.isFile()) return;
-    if (stat.size > 1024 * 1024)
+    const real = stat.isSymbolicLink() ? await discovery.instructionFile(path) : path;
+    if (!real) return;
+    const fileStat = await fs.stat(real);
+    if (!fileStat.isFile()) return;
+    if (fileStat.size > 1024 * 1024)
       throw new EtymonError('SOURCE_LIMIT', `Rule file exceeds 1 MiB: ${path}`);
-    let text = await fs.readFile(path, 'utf8');
+    let text = await fs.readFile(real, 'utf8');
     if (!text.trim()) return;
     // An Etymon-compatible include bridge contributes its target, not a second
     // rule containing the literal @path. Target discovery happens separately.
-    const bridge = /^@([^\r\n]+)\s*$/.exec(text);
+    const bridge =
+      /^@([^\r\n]+)\s*$/.exec(text) ??
+      /^\s*All working instructions live in @([^\s]+)\s*[-–]\s*follow it\.\s*$/i.exec(text);
     if (
       bridge &&
       basename(bridge[1]) === 'AGENTS.md' &&
@@ -126,7 +100,11 @@ export async function importRules(
         harness: p.id,
         message: `${path} references AGENTS.md; importing the shared instructions once`,
       });
-      const included = join(dirname(path), bridge[1]);
+      const included = inside(
+        workspace.root,
+        relative(workspace.root, join(dirname(path), bridge[1])),
+      );
+      if (discovery.excluded(included)) return;
       await addFile(
         included,
         { dialect: 'plain', path: included },
@@ -134,6 +112,14 @@ export async function importRules(
         sourceRoot,
         true,
         explicitScope || dirname(path) !== dirname(included),
+      );
+      for (const prior of [...resources, ...[...(importedPaths?.values() ?? [])].flat()]) {
+        if (prior.origins.includes(included) && prior.rule.base === base)
+          prior.origins = [...new Set([...prior.origins, path])];
+      }
+      claimedPaths.set(
+        identity,
+        resources.filter((prior) => prior.origins.includes(path)),
       );
       return;
     }
@@ -185,11 +171,19 @@ export async function importRules(
         format: 'roo',
         native: { ...rule.native, mode: source.mode },
       }));
+    const origins = [
+      ...new Set([
+        path,
+        stat.isSymbolicLink()
+          ? join(workspace.root, relative(await fs.realpath(workspace.root), real))
+          : path,
+      ]),
+    ];
     const candidates = rules.map((rule) => ({
       kind: 'rule' as const,
       name: rule.name,
       origin: path,
-      origins: [path],
+      origins,
       text: canonicalRuleText(rule),
       extension: '.md' as const,
       rule,
@@ -260,7 +254,7 @@ export async function importRules(
       else winners.set(group, { source: sourceRoot, resources: candidates });
     }
     resources.push(...candidates);
-    claimedPaths.add(identity);
+    claimedPaths.set(identity, candidates);
   }
   for (const source of sources) {
     const root = ruleLocation(source.path, workspace, p.id);
@@ -318,7 +312,7 @@ export async function importRules(
           await addFile(candidateRoot, source, base, candidateRoot);
           continue;
         }
-        const files = await tree(candidateRoot, diagnostics);
+        const files = await discovery.tree(candidateRoot);
         for (const child of files) {
           if (source.flat && child.includes('/')) continue;
           if (
@@ -342,7 +336,7 @@ export async function importRules(
         if (!/^rules-[a-z0-9_-]+$/.test(entry)) continue;
         const directory = join(root, entry);
         if (!(await fs.lstat(directory)).isDirectory()) continue;
-        for (const path of await tree(directory, diagnostics))
+        for (const path of await discovery.tree(directory))
           if (/\.(?:md|txt)$/.test(path))
             await addFile(
               join(directory, path),
@@ -366,7 +360,7 @@ export async function importRules(
     const configPath = (await exists(settings.replace(/\.json$/, '.jsonc')))
       ? settings.replace(/\.json$/, '.jsonc')
       : settings;
-    const raw = await readOptional(configPath);
+    const raw = discovery.excluded(configPath) ? undefined : await readOptional(configPath);
     if (raw) {
       const config = readDocument(raw, configPath.endsWith('.toml') ? 'toml' : 'json');
       const configured =
@@ -447,6 +441,10 @@ export async function importRules(
     identities.set(hash, resource);
     unique.push(resource);
   }
-  for (const path of claimedPaths) importedPaths?.add(path);
-  return { resources: unique, diagnostics };
+  for (const [path, candidates] of claimedPaths)
+    importedPaths?.set(
+      path,
+      candidates.map((candidate) => identities.get(ruleIdentity(candidate.rule)) ?? candidate),
+    );
+  return { resources: unique, diagnostics: [...diagnostics, ...discovery.diagnostics] };
 }

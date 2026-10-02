@@ -8,6 +8,69 @@ import { nativeChecks } from './native.mjs';
 const rules = async (c) => (await c.list()).authored.rule;
 const lockText = (c) => c.read('.agents/etymon.lock');
 export const handlers = {
+  async nativeImportGaps(c) {
+    const deep = Array.from({ length: 24 }, (_, i) => 'level' + i).join('/');
+    await c.write(`${deep}/AGENTS.md`, 'Deep guidance.');
+    await fs.symlink('AGENTS.md', join(c.project, 'CLAUDE.md'));
+    await fs.symlink('missing', join(c.project, '.claude/skills/broken'));
+    const blocked = await c.cli(['convert', '--exclude', 'product/templates/**'], {
+      expectedCode: 1,
+    });
+    assert.equal(blocked.error.code, 'IMPORT_COLLISION');
+    await assert.rejects(c.read('.agents/etymon.toml'), { code: 'ENOENT' });
+    await c.exec('python3', [
+      fileURLToPath(new URL('./tui.py', import.meta.url)),
+      process.execPath,
+      fileURLToPath(new URL('../bin/etymon.js', import.meta.url)),
+      c.project,
+      c.home,
+      join(c.directory, 'cache'),
+      'host-import-conflict',
+    ]);
+    const report = await c.cli([
+      'convert',
+      '--exclude',
+      'product/templates/**',
+      '--on-conflict',
+      'rename',
+    ]);
+    assert(report.diagnostics.some((d) => d.code === 'SKILL_SYMLINK_SKIPPED'));
+    assert(report.diagnostics.some((d) => d.code === 'IMPORT_RESOURCE_RENAMED'));
+    const authored = (await c.list()).authored;
+    assert.equal(Object.keys(authored.rule).length, 3);
+    assert.equal(Object.keys(authored.mcp).length, 2);
+    for (const rule of Object.values(authored.rule).filter((r) => r.destDir !== deep))
+      assert.equal(rule.origins.length, 2);
+    const before = await c.read('.agents/etymon.toml');
+    await c.cli([
+      'convert',
+      '--harness',
+      'codex',
+      '--exclude',
+      'product/templates/**',
+      '--on-conflict',
+      'rename',
+    ]);
+    await c.cli(['convert', '--exclude', 'product/templates/**', '--on-conflict', 'rename']);
+    assert.equal(await c.read('.agents/etymon.toml'), before);
+    assert.equal((await c.list()).lock.dependencies.length, 0);
+    await c.clear([
+      'AGENTS.md',
+      'CLAUDE.md',
+      'packages/api/AGENTS.md',
+      'packages/api/CLAUDE.md',
+      '.mcp.json',
+      '.codex',
+      '.claude',
+      `${deep}/AGENTS.md`,
+    ]);
+    await c.sync('codex');
+    assert.match(await c.read(`${deep}/AGENTS.md`), /Deep guidance/);
+    assert.match(await c.read('packages/api/AGENTS.md'), /API guidance/);
+    assert.match(await c.read('.codex/config.toml'), /old\/checkout/);
+    assert.match(await c.read('product/templates/.cursor/rules/bad.mdc'), /Product template/);
+    await c.idempotent('codex');
+  },
   async agnosticConvert(c) {
     const nativePaths = [
       'AGENTS.md',

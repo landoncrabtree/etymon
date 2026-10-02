@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 export const VERSION: string = JSON.parse(
   readFileSync(new URL('../../package.json', import.meta.url), 'utf8'),
 ).version;
-export const ADAPTER_REVISION = '2026-10-01.1';
+export const ADAPTER_REVISION = '2026-10-02.1';
 export const SKILLS_VERSION = '1.7.0';
 export const kinds = ['skill', 'mcp', 'agent', 'rule'] as const;
 export type Kind = (typeof kinds)[number];

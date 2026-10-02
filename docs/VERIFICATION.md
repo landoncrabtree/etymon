@@ -52,6 +52,18 @@ The GIF has desktop and mobile compositions in both themes. The README omits a f
 
 Inline MCP checks cover imported credential references, local configurations that work after their input JSON is removed, preservation of native extension fields, idempotent reimport, authored-edit conflicts, and rejection of file-backed or missing-connection manifest entries.
 
+The discovery-fix checkpoint passed `npm run check` with 187 unit tests and the production build. The coverage run passed all 25 non-native lifecycle cases and measured 81.29% lines/statements, 77.56% branches, and 85.98% functions, above the enforced floors.
+
+Case 26 and ten focused regression tests cover the concrete native-import gaps: deep instruction scope, hard traversal bounds, broken and cyclic skill aliases, complete-directory alias provenance and executable modes, in-scope instruction symlinks, AGENTS.md bridge origins, exclusions before parsing, invalid options, and explicit MCP conflict renaming. Repeated filtered and all-tool imports leave the manifest stable. The real terminal case excludes a product template and keeps conflicting MCP definitions separately before applying the reviewed import.
+
+Fresh shallow clones were checked with the development CLI on October 2, 2026:
+
+- [Next.js](https://github.com/vercel/next.js/tree/6c2ab2c2650b0888c9310abba16dbb9588d8be0a): 20 skills and 17 rules imported, followed by a successful repeated conversion. The earlier directory-depth failure no longer occurs.
+- [Sanity](https://github.com/sanity-io/sanity/tree/66411f744253ef75a06ce05f5f339846b285e8a0): 34 skills and four rules imported, followed by successful repeated conversion. The dangling skill alias is reported instead of aborting import.
+- [Coolify](https://github.com/coollabsio/coolify/tree/0ed423aaacf7d4eb4be139f2120e97c8f03b348f): `--on-conflict rename` retains two MCP connections without changing their working directories. The next validation gate exposed an unquoted wildcard alias in `.cursor/rules/coolify-ai-docs.mdc`; excluding that malformed file imported 11 skills, two MCP connections, and one rule, followed by successful repeated conversion. Etymon does not silently repair invalid native input.
+
+These checks exercised native import and repeated registration, without application tests, model calls, MCP execution, or native runtime certification. Temporary repository clones were isolated from personal configuration.
+
 ## Local runtime observations
 
 Installed versions during verification: Claude Code **2.1.286**, Codex CLI **0.159.1**, GitHub Copilot CLI **1.0.90-6**, OpenCode **1.18.30**, Gemini CLI **0.62.0**, Pi **0.99.2**, Kilo **7.8.1**, and Herdr **0.9.3**.
