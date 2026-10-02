@@ -68,6 +68,7 @@ const playback = demo.querySelector<HTMLButtonElement>("[data-playback]")!;
 const description = demo.querySelector<HTMLElement>("[data-description]")!;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let active = 2;
+let activeExample = 0;
 let userPaused = reducedMotion.matches;
 let onScreen = false;
 let focused = false;
@@ -105,12 +106,26 @@ function reconcilePlayback() {
   else timeline?.pause();
 }
 
-function showScene(index: number, manual = false) {
+function showScene(index: number, manual = false, exampleIndex = 0) {
   timeline?.kill();
   timeline = undefined;
   active = (index + scenes.length) % scenes.length;
   const scene = scenes[active];
   const panel = panels[active];
+  const examples = "examples" in scene ? scene.examples : [scene];
+  activeExample = exampleIndex % examples.length;
+  const example = examples[activeExample];
+  const examplePanels = [
+    ...panel.querySelectorAll<HTMLElement>("[data-example]"),
+  ];
+  examplePanels.forEach((item, i) => {
+    item.hidden = i !== activeExample;
+  });
+  const examplePanel = examplePanels[activeExample];
+  const exampleSelect = panel.querySelector<HTMLSelectElement>(
+    "[data-example-select]",
+  );
+  if (exampleSelect) exampleSelect.value = String(activeExample);
   panels.forEach((item, i) => {
     item.hidden = i !== active;
   });
@@ -120,16 +135,20 @@ function showScene(index: number, manual = false) {
   });
   description.textContent = scene.description;
   demo.dataset.active = scene.id;
+  demo.dataset.example = example.id;
   if (manual) userPaused = true;
-  const typed = panel.querySelector<HTMLElement>("[data-typed]")!;
-  const lines = [...panel.querySelectorAll<HTMLElement>("[data-line]")];
-  const before = panel.querySelector<HTMLElement>("[data-tree-before]")!;
-  const after = panel.querySelector<HTMLElement>("[data-tree-after]")!;
-  const outputs = [...panel.querySelectorAll<HTMLElement>("[data-output]")];
-  const completion = panel.querySelector<HTMLElement>("[data-completion]")!;
-  const caret = panel.querySelector<HTMLElement>("[data-caret]")!;
+  const typed = examplePanel.querySelector<HTMLElement>("[data-typed]")!;
+  const lines = [...examplePanel.querySelectorAll<HTMLElement>("[data-line]")];
+  const before = examplePanel.querySelector<HTMLElement>("[data-tree-before]")!;
+  const after = examplePanel.querySelector<HTMLElement>("[data-tree-after]")!;
+  const outputs = [
+    ...examplePanel.querySelectorAll<HTMLElement>("[data-output]"),
+  ];
+  const completion =
+    examplePanel.querySelector<HTMLElement>("[data-completion]")!;
+  const caret = examplePanel.querySelector<HTMLElement>("[data-caret]")!;
   const connectors = [
-    ...panel.querySelectorAll<SVGPathElement>(".connector-lines path"),
+    ...examplePanel.querySelectorAll<SVGPathElement>(".connector-lines path"),
   ];
   const animatable = [
     typed,
@@ -142,7 +161,7 @@ function showScene(index: number, manual = false) {
     ...connectors,
   ];
   gsap.set(animatable, { clearProps: "all" });
-  typed.textContent = scene.command;
+  typed.textContent = example.command;
   if (reducedMotion.matches || manual) {
     demo.dataset.phase = "complete";
     updatePlayback();
@@ -162,18 +181,22 @@ function showScene(index: number, manual = false) {
     paused: true,
     defaults: { ease: "expo.out" },
     onComplete: () => {
-      if (canRun()) showScene(active + 1);
+      if (canRun()) {
+        if (activeExample + 1 < examples.length)
+          showScene(active, false, activeExample + 1);
+        else showScene(active + 1);
+      }
     },
   });
   timeline
     .to(
       typewriter,
       {
-        letters: scene.command.length,
-        duration: Math.min(1.7, 0.035 * scene.command.length + 0.35),
+        letters: example.command.length,
+        duration: Math.min(1.7, 0.035 * example.command.length + 0.35),
         ease: "none",
         onUpdate: () => {
-          typed.textContent = scene.command.slice(
+          typed.textContent = example.command.slice(
             0,
             Math.round(typewriter.letters),
           );
@@ -191,7 +214,7 @@ function showScene(index: number, manual = false) {
     .call(() => {
       demo.dataset.phase = "complete";
     })
-    .to({}, { duration: 3 });
+    .to({}, { duration: example.command.length > 90 ? 5 : 3 });
   reconcilePlayback();
 }
 
@@ -211,6 +234,17 @@ tabs.forEach((tab, index) => {
     }
   });
 });
+panels.forEach((panel, index) => {
+  panel
+    .querySelector<HTMLSelectElement>("[data-example-select]")
+    ?.addEventListener("change", (event) => {
+      showScene(
+        index,
+        true,
+        Number((event.currentTarget as HTMLSelectElement).value),
+      );
+    });
+});
 playback.addEventListener("click", () => {
   // Reduced-motion playback changes scenes without spatial or typing effects.
   if (reducedMotion.matches) {
@@ -219,7 +253,7 @@ playback.addEventListener("click", () => {
   }
   userPaused = !userPaused;
   hovered = false;
-  if (!userPaused && !timeline) showScene(active);
+  if (!userPaused && !timeline) showScene(active, false, activeExample);
   reconcilePlayback();
 });
 demo.addEventListener("focusin", (event) => {
@@ -243,7 +277,7 @@ demo.addEventListener("mouseleave", () => {
 document.addEventListener("visibilitychange", reconcilePlayback);
 reducedMotion.addEventListener("change", () => {
   userPaused = reducedMotion.matches;
-  showScene(active);
+  showScene(active, false, activeExample);
 });
 new IntersectionObserver(
   ([entry]) => {

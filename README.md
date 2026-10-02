@@ -6,14 +6,14 @@ Make your repositories portable and AI harness-agnostic with Etymon.
 
 [Website](https://landoncrabtree.github.io/etymon/) · [CLI reference](docs/CLI.md)
 
-## Use case: LobeHub
+## Use cases
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/agent-setup-dark.svg">
-  <img src="docs/assets/agent-setup-light.svg" alt="A real local conversion of LobeHub with Etymon 0.1.1. Fifty skills and four rules move into Etymon source under .agents. The .codex and .gemini skill symlinks and root instruction files leave Git. Workflow prompts in .claude, documentation in .cursor, and .github CI remain tracked." width="1200">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/case-studies-dark.gif">
+  <img src="docs/assets/case-studies-light.gif" alt="Verified local conversions with Etymon 0.1.1: LobeHub, 50 skills and 4 rules; Dify, 5 skills and 10 rules; Supabase JS, 6 skills and 8 rules; shadcn/ui, 1 glob-scoped rule. Each comparison shows tracked setup before and after import and explicit retirement of imported originals. Etymon source lives under .agents. Unrelated hooks, settings, CI, and product templates remain." width="1200" height="812">
 </picture>
 
-[LobeHub](https://github.com/lobehub/lobehub): **50 skills, 4 rules**, converted and synced with the published CLI. [Reproduce the demo](docs/demos/lobehub.md).
+[LobeHub](https://github.com/lobehub/lobehub) · [Dify](https://github.com/langgenius/dify) · [Supabase JS](https://github.com/supabase/supabase-js) · [shadcn/ui](https://github.com/shadcn-ui/ui). Converted locally with published `etymon@0.1.1`.
 
 ## Install
 

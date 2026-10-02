@@ -1,3 +1,96 @@
+const addExamples = [
+  {
+    id: "add-skill",
+    label: "Add a skill",
+    command: "etymon skills add vercel-labs/skills --skill find-skills",
+    lines: ["Select find-skills", "Lock its source commit and content"],
+    completion: "Ready for the next sync.",
+    before: ["etymon.toml", "etymon.lock"],
+    files: ["etymon.toml", "etymon.lock"],
+    outputs: [
+      ["find-skills", "Selected skill"],
+      ["etymon.lock", "Pinned external source"],
+      ["etymon sync", "Install for your tools"],
+    ],
+  },
+  {
+    id: "find-mcp",
+    label: "Find an MCP server",
+    command: "etymon mcp find context7",
+    lines: ["Search the MCP Registry", "Find io.github.upstash/context7"],
+    completion: "Choose a connection to add.",
+    before: ["etymon.toml", "etymon.lock"],
+    files: ["etymon.toml", "etymon.lock"],
+    outputs: [
+      ["Context7", "Library documentation"],
+      ["MCP Registry", "Connection details"],
+      ["Your source", "Unchanged by search"],
+    ],
+  },
+  {
+    id: "add-mcp",
+    label: "Add an MCP server",
+    command: "etymon mcp add io.github.upstash/context7 --remote 0",
+    lines: [
+      "Select the hosted connection",
+      "Save MCP settings in the manifest",
+    ],
+    completion: "One connection for your tools.",
+    before: ["etymon.toml", "etymon.lock"],
+    files: ["etymon.toml", "etymon.lock"],
+    outputs: [
+      ["Context7", "Hosted MCP connection"],
+      ["etymon.toml", "Inline connection settings"],
+      ["etymon.lock", "Registry source recorded"],
+    ],
+  },
+  {
+    id: "create-skill",
+    label: "Create a skill",
+    command:
+      'etymon skills create --name checks --description "Run project checks" --body "Run npm test and report failures." --yes',
+    lines: ["Write checks/SKILL.md", "Register your custom skill"],
+    completion: "Your project checks, ready to share.",
+    before: ["etymon.toml", "etymon.lock"],
+    files: ["etymon.toml", "etymon.lock", "etymon/", "  skills/"],
+    outputs: [
+      ["checks", "Your custom skill"],
+      ["SKILL.md", "Editable instructions"],
+      ["etymon sync", "Install for your tools"],
+    ],
+  },
+  {
+    id: "create-agent",
+    label: "Create an agent",
+    command:
+      'etymon agents create --name reviewer --description "Review changes" --body "Find correctness bugs." --yes',
+    lines: ["Write reviewer.json", "Register your custom agent"],
+    completion: "A reviewer for your project.",
+    before: ["etymon.toml", "etymon.lock"],
+    files: ["etymon.toml", "etymon.lock", "etymon/", "  agents/"],
+    outputs: [
+      ["reviewer", "Your custom agent"],
+      ["reviewer.json", "Editable agent source"],
+      ["etymon sync", "Install for your tools"],
+    ],
+  },
+  {
+    id: "create-rule",
+    label: "Create a rule",
+    command:
+      'etymon rules create --name testing --layout modular --body "Run checks before committing." --yes',
+    lines: ["Write testing.md", "Register an always-on project rule"],
+    completion: "Shared guidance for contributors.",
+    before: ["etymon.toml", "etymon.lock"],
+    files: ["etymon.toml", "etymon.lock", "etymon/", "  rules/"],
+    outputs: [
+      ["testing", "Your project rule"],
+      ["testing.md", "Editable instructions"],
+      ["etymon sync", "Install for your tools"],
+    ],
+  },
+] as const;
+
 export const scenes = [
   {
     id: "init",
@@ -64,25 +157,12 @@ export const scenes = [
     ],
   },
   {
-    id: "skill",
-    label: "skills add",
+    ...addExamples[0],
+    id: "add",
+    label: "add",
     icon: "plus",
-    command: "etymon skills add vercel-labs/skills --skill find-skills",
     description:
-      "Add a skill from skills.sh and lock its source. The next sync installs it for your tools.",
-    lines: [
-      "Resolve vercel-labs/skills",
-      "Select find-skills",
-      "Lock the source commit and content",
-      "Register the selected skill",
-    ],
-    completion: "Ready for the next sync.",
-    before: ["etymon.toml", "etymon.lock"],
-    files: ["etymon.toml", "etymon.lock"],
-    outputs: [
-      ["find-skills", "Selected skill"],
-      ["Pinned commit", "Recorded in etymon.lock"],
-      ["etymon sync", "Install for your tools"],
-    ],
+      "Add skills and MCP servers, or create your own skills, agents and rules. Sync when you're ready.",
+    examples: addExamples,
   },
 ] as const;

@@ -25,138 +25,157 @@ import { scenes } from "../data/scenes";
       hidden={index !== 2}
       data-scene={scene.id}
     >
-      <div class="demo-layout" aria-hidden="true">
-        <div class="workspace-window">
-          <div class="terminal-pane">
-            <div class="window-toolbar">
-              <span class="window-dots">
-                <i></i>
-                <i></i>
-                <i></i>
-              </span>
-              <span>terminal</span>
-            </div>
-            <div class="terminal-body">
-              <div class="demo-command">
-                <span class="dollar">$</span>
-                <span data-typed>{scene.command}</span>
-                <span class="caret" data-caret></span>
-              </div>
-              <div class="terminal-lines">
-                {scene.lines.map((line) => (
-                  <div class="terminal-line" data-line>
-                    <Icon name="check" size={15} />
-                    <span>{line}</span>
+      {("examples" in scene ? scene.examples : [scene]).map(
+        (example, exampleIndex) => (
+          <div data-example={exampleIndex} hidden={exampleIndex !== 0}>
+            <div class="demo-layout" aria-hidden="true">
+              <div class="workspace-window">
+                <div class="terminal-pane">
+                  <div class="window-toolbar">
+                    <span class="window-dots">
+                      <i></i>
+                      <i></i>
+                      <i></i>
+                    </span>
+                    <span>terminal</span>
                   </div>
-                ))}
-              </div>
-              <p class="terminal-completion" data-completion>
-                {scene.completion}
-              </p>
-              <div class="idle-prompt">
-                <span>$</span>
-                <span class="idle-caret"></span>
-              </div>
-            </div>
-          </div>
-          <div class="finder-pane">
-            <div class="window-toolbar finder-toolbar">
-              <Icon name="folder" size={20} />
-              <span>project</span>
-              <span class="source-tag">source</span>
-            </div>
-            <div class="file-tree">
-              <div class="tree-state tree-before" data-tree-before>
-                <div class="tree-root">
-                  <Icon name="folder" size={19} />
-                  <span>
-                    {scene.id === "convert"
-                      ? "Native files"
-                      : scene.id === "init"
-                        ? "my-project/"
-                        : ".agents/"}
-                  </span>
-                </div>
-                {scene.before.map((file) => (
-                  <div class="tree-row">
-                    <Icon
-                      name={file.endsWith("/") ? "folder" : "file"}
-                      size={18}
-                    />
-                    <span>{file}</span>
+                  <div class="terminal-body">
+                    <div class="demo-command">
+                      <span class="dollar">$</span>
+                      <span data-typed>{example.command}</span>
+                      <span class="caret" data-caret></span>
+                    </div>
+                    <div class="terminal-lines">
+                      {example.lines.map((line) => (
+                        <div class="terminal-line" data-line>
+                          <Icon name="check" size={15} />
+                          <span>{line}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p class="terminal-completion" data-completion>
+                      {example.completion}
+                    </p>
+                    <div class="idle-prompt">
+                      <span>$</span>
+                      <span class="idle-caret"></span>
+                    </div>
                   </div>
-                ))}
-              </div>
-              <div class="tree-state tree-after" data-tree-after>
-                <div class="tree-root">
-                  <Icon name="down" size={14} />
-                  <Icon name="folder" size={19} />
-                  <span>.agents/</span>
                 </div>
-                {scene.files.map((file) => (
-                  <div
-                    class:list={[
-                      "tree-row",
-                      { indented: file.startsWith("  ") },
-                    ]}
-                  >
-                    <Icon
-                      name={file.endsWith("/") ? "folder" : "file"}
-                      size={18}
-                    />
-                    <span>{file.trim()}</span>
+                <div class="finder-pane">
+                  <div class="window-toolbar finder-toolbar">
+                    <Icon name="folder" size={20} />
+                    <span>project</span>
+                    <span class="source-tag">source</span>
                   </div>
-                ))}
-                <div class="tree-note">
-                  <Icon name="lock" size={14} />
-                  <span>
-                    {scene.id === "skill"
-                      ? "External source locked"
-                      : "Your shared source"}
-                  </span>
+                  <div class="file-tree">
+                    <div class="tree-state tree-before" data-tree-before>
+                      <div class="tree-root">
+                        <Icon name="folder" size={19} />
+                        <span>
+                          {scene.id === "convert"
+                            ? "Native files"
+                            : scene.id === "init"
+                              ? "my-project/"
+                              : ".agents/"}
+                        </span>
+                      </div>
+                      {example.before.map((file) => (
+                        <div class="tree-row">
+                          <Icon
+                            name={file.endsWith("/") ? "folder" : "file"}
+                            size={18}
+                          />
+                          <span>{file}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div class="tree-state tree-after" data-tree-after>
+                      <div class="tree-root">
+                        <Icon name="down" size={14} />
+                        <Icon name="folder" size={19} />
+                        <span>.agents/</span>
+                      </div>
+                      {example.files.map((file) => (
+                        <div
+                          class:list={[
+                            "tree-row",
+                            { indented: file.startsWith("  ") },
+                          ]}
+                        >
+                          <Icon
+                            name={file.endsWith("/") ? "folder" : "file"}
+                            size={18}
+                          />
+                          <span>{file.trim()}</span>
+                        </div>
+                      ))}
+                      <div class="tree-note">
+                        <Icon name="lock" size={14} />
+                        <span>
+                          {example.id === "find-mcp"
+                            ? "Search only"
+                            : "Your shared source"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="output-rail">
+                <svg
+                  viewBox="0 0 160 210"
+                  preserveAspectRatio="none"
+                  class="connector-lines"
+                  aria-hidden="true"
+                >
+                  <path d="M0 105H44Q68 105 68 81V27Q68 11 91 11H156M0 105H156M0 105H44Q68 105 68 129V183Q68 199 91 199H156" />
+                  <path
+                    class="connector-tips"
+                    d="m149 5 7 6-7 6m0 82 7 6-7 6m0 82 7 6-7 6"
+                  />
+                </svg>
+                <div class="native-outputs">
+                  <p class="output-caption">
+                    {scene.id === "sync"
+                      ? "Native files for your tools"
+                      : scene.id === "convert"
+                        ? "Your portable setup"
+                        : scene.id === "add"
+                          ? "Add to your shared setup"
+                          : "A clean starting point"}
+                  </p>
+                  {example.outputs.map(([file, detail]) => (
+                    <div class="native-file" data-output>
+                      <Icon
+                        name={file.endsWith("/") ? "folder" : "file"}
+                        size={36}
+                      />
+                      <div>
+                        <span class="native-filename">{file}</span>
+                        <span class="native-detail">{detail}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div class="output-rail">
-          <svg
-            viewBox="0 0 160 210"
-            preserveAspectRatio="none"
-            class="connector-lines"
-            aria-hidden="true"
-          >
-            <path d="M0 105H44Q68 105 68 81V27Q68 11 91 11H156M0 105H156M0 105H44Q68 105 68 129V183Q68 199 91 199H156" />
-            <path
-              class="connector-tips"
-              d="m149 5 7 6-7 6m0 82 7 6-7 6m0 82 7 6-7 6"
-            />
-          </svg>
-          <div class="native-outputs">
-            <p class="output-caption">
-              {scene.id === "sync"
-                ? "Native files for your tools"
-                : scene.id === "convert"
-                  ? "Your portable setup"
-                  : scene.id === "skill"
-                    ? "One skill, locked in"
-                    : "A clean starting point"}
+            <p class="sr-only">
+              Command: {example.command}. {example.completion}
             </p>
-            {scene.outputs.map(([file, detail]) => (
-              <div class="native-file" data-output>
-                <Icon name={file.endsWith("/") ? "folder" : "file"} size={36} />
-                <div>
-                  <span class="native-filename">{file}</span>
-                  <span class="native-detail">{detail}</span>
-                </div>
-              </div>
-            ))}
           </div>
+        ),
+      )}
+      {"examples" in scene && (
+        <div class="example-controls">
+          <label for={`example-${scene.id}`}>Try an example</label>
+          <select id={`example-${scene.id}`} data-example-select>
+            {scene.examples.map((example, index) => (
+              <option value={index}>{example.label}</option>
+            ))}
+          </select>
         </div>
-      </div>
-      <p class="sr-only">
-        Command: {scene.command}. {scene.description}
-      </p>
+      )}
     </div>
   ))}
   <div class="workflow-control-row">
@@ -201,8 +220,7 @@ import { scenes } from "../data/scenes";
   <noscript>
     <p class="no-script-demo">
       Try: <code>etymon init</code>, <code>etymon convert claude</code>,{" "}
-      <code>etymon sync</code>, or{" "}
-      <code>etymon skills add vercel-labs/skills --skill find-skills</code>.
+      <code>etymon sync</code>, or <code>etymon mcp find context7</code>.
     </p>
   </noscript>
 </section>

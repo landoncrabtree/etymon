@@ -74,7 +74,72 @@ test("workflow tabs support keyboard selection and reduced motion stays still", 
   );
   await expect(demo).toHaveAttribute("data-playback", "paused");
   await page.waitForTimeout(5500);
-  await expect(demo).toHaveAttribute("data-active", "skill");
+  await expect(demo).toHaveAttribute("data-active", "add");
+});
+
+test("add examples cover every interface and preserve their selection on resume", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("./");
+  await page.getByRole("tab", { name: "add", exact: true }).click();
+  const demo = page.locator("[data-demo]");
+  const picker = page.getByRole("combobox", { name: "Try an example" });
+  const example = page.locator("#scene-add [data-example]:not([hidden])");
+  const choices = [
+    ["Find an MCP server", "etymon mcp find context7", "Unchanged by search"],
+    [
+      "Add an MCP server",
+      "etymon mcp add io.github.upstash/context7 --remote 0",
+      "Inline connection settings",
+    ],
+    [
+      "Create a skill",
+      'etymon skills create --name checks --description "Run project checks" --body "Run npm test and report failures." --yes',
+      "skills/",
+    ],
+    [
+      "Create an agent",
+      'etymon agents create --name reviewer --description "Review changes" --body "Find correctness bugs." --yes',
+      "agents/",
+    ],
+    [
+      "Create a rule",
+      'etymon rules create --name testing --layout modular --body "Run checks before committing." --yes',
+      "rules/",
+    ],
+  ];
+  for (const [label, command, result] of choices) {
+    await picker.selectOption({ label });
+    await expect(example.locator("[data-typed]")).toHaveText(command);
+    await expect(example).toContainText(result);
+    await expect(demo).toHaveAttribute("data-playback", "paused");
+  }
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await expect(demo).toHaveAttribute("data-example", "create-rule");
+  await page.getByRole("button", { name: "Pause demo", exact: true }).click();
+  await page.getByRole("button", { name: "Play demo", exact: true }).click();
+  await expect(demo).toHaveAttribute("data-example", "create-rule");
+});
+
+test("add autoplay advances from skills to MCP examples and pauses on manual selection", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("./");
+  const demo = page.locator("[data-demo]");
+  await page.getByRole("tab", { name: "add", exact: true }).click();
+  await page.getByRole("button", { name: "Play demo", exact: true }).click();
+  await page.mouse.move(1, 1);
+  await expect(demo).toHaveAttribute("data-example", "find-mcp", {
+    timeout: 15000,
+  });
+  await page
+    .getByRole("combobox", { name: "Try an example" })
+    .selectOption({ label: "Create a rule" });
+  await expect(demo).toHaveAttribute("data-example", "create-rule");
+  await expect(demo).toHaveAttribute("data-playback", "paused");
 });
 
 test("autoplay pauses, resumes after selection, and suspends when offscreen", async ({
@@ -104,6 +169,10 @@ for (const theme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("./");
+    await page.getByRole("tab", { name: "add", exact: true }).click();
+    await page
+      .getByRole("combobox", { name: "Try an example" })
+      .selectOption({ label: "Create a skill" });
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
     for (const width of [320, 375, 640, 768, 1024, 1280, 1440, 1536]) {
