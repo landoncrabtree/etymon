@@ -147,10 +147,10 @@ try:
         print(json.dumps({"mode": mode, "exitCode": process.returncode}))
     elif mode.startswith("create-") or mode.startswith("host-create"):
         hosted = mode.startswith("host-create")
-        kind = mode.split("-")[1] if not hosted else "rule" if mode.endswith("rule") else "skill"
+        kind = mode.split("-")[1] if not hosted else "command" if mode.endswith("command") else "rule" if mode.endswith("rule") else "skill"
         if hosted:
             expect("Rules & Instructions" if kind == "rule" else "Add " + kind)
-            send(("jjjj" if kind == "rule" else "j") + "\r")
+            send(("j" * 11 if kind == "command" else "jjjj" if kind == "rule" else "j") + "\r")
             expect("Add " + kind + ":")
             send("\r")
         expect("Instructions" if hosted else f"Create {kind}")

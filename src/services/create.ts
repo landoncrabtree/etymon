@@ -1,6 +1,5 @@
 import { promises as fs } from 'node:fs';
 import { join, relative } from 'node:path';
-import { stringify as yaml } from 'yaml';
 import { stringify as toml } from 'smol-toml';
 import { z } from 'zod';
 import {
@@ -22,6 +21,8 @@ import { canonicalRuleText } from '../providers/rules.js';
 import { resources } from './environment.js';
 import { Unit } from '../harnesses/render.js';
 import { ruleIdentity } from '../core/dedup.js';
+import { Invocation, invocationSchema, SkillPolicy } from '../core/commands.js';
+import { invocationFiles, policyMetadata, skillText } from '../providers/skill-policy.js';
 
 const name = z.string().regex(/^[a-z0-9][a-z0-9_-]{0,63}$/);
 const body = z.string().refine((value) => Boolean(value.trim()), 'Body is required');
@@ -38,6 +39,8 @@ export const creationSchema = z.discriminatedUnion('kind', [
       body,
       license: z.string().optional(),
       compatibility: z.string().optional(),
+      invocation: invocationSchema.optional(),
+      argumentHint: z.string().optional(),
     })
     .strict(),
   z
@@ -85,6 +88,8 @@ export type CreationDraft = {
   body?: string;
   license?: string;
   compatibility?: string;
+  invocation?: Invocation;
+  argumentHint?: string;
   model?: string;
   tools?: string[];
   connection?: z.infer<typeof connectionSchema>;
@@ -121,14 +126,18 @@ export async function create(workspace: Workspace, input: unknown): Promise<Crea
   let text: string | undefined;
   let candidate: Resource;
   if (draft.kind === 'skill') {
+    const policy: SkillPolicy = { invocation: draft.invocation, argumentHint: draft.argumentHint };
+    const values = policyMetadata(policy);
     const metadata = {
       name: draft.name,
       description: draft.description,
       ...(draft.license ? { license: draft.license } : {}),
       ...(draft.compatibility ? { compatibility: draft.compatibility } : {}),
+      ...(Object.keys(values).length ? { metadata: values } : {}),
     };
-    text = `---\n${yaml(metadata)}---\n\n${draft.body}\n`;
+    text = skillText(metadata, draft.body);
     const artifact = fileArtifact('SKILL.md', text);
+    artifact.files.push(...invocationFiles(policy));
     candidate = {
       id,
       kind,
@@ -196,6 +205,13 @@ export async function create(workspace: Workspace, input: unknown): Promise<Crea
         `Authored source already exists at ${destination}`,
       );
   }
+  if (candidate.kind === 'skill')
+    for (const file of candidate.files) {
+      const path = join(destination, '..', file.path);
+      await noSymlink(path, workspace.root);
+      if (file.path !== 'SKILL.md' && (await exists(path)))
+        throw new EtymonError('LOCAL_NAME_COLLISION', `Authored source already exists at ${path}`);
+    }
   await workspace.init();
   const manifest = await workspace.manifest();
   if (candidate.kind === 'mcp')
@@ -208,17 +224,25 @@ export async function create(workspace: Workspace, input: unknown): Promise<Crea
     };
   }
   const units: Unit[] =
-    text === undefined
-      ? []
-      : [
-          {
-            path: destination,
-            content: Buffer.from(text),
-            resources: [id],
-            harnesses: ['create'],
-            mode: 0o600,
-          },
-        ];
+    candidate.kind === 'skill'
+      ? candidate.files.map((file) => ({
+          path: join(destination, '..', file.path),
+          content: Buffer.from(file.content, 'base64'),
+          resources: [id],
+          harnesses: ['create'],
+          mode: file.executable ? 0o755 : 0o600,
+        }))
+      : text === undefined
+        ? []
+        : [
+            {
+              path: destination,
+              content: Buffer.from(text),
+              resources: [id],
+              harnesses: ['create'],
+              mode: 0o600,
+            },
+          ];
   const plan = await planUnits(workspace, units, ['create']);
   plan.state = await readState(workspace);
   plan.changes.push({

@@ -9,6 +9,7 @@ import { canonicalRuleText, parseInstructionFile, parseRule } from '../providers
 import type { Profile } from './profiles.js';
 import { ruleLocation, RuleSource } from './rule-profiles.js';
 import { NativeDiscovery } from './native-discovery.js';
+import { isCommandDirectoryFile } from './command-profiles.js';
 
 export type ImportedRule = {
   kind: 'rule';
@@ -72,7 +73,7 @@ export async function importRules(
       explicitScope ? base : null,
       instructions ? 'plain' : 'native',
     ]);
-    if (discovery.excluded(path)) return;
+    if (discovery.excluded(path) || isCommandDirectoryFile(path)) return;
     if (seenPaths.has(identity) || importedPaths?.has(identity)) return;
     seenPaths.add(identity);
     const stat = await fs.lstat(path);

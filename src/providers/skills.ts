@@ -5,6 +5,8 @@ import { Artifact, Diagnostic, EtymonError, SKILLS_VERSION } from '../core/model
 import { Workspace } from '../core/workspace.js';
 import { bundleIdentity } from '../core/dedup.js';
 import { frontmatter } from './agents.js';
+import { skillPolicy } from '../core/commands.js';
+import { normalizeSkillProjection } from './skill-policy.js';
 
 export function skillMetadata(artifact: Artifact): Record<string, unknown> {
   const file = artifact.files.find((f) => f.path === 'SKILL.md');
@@ -25,6 +27,7 @@ export function skillMetadata(artifact: Artifact): Record<string, unknown> {
       'INVALID_SKILL',
       'Skill description is required and must be at most 1024 characters',
     );
+  skillPolicy(metadata);
   return metadata;
 }
 /** Native installers often link an alias directory to the shared skill bundle. */
@@ -66,7 +69,7 @@ export async function discoverNativeSkills(
     }
     seen.add(real);
     if (await exists(join(real, 'SKILL.md'))) {
-      const artifact = await bundle(real);
+      const artifact = normalizeSkillProjection(await bundle(real));
       result.push({
         path,
         origins: [...new Set([path, join(boundary, relative(realBoundary, real)), ...aliases])],

@@ -25,6 +25,7 @@ import { Workspace } from '../core/workspace.js';
 import { apply, planUnits, Plan, readState, recover } from '../core/transaction.js';
 import { discoverAgents, parseAgent } from '../providers/agents.js';
 import { discoverSkills, skillMetadata } from '../providers/skills.js';
+import { discoverCommands } from '../providers/commands.js';
 import { mcpArtifact, resolveDependency, restoreDependency } from '../providers/index.js';
 import { parseResourceSource } from '../providers/source.js';
 import { importHarnesses, importedResource, Imported } from '../harnesses/import.js';
@@ -156,6 +157,8 @@ export async function add(
   kind: Kind,
   request: Request,
 ): Promise<{ ids: string[]; names: string[] }> {
+  if (request.commandFormat && kind !== 'skill')
+    throw new EtymonError('INVALID_COMMAND', 'Commands use the skill lifecycle');
   const source = await parseResourceSource(
     kind,
     request.source,
@@ -186,6 +189,28 @@ export async function add(
     }
     if (kind === 'rule')
       return registerRules(workspace, source.path, request.names, manifest, request.destDir);
+    if (kind === 'skill' && request.commandFormat) {
+      const commands = await discoverCommands(source.path, request.names, request.commandFormat);
+      await registerImported(workspace, {
+        resources: commands.map((command) => ({
+          kind: 'skill',
+          name: command.name,
+          artifact: command.artifact,
+          origin: command.path,
+        })),
+        diagnostics: [],
+      });
+      const environment = await resources(workspace);
+      return {
+        names: commands.map((command) => command.name),
+        ids: commands.map(
+          (command) =>
+            environment.find(
+              (resource) => resource.kind === 'skill' && resource.name === command.name,
+            )!.id,
+        ),
+      };
+    }
     const locals =
       kind === 'skill'
         ? (await discoverSkills(source.path, request.names)).map((x) => ({
@@ -430,7 +455,20 @@ export async function convert(
       options.rulesPath,
       options,
     ),
-    manifest = await workspace.manifest();
+    result = await registerImported(workspace, imported, options);
+  return result;
+}
+
+/** Shared authored registration for native conversion and local command modernization. */
+export async function registerImported(
+  workspace: Workspace,
+  imported: { resources: Imported[]; diagnostics: Diagnostic[] },
+  options: ImportOptions & { dryRun?: boolean } = {},
+): Promise<{
+  resources: { kind: string; name: string; origin: string; destination: string }[];
+  diagnostics: Diagnostic[];
+}> {
+  const manifest = await workspace.manifest();
   const existingResources = await resources(workspace);
   const changes: { resource: Imported; destination: string; key: string }[] = [];
   for (const resource of imported.resources) {

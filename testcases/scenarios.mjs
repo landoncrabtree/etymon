@@ -3,11 +3,139 @@ import { promises as fs } from 'node:fs';
 import { createServer } from 'node:http';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { nativeChecks } from './native.mjs';
+import { nativeChecks, nativeCommandCheck } from './native.mjs';
 
 const rules = async (c) => (await c.list()).authored.rule;
 const lockText = (c) => c.read('.agents/etymon.lock');
 export const handlers = {
+  async commandMigration(c) {
+    const preview = await c.cli(['convert', '--dry-run']);
+    assert.equal(preview.resources.length, 3);
+    await assert.rejects(c.read('.agents/etymon.toml'), { code: 'ENOENT' });
+    await c.cli(['convert', '--harness', 'cursor']);
+    await c.cli(['convert']);
+    await c.cli(['convert', '--harness', 'claude']);
+    const manifest = await c.read('.agents/etymon.toml');
+    const authored = (await c.list()).authored;
+    assert.deepEqual(Object.keys(authored.skill).sort(), ['checks', 'cleanup', 'inspect']);
+    assert.deepEqual(authored.rule, {});
+    assert.equal(authored.skill.checks.origins.length, 2);
+    assert.equal((await c.list()).lock.dependencies.length, 0);
+    await c.cli(['convert']);
+    assert.equal(await c.read('.agents/etymon.toml'), manifest);
+    await c.clear([
+      '.claude/commands',
+      '.cursor/commands',
+      '.clinerules/workflows',
+      'opencode.json',
+    ]);
+    await c.sync('claude,codex,copilot-cli,pi,omp,cursor');
+    assert.match(await c.read('.claude/skills/checks/SKILL.md'), /disable-model-invocation: true/);
+    assert.match(
+      await c.read('.agents/skills/checks/agents/openai.yaml'),
+      /allow_implicit_invocation: false/,
+    );
+    await assert.rejects(c.read('.claude/commands/checks.md'), { code: 'ENOENT' });
+    await c.cli(['convert', '--harness', 'codex']);
+    await c.cli(['convert']);
+    await c.cli(['convert', '--harness', 'claude']);
+    assert.equal((await c.cli(['commands', 'list'])).resolved.length, 3);
+    await c.idempotent('claude,codex,copilot-cli,pi,omp,cursor');
+    const native = [];
+    for (const target of c.options.native) native.push(await nativeCommandCheck(c, target));
+    await c.cli([
+      'commands',
+      'create',
+      '--name',
+      'manual-checks',
+      '--description',
+      'Run manual checks',
+      '--body',
+      'Run checks when explicitly requested.',
+    ]);
+    assert.match(
+      await c.read('.agents/etymon/skills/manual-checks/SKILL.md'),
+      /etymon.invocation: manual/,
+    );
+    await c.exec('python3', [
+      fileURLToPath(new URL('./tui.py', import.meta.url)),
+      process.execPath,
+      fileURLToPath(new URL('../bin/etymon.js', import.meta.url)),
+      c.project,
+      c.home,
+      join(c.directory, 'cache'),
+      'host-create-command',
+    ]);
+    assert.match(
+      await c.read('.agents/etymon/skills/host-checks/SKILL.md'),
+      /etymon.invocation: manual/,
+    );
+    const personal = join(c.home, '.codex/prompts/checks.md');
+    await fs.mkdir(join(personal, '..'), { recursive: true });
+    await fs.writeFile(personal, '---\ndescription: Personal checks\n---\nRun personal checks.');
+    await c.cli(['convert', '--global', '--harness', 'codex']);
+    await c.cli(['sync', '--global', '--harness', 'codex']);
+    assert.match(
+      await fs.readFile(join(c.home, '.agents/skills/checks/agents/openai.yaml'), 'utf8'),
+      /allow_implicit_invocation: false/,
+    );
+    await c.cli(['commands', 'remove', 'manual-checks', '--allow-lossy']);
+    assert.equal((await c.cli(['commands', 'list'])).resolved.length, 4);
+    return { native };
+  },
+  async commandSemantics(c) {
+    await c.cli(['convert']);
+    assert.deepEqual(Object.keys((await c.list()).authored.skill).sort(), ['git-review', 'review']);
+    const canonical = await c.read('.agents/etymon/skills/review/SKILL.md');
+    const strict = await c.cli(['sync', '--harness', 'codex,opencode', '--dry-run'], {
+      expectedCode: 1,
+    });
+    assert.deepEqual(strict.changes, []);
+    assert(strict.diagnostics.some((d) => d.code === 'SKILL_INVOCATION_UNSUPPORTED'));
+    const lossy = await c.sync('codex,opencode', ['--allow-lossy']);
+    assert(lossy.diagnostics.some((d) => d.code === 'COMMAND_TEMPLATE_OMITTED'));
+    assert(lossy.diagnostics.some((d) => d.code === 'SKILL_COMMAND_FIELDS_OMITTED'));
+    assert.equal(await c.read('.agents/etymon/skills/review/SKILL.md'), canonical);
+    await assert.rejects(c.read('must-not-exist'), { code: 'ENOENT' });
+    await c.idempotent('codex,opencode', ['--allow-lossy']);
+    const listing = await c.cli(['commands', 'add', 'owner/repo/local.md', '--list']);
+    assert.deepEqual(
+      listing.map((command) => command.name),
+      ['local'],
+    );
+    await c.cli(['commands', 'add', 'owner/repo/local.md']);
+    assert.equal((await c.list()).lock.dependencies.length, 0);
+    const missing = await c.cli(['commands', 'add', './absent.md'], { expectedCode: 1 });
+    assert.equal(missing.error.code, 'SOURCE_NOT_FOUND');
+    let content = '---\ndescription: External command\n---\nRun locked checks.';
+    const server = createServer((_request, response) => response.end(content));
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const url = `http://127.0.0.1:${server.address().port}/external.md`;
+      await c.cli(['commands', 'add', url, '--format', 'cursor']);
+      const lock = (await c.list()).lock;
+      assert.equal(lock.dependencies[0].kind, 'skill');
+      assert.equal(lock.dependencies[0].request.commandFormat, 'cursor');
+      const cached = join(
+        c.directory,
+        'cache',
+        lock.dependencies[0].artifacts[0].digest.slice(7) + '.json',
+      );
+      await fs.rm(cached);
+      await c.cli(['commands', 'list']);
+      content = content.replace('locked checks', 'updated checks');
+      await fs.rm(cached);
+      const corrupt = await c.cli(['commands', 'list'], { expectedCode: 1 });
+      assert.equal(corrupt.error.code, 'INTEGRITY_MISMATCH');
+      await c.cli(['update']);
+      await c.sync('codex,opencode', ['--allow-lossy']);
+      assert.match(await c.read('.agents/skills/external/SKILL.md'), /updated checks/);
+      await c.cli(['commands', 'remove', 'external', '--allow-lossy']);
+      await assert.rejects(c.read('.agents/skills/external/SKILL.md'), { code: 'ENOENT' });
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  },
   async nativeImportGaps(c) {
     const deep = Array.from({ length: 24 }, (_, i) => 'level' + i).join('/');
     await c.write(`${deep}/AGENTS.md`, 'Deep guidance.');

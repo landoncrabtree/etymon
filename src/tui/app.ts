@@ -7,6 +7,7 @@ import { add, buildPlan, convert, doctor, remove, update } from '../services/env
 import { profile, profiles } from '../harnesses/profiles.js';
 import { McpRegistry } from '../providers/mcp.js';
 import { create } from '../services/create.js';
+import { commandFormats, CommandFormat } from '../core/commands.js';
 import { promptCreation } from './create.js';
 import { localSource, parseResourceSource } from '../providers/source.js';
 import { isConversionLimit } from '../harnesses/loss.js';
@@ -41,6 +42,7 @@ export class EtymonTui {
     'Remove resource',
     'Doctor',
     'Harnesses',
+    'Add command',
   ];
   constructor(
     private workspace: Workspace,
@@ -329,7 +331,7 @@ export class EtymonTui {
       this.screen.render();
     });
   }
-  private async addResource(kind: Kind): Promise<void> {
+  private async addResource(kind: Kind, command = false): Promise<void> {
     let source: string | undefined;
     if (kind === 'mcp') {
       const query = await this.ask('Find MCP: local JSON, registry ID, or search (blank: create)');
@@ -359,14 +361,22 @@ export class EtymonTui {
       }
     } else
       source = await this.ask(
-        `Add ${kind}: local path, owner/repo[/path], or URL (leave blank to create)`,
+        `Add ${command ? 'command' : kind}: local path, owner/repo[/path], or URL (leave blank to create)`,
       );
     if (source === undefined) return;
     if (!source) {
-      await this.createResource(kind);
+      await this.createResource(kind, command);
       return;
     }
     const request: Request = { source, names: [] };
+    if (command) {
+      const format = await this.choose<CommandFormat | 'auto'>('Native command format', [
+        { label: 'Detect from source', value: 'auto' },
+        ...commandFormats.map((value) => ({ label: value, value })),
+      ]);
+      if (!format) return;
+      request.commandFormat = format;
+    }
     const parsed = await parseResourceSource(
       kind,
       source,
@@ -508,10 +518,15 @@ export class EtymonTui {
       );
     }
   }
-  private async createResource(kind: Kind): Promise<void> {
+  private async createResource(kind: Kind, command = false): Promise<void> {
     this.modal = true;
     try {
-      const draft = await promptCreation(kind, {}, this.screen, { global: this.workspace.global });
+      const draft = await promptCreation(
+        kind,
+        command ? { invocation: 'manual' } : {},
+        this.screen,
+        { global: this.workspace.global },
+      );
       const result = await this.mutation(() => create(this.workspace, draft));
       this.show('Created', `${result.names.join(', ')}\n\n${result.path}\n\nRun Sync to activate.`);
     } finally {
@@ -697,6 +712,9 @@ export class EtymonTui {
               )
               .join('\n\n'),
           );
+          break;
+        case 11:
+          await this.addResource('skill', true);
           break;
       }
     });

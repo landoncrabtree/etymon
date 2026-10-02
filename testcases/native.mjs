@@ -208,3 +208,99 @@ export const nativeChecks = {
     assert.match(mcp, /[Pp]roject/);
   },
 };
+
+/** Command migration exercises native skill discovery without sending a prompt. */
+export async function nativeCommandCheck(c, target) {
+  if (target === 'codex') {
+    await fs.mkdir(join(c.home, '.codex'), { recursive: true });
+    await fs.writeFile(
+      join(c.home, '.codex/config.toml'),
+      `[projects.${JSON.stringify(c.project)}]\ntrust_level = "trusted"\n`,
+    );
+    const client = await rpcClient(c);
+    try {
+      await client.request('initialize', {
+        clientInfo: { name: 'etymon-command-tests', version: '1.0.0' },
+        capabilities: { experimentalApi: true },
+      });
+      client.notify('initialized');
+      const result = await client.request('skills/list', { cwds: [c.project], forceReload: true });
+      contains(result, '.agents/skills/checks/SKILL.md');
+      assert(
+        result.data.some((entry) =>
+          entry.skills.some((skill) => skill.name === 'checks' && skill.enabled),
+        ),
+        'Codex did not enable the migrated skill',
+      );
+      // The app-server API does not expose invocation policy. Fixtures separately
+      // verify agents/openai.yaml; this check certifies discovery only.
+    } finally {
+      await client.close();
+    }
+  } else if (target === 'copilot') {
+    await trustCopilot(c);
+    const skills = JSON.parse(
+      await c.exec('copilot', ['--no-auto-update', 'skill', 'list', '--json']),
+    );
+    contains(skills, 'checks');
+  } else if (target === 'opencode' || target === 'kilo') {
+    const plan = await c.sync(target, ['--allow-lossy']);
+    assert(plan.diagnostics.some((d) => d.code === 'SKILL_INVOCATION_OMITTED'));
+    const skills = JSON.parse(await c.exec(target, ['debug', 'skill']));
+    contains(skills, 'checks');
+    contains(skills, 'Run tests.');
+  } else if (target === 'gemini') {
+    await c.sync('gemini', ['--allow-lossy']);
+    const skills = await c.exec('gemini', ['skills', 'list'], {
+      env: { GEMINI_CLI_TRUST_WORKSPACE: 'true' },
+      combineOutput: true,
+    });
+    assert.match(skills, /checks/);
+  } else if (target === 'claude') {
+    return {
+      skip: 'Claude has no verified unauthenticated skill-list command; its skill format is checked by fixtures, not a model session',
+    };
+  } else if (target === 'pi') {
+    await c.exec('pi', ['--version']);
+    let packageDirectory;
+    for (const directory of c.env.PATH.split(':')) {
+      try {
+        let current = dirname(await fs.realpath(join(directory, 'pi')));
+        while (dirname(current) !== current) {
+          try {
+            if (
+              JSON.parse(await fs.readFile(join(current, 'package.json'), 'utf8')).name ===
+              '@earendil-works/pi-coding-agent'
+            ) {
+              packageDirectory = current;
+              break;
+            }
+          } catch {
+            /* Walk to package root. */
+          }
+          current = dirname(current);
+        }
+      } catch {
+        /* Check next executable directory. */
+      }
+      if (packageDirectory) break;
+    }
+    assert(packageDirectory, 'Pi package SDK is required');
+    await fs.mkdir(join(c.project, 'src'), { recursive: true });
+    const result = JSON.parse(
+      await c.exec(process.execPath, [
+        fileURLToPath(new URL('./pi-inspect.mjs', import.meta.url)),
+        packageDirectory,
+        c.project,
+        c.home,
+      ]),
+    );
+    contains(result.skills, 'checks');
+    assert(
+      result.skills.skills.some(
+        (skill) => skill.name === 'checks' && skill.disableModelInvocation === true,
+      ),
+    );
+  }
+  return { target, discovery: 'native', modelCalls: 0 };
+}

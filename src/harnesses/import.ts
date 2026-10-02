@@ -27,6 +27,7 @@ import { stable } from '../core/fs.js';
 import { skillMetadata } from '../providers/skills.js';
 import { canonicalRuleText } from '../providers/rules.js';
 import { ImportOptions, NativeDiscovery } from './native-discovery.js';
+import { importCommands } from './command-import.js';
 
 export type Imported =
   | ImportedRule
@@ -340,6 +341,26 @@ export async function importHarness(
           origins: skill.origins,
         });
     }
+  const commands = await importCommands(p, workspace, discovery);
+  for (const command of commands.resources) {
+    const skill = resources.find(
+      (resource) => resource.kind === 'skill' && resource.name === command.name,
+    );
+    if (
+      skill &&
+      ['claude', 'copilot-cli', 'antigravity'].includes(p.id) &&
+      resourceIdentity(importedResource(skill)) !== resourceIdentity(importedResource(command))
+    ) {
+      diagnostics.push({
+        code: 'NATIVE_SHADOWING',
+        severity: 'warning',
+        harness: p.id,
+        resource: command.name,
+        message: `${command.origin} is shadowed by skill ${skill.origin}; retained in native setup and excluded from import`,
+      });
+    } else resources.push(command);
+  }
+  diagnostics.push(...commands.diagnostics);
   const agents = location(p, 'agent', workspace);
   if (agents && !discovery.excluded(agents) && (await exists(agents))) {
     for (const path of await walk(agents))

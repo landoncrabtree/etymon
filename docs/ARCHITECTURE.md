@@ -6,6 +6,8 @@ User-facing installation and team workflows are in the [README](../README.md). R
 
 The resource pipeline is shared by the neo-blessed TUI, Commander CLI, and exported SDK.
 
+Commands are native source dialects of skills, rather than a fifth resource kind. `core/commands.ts` validates invocation intent and retained native requirements in the standard string metadata map. `providers/commands.ts` parses command files/configuration without executing templates, normalizes names, and returns skill artifacts. Local command addition shares conversion's registration transaction; external commands use skill dependencies with a locked source format and bundle digest. `harnesses/command-profiles.ts` declares readers only. `skill-render.ts` projects verified invocation controls and gates unsupported native requirements. No legacy command writer is used. See [command migration](COMMANDS.md).
+
 `services/create.ts` validates custom resources against one creation schema and writes source plus manifest through the journaled transaction. Skills become `SKILL.md` bundles, agents become canonical JSON, rules become canonical Markdown, and MCP connections remain inline. Authored files are not registered as generated output. `tui/create.ts` presents the schema in a scrolling form with native text editors, transport/activation selection, save/cancel controls, and validation before submission. Rule patterns appear only for glob activation; the global form omits project scopes and conditional activation. CLI flags and stdin bodies use the same service; no-source `add` and explicit `create` share this entry point.
 
 `providers/source.ts` supplies the shared classification policy for the CLI, TUI, and service. Existing local paths win over Git shorthand or MCP registry IDs. Explicit local paths stop when missing, and filesystem/validation failures never trigger remote fallback. Explicit URLs and Git URIs stay remote. MCP accepts local JSON definitions or registry IDs; its classification does not add Git-backed definitions or treat an endpoint URL as a registry ID. The terminal inspection flow pins a chosen local path to its absolute location before registration.
@@ -29,37 +31,44 @@ Local files / native importer ────────> authored TOML + editable
 
 ## Modules
 
-| Module                              | Responsibility                                                                           |
-| ----------------------------------- | ---------------------------------------------------------------------------------------- |
-| `src/core/model.ts`                 | Validated schemas, discriminated resources, value references, diagnostic codes           |
-| `src/core/dedup.ts`                 | Semantic rule identities and complete skill bundle comparison, independent of origins    |
-| `src/core/fs.ts`                    | Bounded file bundles/downloads, content hashing/cache, process execution, path safety    |
-| `src/core/workspace.ts`             | Project/global roots, authoritative files, operation mutex                               |
-| `src/core/documents.ts`             | Duplicate detection, JSONC edits, native TOML table edits                                |
-| `src/core/transaction.ts`           | Whole-plan composition, drift/adoption, atomic file replacements, journal/recovery       |
-| `src/providers/source.ts`           | Local, Git/forge URL parsing and pinned Git checkout                                     |
-| `src/providers/skills.ts`           | Agent Skills validation and isolated pinned skills CLI staging                           |
-| `src/providers/mcp.ts`              | Official v0.1 registry API, explicit implementation resolution and input handling        |
-| `src/providers/agents.ts`           | Frontmatter parsing, agent discovery and native dialect detection                        |
-| `src/providers/rules.ts`            | Rule formats, activation normalization, canonical Markdown, recoverable native scopes    |
-| `src/providers/index.ts`            | External dependency resolution, artifact integrity and restoration                       |
-| `src/harnesses/profiles.ts`         | Declarative paths, scopes, dialects, prerequisites and source evidence                   |
-| `src/harnesses/render.ts`           | Native projections, tool mappings, conversion diagnostics, env launchers                 |
-| `src/harnesses/loss.ts`             | Eligible conversion limits and resource omission diagnostics                             |
-| `src/harnesses/import.ts`           | Native resource extraction, credential externalization and phase diagnostics             |
-| `src/harnesses/inspect.ts`          | Read-only compatibility alias, precedence and discovery diagnostics                      |
-| `src/harnesses/native-discovery.ts` | Shared bounded instruction inventory, pre-parse exclusions, and safe instruction aliases |
-| `src/harnesses/discovery.ts`        | Verified read aliases kept separate from preferred native write paths                    |
-| `src/harnesses/gitignore.ts`        | Profile-derived project ignores with authoritative-source exceptions                     |
-| `src/harnesses/rule-profiles.ts`    | Rule locations, scope capabilities, native prerequisite notes and primary sources        |
-| `src/harnesses/rule-import.ts`      | Bounded nested discovery, native precedence, condition preservation, merged origins      |
-| `src/harnesses/rule-render.ts`      | Standing composition, scoped output, strict gates and explicit lossy projections         |
-| `src/services/environment.ts`       | Add, environment assembly, sync, conversion, update, remove, doctor                      |
-| `src/services/create.ts`            | Direct custom creation, shared validation, source/manifest transactions                  |
-| `src/tui/create.ts`                 | Visible creation forms with multiline instructions and transport-specific fields         |
-| `src/tui/app.ts`                    | Library widgets and user interaction; no terminal renderer or business logic duplication |
-| `src/cli.ts`                        | Scriptable command interface and TUI launch                                              |
-| `src/index.ts`                      | Programmatic extension surface                                                           |
+| Module                              | Responsibility                                                                            |
+| ----------------------------------- | ----------------------------------------------------------------------------------------- |
+| `src/core/model.ts`                 | Validated schemas, discriminated resources, value references, diagnostic codes            |
+| `src/core/commands.ts`              | Command dialects and reserved skill invocation/native-requirement schemas                 |
+| `src/core/dedup.ts`                 | Semantic rule identities and complete skill bundle comparison, independent of origins     |
+| `src/core/fs.ts`                    | Bounded file bundles/downloads, content hashing/cache, process execution, path safety     |
+| `src/core/workspace.ts`             | Project/global roots, authoritative files, operation mutex                                |
+| `src/core/documents.ts`             | Duplicate detection, JSONC edits, native TOML table edits                                 |
+| `src/core/transaction.ts`           | Whole-plan composition, drift/adoption, atomic file replacements, journal/recovery        |
+| `src/providers/source.ts`           | Local, Git/forge URL parsing and pinned Git checkout                                      |
+| `src/providers/skills.ts`           | Agent Skills validation and isolated pinned skills CLI staging                            |
+| `src/providers/commands.ts`         | Inert native command parsing, file/config precedence, normalization and skill artifacts   |
+| `src/providers/skill-policy.ts`     | Canonical policy metadata, supporting files and exact native projection normalization     |
+| `src/providers/mcp.ts`              | Official v0.1 registry API, explicit implementation resolution and input handling         |
+| `src/providers/agents.ts`           | Frontmatter parsing, agent discovery and native dialect detection                         |
+| `src/providers/rules.ts`            | Rule formats, activation normalization, canonical Markdown, recoverable native scopes     |
+| `src/providers/index.ts`            | External dependency resolution, artifact integrity and restoration                        |
+| `src/harnesses/profiles.ts`         | Declarative paths, scopes, dialects, prerequisites and source evidence                    |
+| `src/harnesses/render.ts`           | Native projections, tool mappings, conversion diagnostics, env launchers                  |
+| `src/harnesses/command-profiles.ts` | Verified native command source locations and primary evidence                             |
+| `src/harnesses/command-import.ts`   | Bounded native command discovery, exclusions, precedence and import provenance            |
+| `src/harnesses/skill-profiles.ts`   | Verified destination invocation controls and primary evidence                             |
+| `src/harnesses/skill-render.ts`     | Skill projections, manual policy, native command requirements and explicit lossy warnings |
+| `src/harnesses/loss.ts`             | Eligible conversion limits and resource omission diagnostics                              |
+| `src/harnesses/import.ts`           | Native resource extraction, credential externalization and phase diagnostics              |
+| `src/harnesses/inspect.ts`          | Read-only compatibility alias, precedence and discovery diagnostics                       |
+| `src/harnesses/native-discovery.ts` | Shared bounded instruction inventory, pre-parse exclusions, and safe instruction aliases  |
+| `src/harnesses/discovery.ts`        | Verified read aliases kept separate from preferred native write paths                     |
+| `src/harnesses/gitignore.ts`        | Profile-derived project ignores with authoritative-source exceptions                      |
+| `src/harnesses/rule-profiles.ts`    | Rule locations, scope capabilities, native prerequisite notes and primary sources         |
+| `src/harnesses/rule-import.ts`      | Bounded nested discovery, native precedence, condition preservation, merged origins       |
+| `src/harnesses/rule-render.ts`      | Standing composition, scoped output, strict gates and explicit lossy projections          |
+| `src/services/environment.ts`       | Add, environment assembly, sync, conversion, update, remove, doctor                       |
+| `src/services/create.ts`            | Direct custom creation, shared validation, source/manifest transactions                   |
+| `src/tui/create.ts`                 | Visible creation forms with multiline instructions and transport-specific fields          |
+| `src/tui/app.ts`                    | Library widgets and user interaction; no terminal renderer or business logic duplication  |
+| `src/cli.ts`                        | Scriptable command interface and TUI launch                                               |
+| `src/index.ts`                      | Programmatic extension surface                                                            |
 
 ## Add a provider
 

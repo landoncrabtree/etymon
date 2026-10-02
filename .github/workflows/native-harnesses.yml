@@ -63,7 +63,7 @@ jobs:
       - name: Inspect native discovery without authentication or model requests
         env:
           HARNESS_TARGET: ${{ matrix.harness }}
-        run: bash test_harness.sh 9 --native "$HARNESS_TARGET" --report-dir test-results/native
+        run: bash test_harness.sh 9 27 --native "$HARNESS_TARGET" --report-dir test-results/native
       - name: Keep native discovery transcripts and generated files
         if: always()
         uses: actions/upload-artifact@v4

@@ -2,6 +2,8 @@ import { join } from 'node:path';
 import { EtymonError } from '../core/model.js';
 import { Workspace } from '../core/workspace.js';
 import { ruleProfiles, RuleProfile } from './rule-profiles.js';
+import { commandProfiles } from './command-profiles.js';
+import { skillControls } from './skill-profiles.js';
 
 export type AgentDialect =
   | 'claude'
@@ -334,6 +336,10 @@ for (const p of profiles) {
     p.rule.global.push({ path: p.rule.file[1], dialect: 'plain' });
   if (p.rule.modular) p.rule.modular[1] = '';
   p.sources.push(...p.rule.sources);
+  p.sources.push(
+    ...(commandProfiles[p.id]?.sources ?? []),
+    ...(skillControls[p.id]?.sources ?? []),
+  );
 }
 export function profile(input: string): Profile {
   const found = profiles.find((p) => p.id === input || p.aliases?.includes(input));

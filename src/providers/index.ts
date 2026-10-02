@@ -1,6 +1,6 @@
 import { promises as fs } from 'node:fs';
-import { basename, relative } from 'node:path';
-import { digest, fileArtifact, jsonArtifact, stable, textFile } from '../core/fs.js';
+import { basename, join, relative } from 'node:path';
+import { digest, exists, fileArtifact, jsonArtifact, stable, textFile } from '../core/fs.js';
 import { Artifact, Dependency, EtymonError, Kind, Request } from '../core/model.js';
 import { Workspace } from '../core/workspace.js';
 import { discoverAgents } from './agents.js';
@@ -8,6 +8,7 @@ import { McpRegistry, resolveServer, sanitizeRegistry, serverName } from './mcp.
 import { stageRepositorySkills } from './skills.js';
 import { parseSource, Source, withGit, withSource } from './source.js';
 import { discoverRules } from './rules.js';
+import { discoverCommands } from './commands.js';
 
 export async function resolveDependency(
   kind: Kind,
@@ -19,7 +20,7 @@ export async function resolveDependency(
       'OFFLINE_RESOLUTION',
       'Adding or updating an external dependency needs network access',
     );
-  const id = `${kind}:external/${digest(stable({ kind, source: request.source, names: request.names, ref: request.ref, package: request.package, remote: request.remote, destDir: request.destDir })).slice(7, 23)}`;
+  const id = `${kind}:external/${digest(stable({ kind, source: request.source, names: request.names, ref: request.ref, package: request.package, remote: request.remote, destDir: request.destDir, commandFormat: request.commandFormat })).slice(7, 23)}`;
   if (kind === 'mcp') {
     const registry = new McpRegistry(request.registry);
     const server = await registry.get(request.source, request.version);
@@ -53,7 +54,9 @@ export async function resolveDependency(
         ...(source.type === 'git'
           ? { repository: source.repository, commit, subpath: source.subpath }
           : {}),
-        ...(kind === 'skill' ? { skillsCli: (await workspace.lock()).toolchain.skills } : {}),
+        ...(kind === 'skill' && !request.commandFormat
+          ? { skillsCli: (await workspace.lock()).toolchain.skills }
+          : {}),
       },
       artifacts,
     };
@@ -67,7 +70,11 @@ async function sourceArtifacts(
   skillsVersion?: string,
 ): Promise<Dependency['artifacts']> {
   if (kind === 'skill') {
-    const staged = await stageRepositorySkills(root, request.names, workspace, skillsVersion);
+    const staged = request.commandFormat
+      ? await discoverCommands(root, request.names, request.commandFormat, {
+          repository: (await fs.stat(root)).isDirectory() && (await exists(join(root, '.git'))),
+        })
+      : await stageRepositorySkills(root, request.names, workspace, skillsVersion);
     return await Promise.all(
       staged.map(async (s) => ({
         name: s.name,

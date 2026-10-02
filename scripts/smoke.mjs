@@ -92,8 +92,31 @@ try {
     0,
   );
   assert.equal(JSON.parse(etymon(['doctor', '--harness', 'codex,opencode', '--json'])).ok, true);
+  JSON.parse(
+    etymon([
+      'commands',
+      'create',
+      '--name',
+      'checks',
+      '--description',
+      'Run checks',
+      '--body',
+      'Run project tests.',
+      '--json',
+    ]),
+  );
+  JSON.parse(etymon(['sync', '--harness', 'codex', '--json']));
+  assert.match(
+    await readFile(join(project, '.agents/skills/checks/agents/openai.yaml'), 'utf8'),
+    /allow_implicit_invocation: false/,
+  );
+  const commands = JSON.parse(etymon(['command', 'list', '--json']));
+  assert(
+    commands.resolved.some((resource) => resource.name === 'checks' && resource.kind === 'skill'),
+  );
+  JSON.parse(etymon(['commands', 'remove', 'checks', '--json']));
   console.log(
-    `Packed ${extracted ? 'extracted execution (existing dependencies)' : 'npx execution'} passed: init → agent + inline MCP + nested rule → native sync → doctor.`,
+    `Packed ${extracted ? 'extracted execution (existing dependencies)' : 'npx execution'} passed: init → agent + inline MCP + nested rule → native sync → doctor → command skill creation/removal.`,
   );
 } finally {
   await rm(root, { recursive: true, force: true });

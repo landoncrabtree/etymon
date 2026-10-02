@@ -1,0 +1,5 @@
+{
+  "command": {
+    "inspect": { "description": "Inspect changes", "template": "Inspect changed files." }
+  }
+}

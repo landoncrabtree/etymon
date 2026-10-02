@@ -1,0 +1,2 @@
+description = "Review changes with Gemini"
+prompt = "Inspect {{args}} using @{README.md}."

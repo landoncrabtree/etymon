@@ -1,4 +1,16 @@
 export * from './core/model.js';
+export {
+  commandFormats,
+  commandFormatSchema,
+  invocationSchema,
+  skillPolicy,
+} from './core/commands.js';
+export type { CommandFormat, CommandSemantics, Invocation, SkillPolicy } from './core/commands.js';
+export { commandProfiles } from './harnesses/command-profiles.js';
+export { skillControls } from './harnesses/skill-profiles.js';
+export type { CommandProfile, CommandSource } from './harnesses/command-profiles.js';
+export { parseCommand, discoverCommands } from './providers/commands.js';
+export { renderSkill } from './harnesses/skill-render.js';
 export { Workspace } from './core/workspace.js';
 export type { ContextOptions } from './core/workspace.js';
 export { Cache } from './core/fs.js';

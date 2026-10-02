@@ -1,0 +1,4 @@
+{
+  "title": "Command semantics require explicit lossy consent; external command skills lock, restore, update and remove",
+  "handler": "commandSemantics"
+}

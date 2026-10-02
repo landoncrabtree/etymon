@@ -3,6 +3,7 @@ import type { Widgets } from 'blessed';
 import { Kind, EtymonError } from '../core/model.js';
 import { Creation, CreationDraft, creationSchema, creationValues } from '../services/create.js';
 import { splitGlobs } from '../providers/rules.js';
+import { invocationSchema } from '../core/commands.js';
 
 const ruleModes = ['always', 'glob', 'model', 'manual', 'never'] as const;
 const ruleLayouts = ['standing', 'modular'] as const;
@@ -51,13 +52,14 @@ export function promptCreation(
     buffer: boolean;
     zero: boolean;
   } = { extended: false, buffer: true, zero: true };
+  const label = kind === 'skill' && initial.invocation === 'manual' ? 'command' : kind;
   const screen =
     host ??
     blessed.screen({
       program: blessed.program(programOptions),
       smartCSR: true,
       fullUnicode: true,
-      title: `Create ${kind}`,
+      title: `Create ${label}`,
     });
   // neo-blessed uses an array here; the upstream blessed typings say boolean.
   const keyScreen = screen as unknown as { ignoreLocked: string[] };
@@ -83,7 +85,7 @@ export function promptCreation(
     top: 0,
     left: 2,
     height: 2,
-    content: `Create ${kind} · Tab moves between fields · Ctrl+S saves · Ctrl+C cancels`,
+    content: `Create ${label} · Tab moves between fields · Ctrl+S saves · Ctrl+C cancels`,
     style: { fg: 'cyan' },
   });
   let row = 3;
@@ -181,6 +183,7 @@ export function promptCreation(
   let transport: Widgets.ListElement | undefined;
   let activation: Widgets.ListElement | undefined;
   let outputLayout: Widgets.ListElement | undefined;
+  let invocation: Widgets.ListElement | undefined;
   if (kind === 'mcp') {
     transport = select(
       'Transport',
@@ -258,6 +261,23 @@ export function promptCreation(
     } else if (kind === 'skill') {
       input('license', 'License', 'Optional license name', initial.license);
       input('compatibility', 'Compatibility', 'Optional requirements', initial.compatibility);
+      if (initial.invocation && !invocationSchema.safeParse(initial.invocation).success)
+        throw new EtymonError(
+          'INVALID_CREATION',
+          'Choose auto, manual, model, or never invocation',
+        );
+      invocation = select(
+        'Invocation',
+        'Manual commands stay hidden from automatic selection where supported',
+        ['Automatic and explicit', 'Explicit only (command)', 'Automatic only', 'Disabled'],
+        invocationSchema.options.indexOf(initial.invocation ?? 'auto'),
+      );
+      input(
+        'argumentHint',
+        'Argument hint',
+        'Optional autocomplete label, such as <branch>',
+        initial.argumentHint,
+      );
     } else if (!scope.global) {
       input(
         'destDir',
@@ -398,9 +418,13 @@ export function promptCreation(
           draft.body = get('body');
           if (kind !== 'rule' || get('description')) draft.description = get('description');
           if (kind === 'skill')
-            for (const key of ['license', 'compatibility']) {
+            for (const key of ['license', 'compatibility', 'argumentHint']) {
               if (get(key)) draft[key] = get(key);
             }
+          if (kind === 'skill' && invocation) {
+            const mode = invocationSchema.options[selected(invocation)];
+            if (mode !== 'auto' || initial.invocation) draft.invocation = mode;
+          }
           if (kind === 'agent') {
             if (get('model')) draft.model = get('model');
             if (get('tools'))

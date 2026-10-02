@@ -163,7 +163,10 @@ it('projects all four interfaces with specific warnings and unchanged authoritat
   expect(skill).toContain('Run tests.');
   expect(skill.endsWith('---\n\n    Run tests.  \n\n')).toBe(true);
   expect(skill).not.toContain('argument-hint');
-  expect(skill).not.toContain('disable-model-invocation');
+  expect(skill).toContain('disable-model-invocation: true');
+  expect(
+    await fs.readFile(join(ws.root, '.agents/skills/checks/agents/openai.yaml'), 'utf8'),
+  ).toContain('allow_implicit_invocation: false');
   expect(await fs.readFile(join(ws.root, '.agents/skills/checks/assets/check.txt'), 'utf8')).toBe(
     'asset bytes\n',
   );

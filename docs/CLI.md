@@ -25,7 +25,7 @@ Options may appear before or after subcommands.
 | `--rules-path <path>`          | Explicit project instruction directory; one destination         |
 | `-V`, `--version`              | Installed package version                                       |
 
-`skill`/`skills`, `agent`/`agents`, and `rule`/`rules` are equivalent command groups. `ls` aliases `list`; `rm` aliases a resource group's `remove`.
+`skill`/`skills`, `agent`/`agents`, `rule`/`rules`, and `command`/`commands` are equivalent command groups. Commands register skills. `ls` aliases `list`; `rm` aliases a resource group's `remove`.
 
 ## Initialize and sync
 
@@ -87,6 +87,8 @@ Each distinct imported rule gets a manifest entry and canonical Markdown under `
 
 `--dry-run` reports the import without writing source. Explicit configuration/rule paths use the shared options above. See [rule compatibility](RULES.md) for recognized locations, conditions, nesting, and precedence.
 
+Native command directories and command configuration maps also participate in conversion. They register standard skill bundles, with invocation policy and native requirements retained. Sync writes modern skills rather than legacy command files. VS Code prompt files remain outside discovery. See [command migration](COMMANDS.md) for locations and compatibility gates.
+
 ## Add a source
 
 ```bash
@@ -123,6 +125,27 @@ MCP accepts local JSON connections or registry IDs. A missing bare ID is looked 
 | `--input <values...>`      | MCP                   | Metadata inputs as `NAME=value` or `NAME=env:VARIABLE` |
 
 Local skills retain their full bundle, including assets. Local agents/rules retain registered source paths. Local MCP JSON is embedded in the manifest and can be removed after import. Local resources do not add external lock dependencies.
+
+## Commands
+
+```bash
+etymon commands add ./.cursor/commands
+etymon commands add ./.claude/commands/review.md
+etymon commands add owner/repo --select checks --format cursor
+etymon commands add ./opencode.json --list
+etymon commands create
+etymon commands create --name checks --description "Run checks" \
+  --body "Run npm test and report failures." --yes
+etymon commands list
+etymon commands remove checks
+etymon convert --global --harness codex # Import user custom prompts as skills
+```
+
+`commands add` shares local-first source classification and supports Git refs, direct file URLs, and `--list`. `--select <names...>` selects command names; `--skill` is an alias for the selector. `--format` defaults to `auto` and accepts `markdown`, `claude`, `codex`, `copilot`, `cursor`, `gemini`, `opencode`, `kilo`, `amp`, `roo`, `cline`, `windsurf`, `antigravity`, `pi`, `omp`, `kiro`, or `continue`. Explicit format filters recognized repository locations or parses a selected command directory/file. A full external repository without recognized locations fails instead of importing its ordinary Markdown files.
+
+No-source `commands add` opens the creation form. Command creation defaults to manual-only invocation. Commands use skill registrations, external lock dependencies, update, removal, and sync; there is no separate command resource kind. `commands list` shows skills with explicit invocation metadata, including those authored through `skills create --invocation`.
+
+Most command dialects are manual-only. Claude-compatible and Antigravity command defaults follow their source format. `sync` preserves invocation restrictions where the destination supports them. Unsupported arguments, automatic context, execution directives, or native settings block strict sync. `--allow-lossy` reports specific losses and keeps canonical source intact. [Command migration](COMMANDS.md) lists verified controls and format details.
 
 ## Create a resource
 
@@ -171,6 +194,8 @@ etymon mcp create --name local-server --transport stdio --command node \
 | `--body-file <path>`       | Skills, agents, rules | Read instructions from a file or `-` for stdin; mutually exclusive with `--body`             |
 | `--license <name>`         | Skills                | Optional license                                                                             |
 | `--compatibility <text>`   | Skills                | Optional requirements                                                                        |
+| `--invocation <mode>`      | Skills, commands      | `auto`, `manual`, `model`, or `never`; commands default to `manual`                          |
+| `--argument-hint <text>`   | Skills, commands      | Optional argument autocomplete hint; destination support is required                         |
 | `--model <name>`           | Agents                | Optional model preference                                                                    |
 | `--tools <names...>`       | Agents                | Tool allowlist; accepts comma-separated or space-separated names                             |
 | `--dest-dir <directory>`   | Rules                 | Project-relative scope; default `.`                                                          |

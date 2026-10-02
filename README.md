@@ -77,6 +77,8 @@ etymon agents add augmnt/agents/api-designer.md
 etymon rules add ./guidance.md --dest-dir src/api
 etymon mcp add ./mcp.json
 etymon mcp create
+etymon commands add ./.cursor/commands # Modernize commands into skills
+etymon commands create                # Create a manual-only skill
 etymon convert --harness claude # Import one tool
 
 etymon list
@@ -103,14 +105,14 @@ etymon uninstall
 
 | Interface            | Sources                                                               |
 | -------------------- | --------------------------------------------------------------------- |
-| Skills               | Local folders, [skills.sh](https://skills.sh), Git                    |
+| Skills               | Local folders, [skills.sh](https://skills.sh), Git, legacy commands   |
 | MCP                  | Local JSON, [MCP Registry](https://registry.modelcontextprotocol.io/) |
 | Agents               | Local files, Git, file URLs                                           |
 | Rules & Instructions | Local files, Git, file URLs                                           |
 
 Claude Code, Codex, Copilot CLI/cloud, VS Code, Gemini, Kiro, Pi, Oh My Pi, OpenCode, Cursor, Antigravity, Roo, Cline, Kilo, Continue, Windsurf, Amp, and Zed.
 
-[Supported interfaces by tool](docs/CLI.md#supported-tools) · [Rule compatibility](docs/RULES.md)
+[Supported interfaces by tool](docs/CLI.md#supported-tools) · [Rule compatibility](docs/RULES.md) · [Command migration](docs/COMMANDS.md)
 
 ## Contributing
 

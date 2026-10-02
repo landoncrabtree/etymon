@@ -21,6 +21,10 @@ import { discoverRules } from './providers/rules.js';
 import { McpRegistry } from './providers/mcp.js';
 import { discoverAgents } from './providers/agents.js';
 import { discoverSkills, stageRepositorySkills } from './providers/skills.js';
+import { discoverCommands } from './providers/commands.js';
+import { CommandFormat, skillPolicy } from './core/commands.js';
+import { commandProfiles } from './harnesses/command-profiles.js';
+import { skillControls } from './harnesses/skill-profiles.js';
 import { parseResourceSource, withSource } from './providers/source.js';
 import { inspectUninstall, uninstall } from './services/uninstall.js';
 import { create, creationValues, CreationDraft } from './services/create.js';
@@ -65,6 +69,10 @@ type Options = {
   bodyFile?: string;
   license?: string;
   compatibility?: string;
+  invocation?: string;
+  argumentHint?: string;
+  format?: CommandFormat | 'auto';
+  select?: string[];
   model?: string;
   tools?: string[];
   transport?: string;
@@ -231,7 +239,9 @@ function creationFlags(command: Command, kind: Kind): Command {
   if (kind === 'skill')
     command
       .option('--license <name>', 'optional license')
-      .option('--compatibility <text>', 'optional requirements');
+      .option('--compatibility <text>', 'optional requirements')
+      .option('--invocation <mode>', 'auto, manual, model, or never')
+      .option('--argument-hint <text>', 'optional command argument autocomplete hint');
   if (kind === 'agent')
     command
       .option('--model <name>', 'optional model preference')
@@ -288,6 +298,8 @@ async function createResource(kind: Kind, opts: Options): Promise<void> {
     if (kind === 'skill') {
       if (opts.license) initial.license = opts.license;
       if (opts.compatibility) initial.compatibility = opts.compatibility;
+      if (opts.invocation !== undefined) initial.invocation = opts.invocation;
+      if (opts.argumentHint !== undefined) initial.argumentHint = opts.argumentHint;
     }
     if (kind === 'rule') {
       if (opts.destDir) initial.destDir = opts.destDir;
@@ -370,9 +382,18 @@ program
       ].join('\n'),
     );
   });
-for (const kind of kinds) {
-  const group = program.command(kind).description(`Manage ${kind} resources`);
-  if (kind !== 'mcp') group.alias(kind + 's');
+for (const { kind, name: interfaceName, commandInterface } of [
+  ...kinds.map((kind) => ({ kind, name: kind, commandInterface: false })),
+  { kind: 'skill' as const, name: 'command', commandInterface: true },
+]) {
+  const group = program
+    .command(interfaceName)
+    .description(
+      commandInterface
+        ? 'Modernize native commands as portable skills'
+        : `Manage ${kind} resources`,
+    );
+  if (kind !== 'mcp') group.alias(interfaceName + 's');
   const adding = group
     .command('add [source]')
     .description(`Register a local ${kind} or lock an external source`)
@@ -396,6 +417,10 @@ for (const kind of kinds) {
       .option('--package <identifier>', 'select package identifier or registry type')
       .option('--remote <index>', 'select hosted connection index')
       .option('--input <values...>', 'metadata inputs as NAME=value or NAME=env:VARIABLE');
+  if (commandInterface)
+    adding
+      .option('--select <names...>', 'command names (default: all source commands)')
+      .option('--format <dialect>', 'native command source dialect (default: auto)', 'auto');
   creationFlags(adding, kind);
   const creating = creationFlags(
     group
@@ -405,15 +430,31 @@ for (const kind of kinds) {
   );
   if (kind === 'rule')
     creating.option('--dest-dir <directory>', 'project-relative directory scope');
-  creating.action(async (_options, command: Command) => createResource(kind, options(command)));
+  creating.action(async (_options, command: Command) =>
+    createResource(kind, {
+      ...options(command),
+      ...(commandInterface ? { invocation: options(command).invocation ?? 'manual' } : {}),
+    }),
+  );
   adding.action(async (source: string | undefined, _options, command: Command) => {
-    const opts = options(command),
+    const opts = {
+        ...options(command),
+        ...(commandInterface ? { invocation: options(command).invocation ?? 'manual' } : {}),
+      },
       ws = workspace(opts);
     if (source === undefined) {
       await createResource(kind, opts);
       return;
     }
-    let req = request(source, opts, kind);
+    let req = {
+      ...request(source, opts, kind),
+      ...(commandInterface
+        ? {
+            commandFormat: opts.format ?? ('auto' as const),
+            names: opts.select ?? opts.skill ?? [],
+          }
+        : {}),
+    };
     const parsed = await parseResourceSource(kind, source, ws.cwd, opts.ref, ws.home);
     if (parsed.type === 'local') req.source = parsed.path;
     if (opts.list) {
@@ -428,9 +469,13 @@ for (const kind of kinds) {
       const listing = await withSource(parsed, ws, async (root) =>
         kind === 'skill'
           ? (
-              await (parsed.type === 'local'
-                ? discoverSkills(root, req.names)
-                : stageRepositorySkills(root, req.names, ws))
+              await (commandInterface
+                ? discoverCommands(root, req.names, opts.format, {
+                    repository: parsed.type === 'git' && !parsed.subpath,
+                  })
+                : parsed.type === 'local'
+                  ? discoverSkills(root, req.names)
+                  : stageRepositorySkills(root, req.names, ws))
             ).map((s) => ({ name: s.name, path: s.path }))
           : kind === 'rule'
             ? (await discoverRules(root, req.names)).map(({ rule }) => ({
@@ -504,11 +549,24 @@ for (const kind of kinds) {
         ws = workspace(opts);
       const lock = await ws.lock(),
         manifest = await ws.manifest();
+      const selected = (await resources(ws)).filter(
+        (resource) =>
+          resource.kind === kind &&
+          (!commandInterface ||
+            (resource.kind === 'skill' && Boolean(skillPolicy(resource.metadata).invocation))),
+      );
+      const names = new Set(selected.map((resource) => resource.name));
       output(
         {
-          external: lock.dependencies.filter((d) => d.kind === kind),
-          authored: manifest[kind],
-          resolved: (await resources(ws)).filter((resource) => resource.kind === kind),
+          external: lock.dependencies.filter(
+            (d) =>
+              d.kind === kind &&
+              (!commandInterface || d.artifacts.some((artifact) => names.has(artifact.name))),
+          ),
+          authored: commandInterface
+            ? Object.fromEntries(Object.entries(manifest[kind]).filter(([name]) => names.has(name)))
+            : manifest[kind],
+          resolved: selected,
         },
         opts,
       );
@@ -542,7 +600,7 @@ for (const kind of kinds) {
         output(await new McpRegistry(opts.registry).get(id, opts.version), opts);
       });
   }
-  if (kind === 'skill')
+  if (kind === 'skill' && !commandInterface)
     group
       .command('find <query>')
       .description('Search skills.sh through the pinned skills CLI')
@@ -666,6 +724,13 @@ program
         id: p.id,
         label: p.label,
         skills: Boolean(p.skill),
+        skillInvocation: skillControls[p.id] ?? null,
+        commands: commandProfiles[p.id]
+          ? {
+              project: commandProfiles[p.id].project.map((source) => source.path),
+              global: commandProfiles[p.id].global.map((source) => source.path),
+            }
+          : null,
         agents: Boolean(p.agent),
         mcp: Boolean(p.mcp || ['cline', 'zed'].includes(p.id)),
         rules: p.rule,

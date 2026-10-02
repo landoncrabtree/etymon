@@ -1,6 +1,6 @@
 # Executable scenarios
 
-`testcases/1` through `testcases/26` are editable starting states. Each folder contains a `scenario.json` and ordinary native/source files. `scenarios.mjs` defines the operations and assertions; `native.mjs` contains checks against the actual installed harnesses.
+`testcases/1` through `testcases/28` are editable starting states. Each folder contains a `scenario.json` and ordinary native/source files. `scenarios.mjs` defines the operations and assertions; `native.mjs` contains checks against the actual installed harnesses.
 
 Run from any directory:
 
@@ -9,6 +9,7 @@ Run from any directory:
 ./test_harness.sh 1 2 5                     # selected scenarios
 ./test_harness.sh 9 --native codex,opencode,copilot,claude
 ./test_harness.sh 9 --native gemini,pi,kilo  # install these CLIs first
+./test_harness.sh 27 --native codex,copilot,opencode # Migrated command skills
 ./test_harness.sh --keep --report-dir ./test-results/local
 npm run test:coverage
 ```
@@ -17,36 +18,40 @@ The runner builds Etymon, copies each fixture into a fresh temporary Git reposit
 
 `convert` imports all detected native setups into Etymon; `convert --harness <harness>` filters discovery. `sync --harness <harness>` exports the registered environment. Every scenario distinguishes these operations and checks the resulting manifest, lock, or native files. Repeated sync must produce no changes.
 
-| Case | Behavior tested                                                                                                                                                     |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1    | Existing OpenCode MCP → authored manifest → Claude/Codex → equivalent reimport                                                                                      |
-| 2    | Nested AGENTS.md scopes → manifest `destDir` → deleted files restored by Codex → Continue globs → Zed capability gate                                               |
-| 3    | Real skills CLI stages a local Git fixture → commit/digest lock → Codex/Copilot → cached offline restoration                                                        |
-| 4    | Deterministic localhost MCP registry → exact metadata/digest lock → Copilot reimport/idempotence → Pi projection                                                    |
-| 5    | Equivalent rule/skill aliases register once; Claude bridge remains stable                                                                                           |
-| 6    | Standalone global guidance, no global project directories or conditional rules                                                                                      |
-| 7    | Cursor globs translate to Claude/Copilot; Codex broadens activation only with explicit lossy opt-in                                                                 |
-| 8    | Shared instruction fragments survive removal; manual output edits block deletion                                                                                    |
-| 9    | Installed harnesses use their own discovery APIs without sign-in or prompts                                                                                         |
-| 10   | Continue regex + glob/model conditions stay in source; lossy sync reports their omission                                                                            |
-| 11   | Editable `destDir` moves guidance and removes stale native placement                                                                                                |
-| 12   | Git agent lock, offline sync, explicit update, multiple targets, and removal                                                                                        |
-| 13   | Identical SKILL.md with conflicting supporting assets blocks import atomically                                                                                      |
-| 14   | JSONC comments/settings survive sync; credentials become runtime references                                                                                         |
-| 15   | All 19 project rule writers compose and resync without changes                                                                                                      |
-| 16   | Actual neo-blessed TUI in a POSIX terminal: rule registration, directory scope, harness dialog, and clean exit                                                      |
-| 17   | Actual global npm uninstall from the installed CLI: terminal keep/remove/cancel, dry-run, scripted defaults, and project preservation                               |
-| 18   | Initialization preserves project ignores and tracks authoritative files while ignoring native outputs from multiple tools                                           |
-| 19   | Custom creation from flags, stdin, and real terminal forms; multiline instructions, inline STDIO/HTTP/SSE, validation, cancellation, and stable sync                |
-| 20   | Bare local paths win over Git shorthand/registry IDs for all interfaces; explicit missing paths stop; offline native sync remains stable                            |
-| 21   | Real skills CLI selects repo variants; locked source path/assets survive upstream changes and an empty cache; local conflicts still block                           |
-| 22   | Lossy CLI/TUI review across interfaces, unchanged source, omissions, scope warnings, and ownership conflicts                                                        |
-| 23   | Four Cursor modules with mixed always/glob activation → separate Claude rules → repeat sync/reimport → Cursor round trip → lossy Codex composition and removal      |
-| 24   | Standalone `.claude/CLAUDE.md` → root standing registration → Copilot/Codex AGENTS.md → Continue rule file → stable reimport and restoration                        |
-| 25   | Codex filter → all tools → Claude filter; shared instructions, complete skill bundles, and MCP connections register once; scopes and activation survive restoration |
-| 26   | Deep nested guidance, broken skill aliases, bridge provenance, product-template exclusions, and explicit MCP conflict renaming                                      |
+| Case | Behavior tested                                                                                                                                                          |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1    | Existing OpenCode MCP → authored manifest → Claude/Codex → equivalent reimport                                                                                           |
+| 2    | Nested AGENTS.md scopes → manifest `destDir` → deleted files restored by Codex → Continue globs → Zed capability gate                                                    |
+| 3    | Real skills CLI stages a local Git fixture → commit/digest lock → Codex/Copilot → cached offline restoration                                                             |
+| 4    | Deterministic localhost MCP registry → exact metadata/digest lock → Copilot reimport/idempotence → Pi projection                                                         |
+| 5    | Equivalent rule/skill aliases register once; Claude bridge remains stable                                                                                                |
+| 6    | Standalone global guidance, no global project directories or conditional rules                                                                                           |
+| 7    | Cursor globs translate to Claude/Copilot; Codex broadens activation only with explicit lossy opt-in                                                                      |
+| 8    | Shared instruction fragments survive removal; manual output edits block deletion                                                                                         |
+| 9    | Installed harnesses use their own discovery APIs without sign-in or prompts                                                                                              |
+| 10   | Continue regex + glob/model conditions stay in source; lossy sync reports their omission                                                                                 |
+| 11   | Editable `destDir` moves guidance and removes stale native placement                                                                                                     |
+| 12   | Git agent lock, offline sync, explicit update, multiple targets, and removal                                                                                             |
+| 13   | Identical SKILL.md with conflicting supporting assets blocks import atomically                                                                                           |
+| 14   | JSONC comments/settings survive sync; credentials become runtime references                                                                                              |
+| 15   | All 19 project rule writers compose and resync without changes                                                                                                           |
+| 16   | Actual neo-blessed TUI in a POSIX terminal: rule registration, directory scope, harness dialog, and clean exit                                                           |
+| 17   | Actual global npm uninstall from the installed CLI: terminal keep/remove/cancel, dry-run, scripted defaults, and project preservation                                    |
+| 18   | Initialization preserves project ignores and tracks authoritative files while ignoring native outputs from multiple tools                                                |
+| 19   | Custom creation from flags, stdin, and real terminal forms; multiline instructions, inline STDIO/HTTP/SSE, validation, cancellation, and stable sync                     |
+| 20   | Bare local paths win over Git shorthand/registry IDs for all interfaces; explicit missing paths stop; offline native sync remains stable                                 |
+| 21   | Real skills CLI selects repo variants; locked source path/assets survive upstream changes and an empty cache; local conflicts still block                                |
+| 22   | Lossy CLI/TUI review across interfaces, unchanged source, omissions, scope warnings, and ownership conflicts                                                             |
+| 23   | Four Cursor modules with mixed always/glob activation → separate Claude rules → repeat sync/reimport → Cursor round trip → lossy Codex composition and removal           |
+| 24   | Standalone `.claude/CLAUDE.md` → root standing registration → Copilot/Codex AGENTS.md → Continue rule file → stable reimport and restoration                             |
+| 25   | Codex filter → all tools → Claude filter; shared instructions, complete skill bundles, and MCP connections register once; scopes and activation survive restoration      |
+| 26   | Deep nested guidance, broken skill aliases, bridge provenance, product-template exclusions, and explicit MCP conflict renaming                                           |
+| 27   | Commands become skills; filtered/all/repeated conversion, six writers, global Codex custom prompts, headless and real terminal creation, native discovery and removal    |
+| 28   | Native command arguments/context/tool settings, strict and lossy sync, local-first resolution, external skill lock, empty-cache restoration, integrity errors and update |
 
 Cases 3 and 21 use `npx skills@1.7.0`; first use needs npm access. `--skills-cli /absolute/path/to/skills/bin/cli.mjs` can use a preinstalled **real** 1.7.0 CLI in a restricted environment. The wrapper forwards the upstream command and checks its requested version; it does not simulate installation. Case 4 needs localhost sockets; `--skip-registry` explicitly reports that case as skipped. Case 9 is skipped unless `--native` selects installed loaders. Missing selected CLIs fail the scenario.
+
+Case 27 also verifies migrated command skills through selected native loaders. Claude's command-skill inspection is explicitly skipped because no verified unauthenticated listing API is available. Codex lists the enabled skill but does not expose invocation policy in its response; policy format is verified separately. OpenCode, Gemini, and Kilo command-skill checks require reviewed lossy sync because their manual-only control has no verified mapping. Pi's real resource loader also exposes the disabled model-invocation flag.
 
 The native checks currently cover:
 

@@ -14,7 +14,7 @@ import { digest, exists, fileArtifact, textFile } from '../core/fs.js';
 import { Workspace } from '../core/workspace.js';
 import { AgentDialect, agentExtension, location, Profile } from './profiles.js';
 import { renderRules } from './rule-render.js';
-import { frontmatter } from '../providers/agents.js';
+import { renderSkill } from './skill-render.js';
 import { isConversionLimit, omittedResource } from './loss.js';
 
 export type Unit = {
@@ -374,47 +374,12 @@ export async function render(
     const start = units.length;
     try {
       if (resource.kind === 'skill') {
-        const special = Object.keys(resource.metadata).filter(
-          (k) =>
-            ![
-              'name',
-              'description',
-              'license',
-              'compatibility',
-              'metadata',
-              'allowed-tools',
-            ].includes(k),
-        );
-        const omitExtensions = special.length > 0 && p.id !== 'claude';
-        if (omitExtensions) {
-          if (!options.allowLossy)
-            throw new EtymonError(
-              'SKILL_EXTENSION_BLOCKED',
-              `Skill ${resource.name} uses native fields ${special.join(', ')}; review with --allow-lossy to omit them`,
-            );
-          diagnostics.push({
-            code: 'SKILL_FIELDS_OMITTED',
-            severity: 'warning',
-            message: `Skill ${resource.name}: omitted native fields ${special.join(', ')} from ${p.id}; their behavior and restrictions no longer apply`,
-            resource: resource.id,
-            harness: p.id,
-          });
-        }
-        for (const file of resource.files) {
-          let content = Buffer.from(file.content, 'base64');
-          if (omitExtensions && file.path === 'SKILL.md') {
-            const text = content.toString('utf8'),
-              parsed = frontmatter(text);
-            for (const key of special) delete parsed.metadata[key];
-            const body = text.replace(
-              /^\uFEFF?---\s*\r?\n[\s\S]*?\r?\n---[^\S\r\n]*(?:\r?\n|$)/,
-              '',
-            );
-            content = Buffer.from(`---\n${yaml(parsed.metadata, { lineWidth: 0 })}---\n${body}`);
-          }
+        const result = renderSkill(resource, p, options);
+        diagnostics.push(...result.diagnostics);
+        for (const file of result.artifact.files) {
           units.push({
             path: join(destination, resource.name, file.path),
-            content,
+            content: Buffer.from(file.content, 'base64'),
             mode: file.executable ? 0o755 : 0o644,
             ...owner,
           });
