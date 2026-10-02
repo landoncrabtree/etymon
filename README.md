@@ -9,11 +9,13 @@ Make your repositories portable and AI harness-agnostic with Etymon.
 ## Use cases
 
 <picture>
+  <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="docs/assets/case-studies-dark-mobile.gif">
+  <source media="(max-width: 600px)" srcset="docs/assets/case-studies-light-mobile.gif">
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/case-studies-dark.gif">
-  <img src="docs/assets/case-studies-light.gif" alt="Verified local conversions with Etymon 0.1.1: LobeHub, 50 skills and 4 rules; Dify, 5 skills and 10 rules; Supabase JS, 6 skills and 8 rules; shadcn/ui, 1 glob-scoped rule. Each comparison shows tracked setup before and after import and explicit retirement of imported originals. Etymon source lives under .agents. Unrelated hooks, settings, CI, and product templates remain." width="1200" height="812">
+  <img src="docs/assets/case-studies-light.gif" alt="Real migrations with published Etymon 0.1.1: LobeHub consolidates nine agent setup locations into .agents, Ant Design six, and Formbricks seven. Imported originals were explicitly retired after verification. These views show imported agent resources; other repository files remain unchanged." width="1200">
 </picture>
 
-[LobeHub](https://github.com/lobehub/lobehub) · [Dify](https://github.com/langgenius/dify) · [Supabase JS](https://github.com/supabase/supabase-js) · [shadcn/ui](https://github.com/shadcn-ui/ui). Converted locally with published `etymon@0.1.1`.
+[LobeHub](https://github.com/lobehub/lobehub) · [Ant Design](https://github.com/ant-design/ant-design) · [Formbricks](https://github.com/formbricks/formbricks). Real local migrations with `etymon@0.1.1`. Imported agent resources shown; other repo files kept.
 
 ## Install
 
