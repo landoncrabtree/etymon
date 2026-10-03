@@ -1,6 +1,6 @@
 {
   "name": "etymon",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A portable environment manager for coding agent skills, MCP servers, agents, and rules",
   "type": "module",
   "repository": {

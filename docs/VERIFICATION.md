@@ -46,6 +46,8 @@ Release workflow tests run the shell entry points in temporary projects with npm
 
 Release candidate **0.1.1** passed formatting, strict types, all 177 unit tests, and the production build. A fresh npm/npx installation passed the packed CLI smoke check. Archive inspection and the publication dry run confirmed the package name, version, executable, production modules, and documentation; repository fixtures and development files were excluded.
 
+Release candidate **0.1.2** passed formatting, strict types, all 209 unit tests, and the production build. All 28 lifecycle scenarios passed before release preparation, with coverage above the enforced floors. A fresh npm/npx installation passed the packed CLI smoke check. Archive inspection and the publication dry run confirmed the version, executable, command migration and skill discovery modules, and exclusion of repository fixtures, authored configuration, and unrelated video sources. This candidate includes native import fixes, command-to-skill migration, and the Expo repository symlink fix.
+
 The README GIF shows imported agent resources from three real local migrations with published `etymon@0.1.1`:
 
 - [LobeHub](https://github.com/lobehub/lobehub/tree/4bcb808c608ed79497713ab20bcd03ac6d8713da): nine source locations, 50 skills and four rules. Five skill directories or links, two root instruction files, and two nested instruction files consolidate into `.agents`.
