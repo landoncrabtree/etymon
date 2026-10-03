@@ -1,6 +1,6 @@
 import { promises as fs } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
-import { bundle, exists, inside, run, temporary, walk } from '../core/fs.js';
+import { bundle, exists, inside, noSymlink, run, temporary, unpack } from '../core/fs.js';
 import { Artifact, Diagnostic, EtymonError, SKILLS_VERSION } from '../core/model.js';
 import { Workspace } from '../core/workspace.js';
 import { bundleIdentity } from '../core/dedup.js';
@@ -109,11 +109,12 @@ export async function discoverSkills(
   names: string[] = [],
   options: { keepVariants?: boolean } = {},
 ): Promise<{ path: string; name: string; artifact: Artifact }[]> {
-  const isFile = (await fs.stat(root)).isFile();
+  const stat = await fs.lstat(root);
+  if (stat.isSymbolicLink())
+    throw new EtymonError('SOURCE_SYMLINK', `Skill source is a symlink: ${root}`);
+  const isFile = stat.isFile();
   const directory = isFile ? dirname(root) : root;
-  const paths = isFile
-    ? [root]
-    : (await walk(directory)).filter((p) => p.endsWith('SKILL.md')).map((p) => join(directory, p));
+  const paths = isFile ? [root] : await skillDefinitions(directory);
   const found = [];
   for (const path of paths) {
     const artifact = await bundle(dirname(path));
@@ -140,6 +141,31 @@ export async function discoverSkills(
   return [...unique.values()];
 }
 
+/** Locate definitions without following unrelated repository aliases. */
+async function skillDefinitions(root: string): Promise<string[]> {
+  const result: string[] = [];
+  let entries = 0;
+  async function visit(directory: string, depth: number): Promise<void> {
+    if (!depth) throw new EtymonError('SOURCE_LIMIT', 'Source exceeds the maximum directory depth');
+    for (const entry of (await fs.readdir(directory, { withFileTypes: true })).sort((a, b) =>
+      a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+    )) {
+      if (['.git', 'node_modules', '.etymon'].includes(entry.name)) continue;
+      if (++entries > 5000) throw new EtymonError('SOURCE_LIMIT', 'Source exceeds 5000 entries');
+      const path = join(directory, entry.name);
+      if (entry.isSymbolicLink()) {
+        if (entry.name === 'SKILL.md')
+          throw new EtymonError('SOURCE_SYMLINK', `Skill definition is a symlink: ${path}`);
+        continue;
+      }
+      if (entry.isDirectory()) await visit(path, depth - 1);
+      else if (entry.isFile() && entry.name === 'SKILL.md') result.push(path);
+    }
+  }
+  await visit(root, 16);
+  return result;
+}
+
 /** Let the pinned upstream CLI select repository variants, then verify their origin. */
 export async function stageRepositorySkills(
   root: string,
@@ -147,9 +173,55 @@ export async function stageRepositorySkills(
   workspace: Workspace,
   version?: string,
 ): Promise<{ path: string; name: string; artifact: Artifact }[]> {
-  // Bound and validate source before the upstream copier can follow any links.
-  const candidates = await discoverSkills(root, names, { keepVariants: true });
-  const staged = await stageWithSkills(root, names, workspace, version);
+  // Validate complete bundles before the upstream copier can read them.
+  const candidates = await discoverSkills(root, [], { keepVariants: true });
+  for (const name of names)
+    if (name !== '*' && !candidates.some((candidate) => candidate.name === name))
+      throw new EtymonError('SKILL_NOT_FOUND', `No skill named ${name} in source`);
+  // Give upstream a link-free source view. Ordinary repository aliases must
+  // neither abort discovery nor let plugin metadata follow paths outside source.
+  const staged = await temporary(async (input) => {
+    const directory = (await fs.lstat(root)).isFile() ? dirname(root) : root;
+    for (const candidate of candidates)
+      await unpack(
+        {
+          version: 1,
+          files: candidate.artifact.files.map((file) => ({
+            ...file,
+            path: join(relative(directory, candidate.path), file.path).replaceAll('\\', '/'),
+          })),
+        },
+        input,
+      );
+    // Preserve upstream's plugin layout and installed-project selection policy.
+    for (const path of [
+      '.claude-plugin/marketplace.json',
+      '.claude-plugin/plugin.json',
+      'skills-lock.json',
+    ]) {
+      const source = join(directory, path);
+      await noSymlink(source, directory);
+      if (!(await exists(source))) continue;
+      const stat = await fs.lstat(source);
+      if (!stat.isFile()) continue;
+      if (stat.size > 1024 * 1024)
+        throw new EtymonError('SOURCE_LIMIT', `Skill discovery metadata exceeds 1 MiB: ${source}`);
+      await unpack(
+        {
+          version: 1,
+          files: [
+            {
+              path,
+              content: (await fs.readFile(source)).toString('base64'),
+              executable: Boolean(stat.mode & 0o111),
+            },
+          ],
+        },
+        input,
+      );
+    }
+    return stageWithSkills(input, names, workspace, version);
+  });
   return staged.map((skill) => {
     const paths = new Set(skill.artifact.files.map((file) => file.path));
     const identity = bundleIdentity(skill.artifact);

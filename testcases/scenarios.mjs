@@ -8,6 +8,66 @@ import { nativeChecks, nativeCommandCheck } from './native.mjs';
 const rules = async (c) => (await c.list()).authored.rule;
 const lockText = (c) => c.read('.agents/etymon.lock');
 export const handlers = {
+  async skillRepositoryAliases(c) {
+    const source = join(c.project, 'source'),
+      uri = 'git+file://' + source;
+    const bundle = 'source/plugins/expo/packages/domain/a/b/skills/checks';
+    const outside = join(c.directory, 'private-skill');
+    await fs.mkdir(outside);
+    await fs.writeFile(
+      join(outside, 'SKILL.md'),
+      '---\nname: private\ndescription: Private fixture\n---\nPRIVATE_OUTSIDE_SOURCE\n',
+    );
+    await fs.symlink('AGENTS.md', join(source, 'CLAUDE.md'));
+    await fs.symlink('missing', join(source, 'broken'));
+    await fs.symlink('cycle', join(source, 'cycle'));
+    await fs.symlink(outside, join(source, 'external-directory'));
+    await fs.symlink(join(outside, 'SKILL.md'), join(source, 'external-file'));
+    await fs.chmod(join(c.project, bundle, 'scripts/check.sh'), 0o755);
+    await c.exec('git', ['init', '-q'], { cwd: source });
+    await c.gitCommit(source);
+    const listing = await c.cli(['skills', 'add', uri, '--list']);
+    assert.equal(listing.length, 1);
+    assert.equal(listing[0].name, 'checks');
+    await c.cli(['skills', 'add', uri]);
+    const locked = await lockText(c),
+      first = (await c.list()).lock.dependencies[0];
+    assert.equal(first.artifacts[0].path, bundle.slice('source/'.length));
+    await c.sync('codex');
+    assert.equal(
+      await c.read('.agents/skills/checks/assets/checks.txt'),
+      'LOCKED_PLUGIN_ASSET_v1\n',
+    );
+    assert((await fs.stat(join(c.project, '.agents/skills/checks/scripts/check.sh'))).mode & 0o111);
+    assert.equal((await c.cli(['skills', 'list'])).resolved.length, 1);
+    await c.write(bundle + '/assets/checks.txt', 'LOCKED_PLUGIN_ASSET_v2\n');
+    await c.gitCommit(source);
+    await c.clear(['.agents/skills/checks']);
+    await c.sync('codex', ['--cache', join(c.directory, 'fresh-cache')]);
+    assert.equal(
+      await c.read('.agents/skills/checks/assets/checks.txt'),
+      'LOCKED_PLUGIN_ASSET_v1\n',
+    );
+    assert.equal(await lockText(c), locked);
+    await c.cli(['update']);
+    assert.notEqual((await c.list()).lock.dependencies[0].resolved.commit, first.resolved.commit);
+    await c.sync('codex');
+    assert.equal(
+      await c.read('.agents/skills/checks/assets/checks.txt'),
+      'LOCKED_PLUGIN_ASSET_v2\n',
+    );
+    await c.idempotent('codex');
+    const beforeInvalid = await lockText(c);
+    await fs.symlink(join(outside, 'SKILL.md'), join(c.project, bundle, 'assets/leak'));
+    await c.gitCommit(source);
+    const rejected = await c.cli(['update'], { expectedCode: 1 });
+    assert.equal(rejected.error.code, 'SOURCE_SYMLINK');
+    assert.equal(await lockText(c), beforeInvalid);
+    assert.equal(
+      await c.read('.agents/skills/checks/assets/checks.txt'),
+      'LOCKED_PLUGIN_ASSET_v2\n',
+    );
+  },
   async commandMigration(c) {
     const preview = await c.cli(['convert', '--dry-run']);
     assert.equal(preview.resources.length, 3);

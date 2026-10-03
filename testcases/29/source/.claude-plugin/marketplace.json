@@ -1,0 +1,10 @@
+{
+  "name": "skill-fixture",
+  "plugins": [
+    {
+      "name": "expo-fixture",
+      "source": "./plugins/expo/packages/domain/a/b",
+      "skills": ["./skills/checks"]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Executable scenarios
 
-`testcases/1` through `testcases/28` are editable starting states. Each folder contains a `scenario.json` and ordinary native/source files. `scenarios.mjs` defines the operations and assertions; `native.mjs` contains checks against the actual installed harnesses.
+`testcases/1` through `testcases/29` are editable starting states. Each folder contains a `scenario.json` and ordinary native/source files. `scenarios.mjs` defines the operations and assertions; `native.mjs` contains checks against the actual installed harnesses.
 
 Run from any directory:
 
@@ -48,8 +48,9 @@ The runner builds Etymon, copies each fixture into a fresh temporary Git reposit
 | 26   | Deep nested guidance, broken skill aliases, bridge provenance, product-template exclusions, and explicit MCP conflict renaming                                           |
 | 27   | Commands become skills; filtered/all/repeated conversion, six writers, global Codex custom prompts, headless and real terminal creation, native discovery and removal    |
 | 28   | Native command arguments/context/tool settings, strict and lossy sync, local-first resolution, external skill lock, empty-cache restoration, integrity errors and update |
+| 29   | Unrelated repository aliases, deep plugin skill discovery, executable assets, immutable restoration, explicit update, and linked bundle rejection without partial writes |
 
-Cases 3 and 21 use `npx skills@1.7.0`; first use needs npm access. `--skills-cli /absolute/path/to/skills/bin/cli.mjs` can use a preinstalled **real** 1.7.0 CLI in a restricted environment. The wrapper forwards the upstream command and checks its requested version; it does not simulate installation. Case 4 needs localhost sockets; `--skip-registry` explicitly reports that case as skipped. Case 9 is skipped unless `--native` selects installed loaders. Missing selected CLIs fail the scenario.
+Cases 3, 21, and 29 use `npx skills@1.7.0`; first use needs npm access. `--skills-cli /absolute/path/to/skills/bin/cli.mjs` can use a preinstalled **real** 1.7.0 CLI in a restricted environment. The wrapper forwards the upstream command and checks its requested version; it does not simulate installation. Case 4 needs localhost sockets; `--skip-registry` explicitly reports that case as skipped. Case 9 is skipped unless `--native` selects installed loaders. Missing selected CLIs fail the scenario.
 
 Case 27 also verifies migrated command skills through selected native loaders. Claude's command-skill inspection is explicitly skipped because no verified unauthenticated listing API is available. Codex lists the enabled skill but does not expose invocation policy in its response; policy format is verified separately. OpenCode, Gemini, and Kilo command-skill checks require reviewed lossy sync because their manual-only control has no verified mapping. Pi's real resource loader also exposes the disabled model-invocation flag.
 

@@ -108,6 +108,8 @@ For skills, agents, and rules, a missing bare `owner/repo[/path]` becomes Git sh
 
 External skill repositories use the pinned `npx skills` discovery policy to select among tool-specific variants. Etymon verifies the installed files against the checkout and locks the chosen source path and bundle digest. External skill `--list` performs this selection in a temporary staging directory. Conflicting bundles found during local discovery or native conversion still block.
 
+Unrelated repository symlinks, such as a root `CLAUDE.md` alias, do not block skill discovery. Links inside skill bundles or discovery metadata remain errors. The upstream CLI receives validated bundles at their original relative paths, plus its plugin and skill-lock metadata, in a temporary directory without symlinks.
+
 MCP accepts local JSON connections or registry IDs. A missing bare ID is looked up in the registry. MCP endpoint URLs belong in `mcp create --url`, rather than `mcp add`. Git-backed MCP definitions are not supported.
 
 | Add option                 | Applies to            | Behavior                                               |

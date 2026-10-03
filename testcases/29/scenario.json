@@ -1,0 +1,4 @@
+{
+  "title": "Skill repositories ignore unrelated aliases, retain plugin discovery metadata, and restore locked assets safely",
+  "handler": "skillRepositoryAliases"
+}
