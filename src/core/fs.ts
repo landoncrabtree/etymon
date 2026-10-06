@@ -59,7 +59,9 @@ export function safeRelative(path: string): void {
     throw new EtymonError('UNSAFE_PATH', `Unsafe artifact path: ${path}`);
 }
 export async function noSymlink(path: string, boundary: string): Promise<void> {
-  inside(boundary, relative(boundary, path));
+  const rel = relative(resolve(boundary), resolve(path));
+  if (rel === '..' || rel.startsWith('..' + sep) || isAbsolute(rel))
+    throw new EtymonError('UNSAFE_PATH', `Path escapes its root: ${path}`);
   let current = resolve(path);
   while (true) {
     try {
