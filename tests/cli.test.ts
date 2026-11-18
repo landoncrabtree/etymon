@@ -9,6 +9,20 @@ afterEach(async () => {
   for (const dir of directories.splice(0)) await fs.rm(dir, { recursive: true, force: true });
 });
 const cli = resolve('src/cli.ts');
+it('explains Etymon workflows with the same guidance as llms.txt', async () => {
+  const explanation = await run(process.execPath, ['--import', 'tsx', cli, 'explain']);
+  const llms = await fs.readFile(resolve('llms.txt'), 'utf8');
+  expect(explanation).toBe(llms.trim());
+  expect(explanation).toContain('etymon init');
+  expect(explanation).toContain('etymon convert');
+  expect(explanation).toContain('etymon skills find <query>');
+  expect(explanation).toContain('etymon skills create');
+  expect(explanation).toContain('etymon mcp find <query>');
+  expect(explanation).toContain('etymon mcp create');
+  expect(explanation).toContain('etymon agents create');
+  expect(explanation).toContain('etymon rules create');
+  expect(explanation).toContain('etymon sync --harness <ids>');
+});
 it('documents MCP find as the primary command and inspects local JSON without registration', async () => {
   const root = await fs.mkdtemp(join(tmpdir(), 'etymon-cli-mcp-'));
   directories.push(root);
