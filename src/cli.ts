@@ -28,6 +28,7 @@ import { skillControls } from './harnesses/skill-profiles.js';
 import { parseResourceSource, withSource } from './providers/source.js';
 import { inspectUninstall, uninstall } from './services/uninstall.js';
 import { create, creationValues, CreationDraft } from './services/create.js';
+import { EXPLANATION } from './explain.js';
 
 type Options = {
   cwd?: string;
@@ -335,6 +336,12 @@ const init = program
     );
   });
 void init;
+program
+  .command('explain')
+  .description('Explain Etymon workflows for agentic models')
+  .action(() => {
+    process.stdout.write(EXPLANATION);
+  });
 program
   .command('uninstall')
   .description('Uninstall the global npm package; optionally remove personal config and lockfile')
