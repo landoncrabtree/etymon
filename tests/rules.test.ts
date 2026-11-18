@@ -456,7 +456,7 @@ describe('rule lifecycle and aliases', () => {
       recursive: true,
     });
     await write(join(ws.root, '.codex/skills/checks/assets/data.txt'), 'two');
-    await expect(convert(ws, 'codex')).rejects.toMatchObject({ code: 'IMPORT_COLLISION' });
+    await expect(convert(ws, 'codex')).rejects.toMatchObject({ code: 'IMPORT_CONFLICT' });
   });
 });
 describe('user rule scope', () => {

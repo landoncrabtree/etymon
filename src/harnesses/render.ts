@@ -27,7 +27,12 @@ export type Unit = {
   harnesses: string[];
 };
 export type RenderResult = { units: Unit[]; diagnostics: Diagnostic[] };
-export type RenderOptions = { allowLossy?: boolean; configPath?: string; rulesPath?: string };
+export type RenderOptions = {
+  allowLossy?: boolean;
+  configPath?: string;
+  rulesPath?: string;
+  authoredSkillPaths?: Set<string>;
+};
 const toolCapabilities: Record<string, string[]> = {
   Read: ['read'],
   Grep: ['search'],
@@ -380,7 +385,7 @@ export async function render(
           const path = join(destination, resource.name, file.path);
           if (
             resource.id.startsWith('skill:local/') &&
-            destination === join(workspace.agents, 'skills') &&
+            options.authoredSkillPaths?.has(join(destination, resource.name)) &&
             (await exists(path))
           )
             continue;

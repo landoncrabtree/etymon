@@ -1,5 +1,5 @@
 import { promises as fs } from 'node:fs';
-import { basename, join, relative, resolve } from 'node:path';
+import { basename, join, relative, resolve, sep } from 'node:path';
 import { stringify as toml } from 'smol-toml';
 import {
   Agent,
@@ -56,15 +56,25 @@ export async function resources(
     lock?: Lock;
     diagnostics?: Diagnostic[];
     deduplicate?: boolean;
+    authoredSkillPaths?: Set<string>;
   } = {},
 ): Promise<Resource[]> {
   const result: Resource[] = [],
     manifest = options.manifest ?? (await workspace.manifest()),
-    lock = options.lock ?? (await workspace.lock());
+    lock = options.lock ?? (await workspace.lock()),
+    state = await readState(workspace);
   for (const [key, local] of Object.entries(manifest.skill)) {
     if (!local.path) throw new EtymonError('INVALID_MANIFEST', `Skill ${key} needs a path`);
     const canonical = join(workspace.agents, 'skills', key);
-    const path = (await exists(canonical)) ? canonical : resolve(workspace.agents, local.path);
+    const canonicalOwned = state.units.some((unit) => {
+      const rel = relative(canonical, unit.path);
+      return rel === '' || (rel !== '..' && !rel.startsWith('..' + sep));
+    });
+    const path =
+      (await exists(canonical)) && !canonicalOwned
+        ? canonical
+        : resolve(workspace.agents, local.path);
+    if (path === canonical) options.authoredSkillPaths?.add(canonical);
     const artifact = await bundle(path);
     const metadata = skillMetadata(artifact);
     result.push({
@@ -406,10 +416,14 @@ export async function buildPlan(
       'Locked build requires the exact etymon and adapter revision recorded in the lock',
     );
   const diagnostics: Diagnostic[] = [],
-    environment = await resources(workspace, { diagnostics }),
+    authoredSkillPaths = new Set<string>(),
+    environment = await resources(workspace, { diagnostics, authoredSkillPaths }),
     units: Unit[] = [];
   for (const target of targets) {
-    const rendered = await render(environment, profile(target), workspace, options);
+    const rendered = await render(environment, profile(target), workspace, {
+      ...options,
+      authoredSkillPaths,
+    });
     units.push(...rendered.units);
     diagnostics.push(...rendered.diagnostics);
   }
