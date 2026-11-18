@@ -780,7 +780,7 @@ Never execute unrestricted `npx skills add` inside the user's actual project and
 
 ### 6.5 Skill import and source ownership
 
-`convert` imports the full skill tree into `.agents/etymon/skills/<name>/` when it is authored, modified or lacks verified external provenance. Preserve relative references, executable modes and source-native metadata without executing dynamic instructions or scripts. Register the source path in `etymon.toml`.
+`convert` imports the full skill tree into `.agents/skills/<name>/` when it is authored, modified or lacks verified external provenance. Preserve relative references, executable modes and source-native metadata without executing dynamic instructions or scripts. Register the source path in `etymon.toml`.
 
 A verified unchanged external skill is represented by its lock entry instead. Project-specific supported configuration belongs in a typed manifest binding, not an edited package cache. A locally modified external skill is a fork; do not discard its edits when a similarly named registry package is found.
 
@@ -1278,7 +1278,7 @@ This is an Etymon schema proposal. All file paths below resolve relative to `.ag
 schema_version = 1
 
 [skills.release-check]
-path = "etymon/skills/release-check"
+path = "skills/release-check"
 
 [agents.reviewer]
 path = "etymon/agents/reviewer.md"

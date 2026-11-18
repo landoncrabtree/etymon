@@ -27,7 +27,12 @@ export type Unit = {
   harnesses: string[];
 };
 export type RenderResult = { units: Unit[]; diagnostics: Diagnostic[] };
-export type RenderOptions = { allowLossy?: boolean; configPath?: string; rulesPath?: string };
+export type RenderOptions = {
+  allowLossy?: boolean;
+  configPath?: string;
+  rulesPath?: string;
+  authoredSkillPaths?: Set<string>;
+};
 const toolCapabilities: Record<string, string[]> = {
   Read: ['read'],
   Grep: ['search'],
@@ -377,8 +382,15 @@ export async function render(
         const result = renderSkill(resource, p, options);
         diagnostics.push(...result.diagnostics);
         for (const file of result.artifact.files) {
+          const path = join(destination, resource.name, file.path);
+          if (
+            resource.id.startsWith('skill:local/') &&
+            options.authoredSkillPaths?.has(join(destination, resource.name)) &&
+            (await exists(path))
+          )
+            continue;
           units.push({
-            path: join(destination, resource.name, file.path),
+            path,
             content: Buffer.from(file.content, 'base64'),
             mode: file.executable ? 0o755 : 0o644,
             ...owner,

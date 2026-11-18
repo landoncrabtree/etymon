@@ -124,7 +124,7 @@ npx etymon sync --harness codex
 
 ```bash
 npx etymon agent add ./.agents/etymon/agents/reviewer.md
-npx etymon skill add ./.agents/etymon/skills/release-check
+npx etymon skill add ./.agents/skills/release-check
 
 # Edit the source files, then regenerate the native environment.
 npx etymon sync --harness claude,codex

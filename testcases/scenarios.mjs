@@ -114,7 +114,7 @@ export const handlers = {
       'Run checks when explicitly requested.',
     ]);
     assert.match(
-      await c.read('.agents/etymon/skills/manual-checks/SKILL.md'),
+      await c.read('.agents/skills/manual-checks/SKILL.md'),
       /etymon.invocation: manual/,
     );
     await c.exec('python3', [
@@ -126,10 +126,7 @@ export const handlers = {
       join(c.directory, 'cache'),
       'host-create-command',
     ]);
-    assert.match(
-      await c.read('.agents/etymon/skills/host-checks/SKILL.md'),
-      /etymon.invocation: manual/,
-    );
+    assert.match(await c.read('.agents/skills/host-checks/SKILL.md'), /etymon.invocation: manual/);
     const personal = join(c.home, '.codex/prompts/checks.md');
     await fs.mkdir(join(personal, '..'), { recursive: true });
     await fs.writeFile(personal, '---\ndescription: Personal checks\n---\nRun personal checks.');
@@ -146,7 +143,7 @@ export const handlers = {
   async commandSemantics(c) {
     await c.cli(['convert']);
     assert.deepEqual(Object.keys((await c.list()).authored.skill).sort(), ['git-review', 'review']);
-    const canonical = await c.read('.agents/etymon/skills/review/SKILL.md');
+    const canonical = await c.read('.agents/skills/review/SKILL.md');
     const strict = await c.cli(['sync', '--harness', 'codex,opencode', '--dry-run'], {
       expectedCode: 1,
     });
@@ -155,7 +152,7 @@ export const handlers = {
     const lossy = await c.sync('codex,opencode', ['--allow-lossy']);
     assert(lossy.diagnostics.some((d) => d.code === 'COMMAND_TEMPLATE_OMITTED'));
     assert(lossy.diagnostics.some((d) => d.code === 'SKILL_COMMAND_FIELDS_OMITTED'));
-    assert.equal(await c.read('.agents/etymon/skills/review/SKILL.md'), canonical);
+    assert.equal(await c.read('.agents/skills/review/SKILL.md'), canonical);
     await assert.rejects(c.read('must-not-exist'), { code: 'ENOENT' });
     await c.idempotent('codex,opencode', ['--allow-lossy']);
     const listing = await c.cli(['commands', 'add', 'owner/repo/local.md', '--list']);
@@ -714,7 +711,7 @@ export const handlers = {
       '.agents/etymon.toml',
       '.agents/etymon.lock',
       '.agents/etymon/agents/reviewer.json',
-      '.agents/etymon/skills/checks/SKILL.md',
+      '.agents/skills/checks/SKILL.md',
       '.agents/etymon/rules/api.md',
       '.github/workflows/ci.yml',
       'src/index.ts',
@@ -724,7 +721,6 @@ export const handlers = {
       '.mcp.json',
       '.codex/config.toml',
       '.codex/agents/reviewer.toml',
-      '.agents/skills/checks/SKILL.md',
       'packages/api/AGENTS.md',
       'packages/api/CLAUDE.md',
       'opencode.json',

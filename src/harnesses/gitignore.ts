@@ -34,6 +34,8 @@ export function projectIgnorePatterns(workspace: Workspace): string[] {
     '!/.agents/etymon.lock',
     '!/.agents/etymon/',
     '!/.agents/etymon/**',
+    '!/.agents/skills/',
+    '!/.agents/skills/**',
   ];
 }
 

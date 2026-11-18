@@ -145,7 +145,7 @@ export async function create(workspace: Workspace, input: unknown): Promise<Crea
       files: artifact.files,
       metadata: skillMetadata(artifact),
     } as Resource;
-    destination = join(workspace.agents, 'etymon/skills', draft.name, 'SKILL.md');
+    destination = join(workspace.agents, 'skills', draft.name, 'SKILL.md');
   } else if (draft.kind === 'agent') {
     const agent = agentSchema.parse({
       name: draft.name,

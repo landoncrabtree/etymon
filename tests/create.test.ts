@@ -35,8 +35,8 @@ it('creates editable skill sources with metadata and includes subsequently autho
     license: 'MIT',
     compatibility: 'Node.js 22+',
   });
-  expect(result.path).toBe(join(ws.agents, 'etymon/skills/checks/SKILL.md'));
-  expect((await ws.manifest()).skill.checks.path).toBe('etymon/skills/checks');
+  expect(result.path).toBe(join(ws.agents, 'skills/checks/SKILL.md'));
+  expect((await ws.manifest()).skill.checks.path).toBe('skills/checks');
   expect((await ws.lock()).dependencies).toEqual([]);
   expect((await readState(ws)).units.some((unit) => unit.path === result.path)).toBe(false);
   await fs.mkdir(join(result.path, '../assets'));
@@ -161,7 +161,7 @@ it('rejects invalid creation before writing and never overwrites an authored des
   ])
     await expect(create(ws, invalid)).rejects.toMatchObject({ code: 'INVALID_CREATION' });
   await expect(fs.access(ws.manifestPath)).rejects.toMatchObject({ code: 'ENOENT' });
-  const path = join(ws.agents, 'etymon/skills/checks/SKILL.md');
+  const path = join(ws.agents, 'skills/checks/SKILL.md');
   await fs.mkdir(join(path, '..'), { recursive: true });
   await fs.writeFile(path, 'Existing authored file.\n');
   await expect(create(ws, draft)).rejects.toMatchObject({ code: 'LOCAL_NAME_COLLISION' });

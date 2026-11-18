@@ -212,7 +212,7 @@ etymon mcp create --name local-server --transport stdio --command node \
 | `--env <values...>`        | MCP                   | STDIO environment values or references                                                       |
 | `--header <values...>`     | MCP                   | HTTP/SSE header values or references                                                         |
 
-The same flags work on no-source `add`. New skills go to `.agents/etymon/skills/<name>/SKILL.md`, agents to `.agents/etymon/agents/<name>.json`, and rules to `.agents/etymon/rules/<name>.md`. MCP remains inline. Creation registers source without generating native output; run sync to activate it. Duplicate names do not overwrite existing source.
+The same flags work on no-source `add`. New skills go to `.agents/skills/<name>/SKILL.md`, agents to `.agents/etymon/agents/<name>.json`, and rules to `.agents/etymon/rules/<name>.md`. MCP remains inline. Creation registers source without generating native output; run sync to activate it. Duplicate names do not overwrite existing source.
 
 ## Find and inspect
 

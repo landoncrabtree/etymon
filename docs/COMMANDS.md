@@ -10,7 +10,7 @@ etymon commands create --name checks --description "Run checks" \
 etymon sync --harness claude,codex
 ```
 
-Commands share the skill manifest, cache, external lock, update, and removal lifecycle. Local imports become editable bundles under `.agents/etymon/skills/`. External definitions are locked as skill dependencies with their source dialect and bundle digest. Sync restores exact locked bytes; update deliberately changes the resolution.
+Commands share the skill manifest, cache, external lock, update, and removal lifecycle. Local imports become editable bundles under `.agents/skills/`. External definitions are locked as skill dependencies with their source dialect and bundle digest. Sync restores exact locked bytes; update deliberately changes the resolution.
 
 ## Recognized sources
 
