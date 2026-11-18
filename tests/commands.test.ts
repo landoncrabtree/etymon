@@ -143,7 +143,7 @@ it('modernizes filtered commands, preserves strict policy, deduplicates projecti
   const ws = await fixture();
   await write(join(ws.root, '.cursor/commands/checks.md'), manual);
   await convert(ws, 'cursor');
-  const source = join(ws.agents, 'etymon/skills/checks/SKILL.md');
+  const source = join(ws.agents, 'skills/checks/SKILL.md');
   const canonical = await fs.readFile(source, 'utf8');
   await fs.rm(join(ws.root, '.cursor/commands'), { recursive: true });
   await sync(ws, ['claude', 'codex', 'copilot-cli', 'vscode-local', 'cursor', 'pi', 'omp', 'zed']);
@@ -188,7 +188,7 @@ it('keeps native argument, tool and context semantics, never runs substitutions,
   );
   await convert(ws, 'claude');
   expect(await exists(marker)).toBe(false);
-  const canonical = await fs.readFile(join(ws.agents, 'etymon/skills/review/SKILL.md'), 'utf8');
+  const canonical = await fs.readFile(join(ws.agents, 'skills/review/SKILL.md'), 'utf8');
   await sync(ws, ['claude']);
   expect(await fs.readFile(join(ws.root, '.claude/skills/review/SKILL.md'), 'utf8')).toContain(
     'allowed-tools: Read',
@@ -213,9 +213,7 @@ it('keeps native argument, tool and context semantics, never runs substitutions,
   expect(
     lossy.diagnostics.filter((d) => d.severity === 'warning').every((d) => d.resource && d.harness),
   ).toBe(true);
-  expect(await fs.readFile(join(ws.agents, 'etymon/skills/review/SKILL.md'), 'utf8')).toBe(
-    canonical,
-  );
+  expect(await fs.readFile(join(ws.agents, 'skills/review/SKILL.md'), 'utf8')).toBe(canonical);
   expect(await exists(marker)).toBe(false);
 });
 
@@ -294,15 +292,14 @@ it('uses local sources first, registers commands transactionally and removes onl
     commandFormat: 'auto',
   });
   expect(added.ids).toEqual(['skill:local/checks']);
-  expect((await ws.manifest()).skill.checks.path).toBe('etymon/skills/checks');
+  expect((await ws.manifest()).skill.checks.path).toBe('skills/checks');
   expect((await ws.lock()).dependencies).toEqual([]);
   expect(
     await add(ws, 'skill', { source: 'owner/repo/checks.md', names: [], commandFormat: 'auto' }),
   ).toEqual(added);
   await sync(ws, ['codex']);
   await remove(ws, 'skill', 'checks');
-  expect(await exists(join(ws.root, '.agents/skills/checks/SKILL.md'))).toBe(false);
-  expect(await exists(join(ws.root, '.agents/etymon/skills/checks/SKILL.md'))).toBe(true);
+  expect(await exists(join(ws.root, '.agents/skills/checks/SKILL.md'))).toBe(true);
   expect(await exists(join(ws.root, 'owner/repo/checks.md'))).toBe(true);
   await expect(
     add(ws, 'skill', { source: './absent.md', names: [], commandFormat: 'auto' }),

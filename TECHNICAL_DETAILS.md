@@ -57,14 +57,14 @@ Self-authored TOML + files ─────────────────�
 
 ### 1.2 Authoritative ownership
 
-| Input/state | Authoritative responsibility |
-|---|---|
-| `.agents/etymon.toml` | Optional authored-resource declarations, custom MCP connections, relationships and project-specific bindings/overrides |
-| `.agents/etymon/{skills,agents,rules,plugins,hooks}/` | Editable first-party or imported resource files |
-| `.agents/etymon/native/` | Optional sanitized, explicitly preserved native material; not automatically activated |
-| `.agents/etymon.lock` | CLI-owned external dependency requests, immutable resolutions, provenance, transitive graph, and pinned build-tool metadata |
-| `.agents/.etymon/` | Ignored machine state, input/output digests, ownership journal, runtime materialization and staging |
-| Native harness files | Generated owned entries/files, alongside unrelated user-owned content |
+| Input/state                                           | Authoritative responsibility                                                                                                |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `.agents/etymon.toml`                                 | Optional authored-resource declarations, custom MCP connections, relationships and project-specific bindings/overrides      |
+| `.agents/etymon/{skills,agents,rules,plugins,hooks}/` | Editable first-party or imported resource files                                                                             |
+| `.agents/etymon/native/`                              | Optional sanitized, explicitly preserved native material; not automatically activated                                       |
+| `.agents/etymon.lock`                                 | CLI-owned external dependency requests, immutable resolutions, provenance, transitive graph, and pinned build-tool metadata |
+| `.agents/.etymon/`                                    | Ignored machine state, input/output digests, ownership journal, runtime materialization and staging                         |
+| Native harness files                                  | Generated owned entries/files, alongside unrelated user-owned content                                                       |
 
 The earlier lock-only model is superseded for mixed environments. There is still no `agents.toml`: the authored file is **`etymon.toml`**, and it does not duplicate the external dependency list. A registry-only project may omit it. An authored-only project may use an empty external lock. A mixed environment requires the manifest, source files, and lock together.
 
@@ -72,12 +72,12 @@ Editing a local prompt changes authored source, not the external lock. Updating 
 
 ### 1.3 Resource scope and roadmap
 
-| Priority | Resources | Initial source strategy |
-|---|---|---|
-| P0 | Skills, MCP servers, agents | Agent Skills/skills.sh; official MCP Registry; Git/local agents; native import/export for the supported core |
-| P1 | Rules | Local/Git and native imports; always-on and directory scope first |
-| P2 | Plugins | Agent Plugins and native bundle importers; parent/child identity and safe decomposition |
-| P3 | Hooks | Small versioned event/handler contracts and deliberately implemented bridges |
+| Priority | Resources                   | Initial source strategy                                                                                      |
+| -------- | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| P0       | Skills, MCP servers, agents | Agent Skills/skills.sh; official MCP Registry; Git/local agents; native import/export for the supported core |
+| P1       | Rules                       | Local/Git and native imports; always-on and directory scope first                                            |
+| P2       | Plugins                     | Agent Plugins and native bundle importers; parent/child identity and safe decomposition                      |
+| P3       | Hooks                       | Small versioned event/handler contracts and deliberately implemented bridges                                 |
 
 The six resource abstractions are **Skill, MCP, Agent, Rule, Plugin, and Hook**. A **Harness** abstraction has a versioned importer and exporter. Native-only preservation is an outcome/envelope, not a seventh universal executable resource type.
 
@@ -107,13 +107,13 @@ A lock can pin external artifacts and generation rules. It cannot freeze a hoste
 
 ### 2.1 Evidence and support labels
 
-| Label | Meaning |
-|---|---|
-| **N — Native** | The reviewed native documentation/source describes the resource and a loading mechanism. This is not a claim of runtime testing. |
-| **P — Partial / different primitive** | Related functionality exists, but differs in scope, lifecycle, or semantics. |
-| **X — Extension-mediated** | Achievable through the harness's documented executable extension mechanism, not by dropping in a universal resource file. |
-| **? — Unverified** | This review did not establish a sufficiently precise public contract. Do not emit speculative configuration. |
-| **— — Explicitly unavailable in the stated surface** | Use only where a source explicitly excludes it. |
+| Label                                                | Meaning                                                                                                                          |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **N — Native**                                       | The reviewed native documentation/source describes the resource and a loading mechanism. This is not a claim of runtime testing. |
+| **P — Partial / different primitive**                | Related functionality exists, but differs in scope, lifecycle, or semantics.                                                     |
+| **X — Extension-mediated**                           | Achievable through the harness's documented executable extension mechanism, not by dropping in a universal resource file.        |
+| **? — Unverified**                                   | This review did not establish a sufficiently precise public contract. Do not emit speculative configuration.                     |
+| **— — Explicitly unavailable in the stated surface** | Use only where a source explicitly excludes it.                                                                                  |
 
 A “Native” entry is still subject to version, trust, entitlement, feature flags, and configuration precedence. “Unverified” does **not** mean the product cannot have the feature. These labels describe the **native product**, not shipped Etymon import/export support. Etymon certifies each direction and feature separately (Section 14).
 
@@ -162,27 +162,27 @@ Source under `.agents/etymon/` is separate from either read-set discovery or nat
 
 The linked harness sections provide the specs, locations, qualifications, and primary sources for these abbreviated **native-capability** entries. They are retained research inventory, not an Etymon implementation or conversion certification matrix. **Plugins** includes native bundles or executable extensions, not necessarily a common format.
 
-| Target | Skills | Agents | MCP | Plugins | Rules | Hooks |
-|---|---|---|---|---|---|---|
-| [Claude Code](#41-claude-code) | N | N | N | N | N | N |
-| [Codex](#42-codex) | N | N | N | N | N | N |
-| [Copilot CLI](#43-github-copilot-cli) | N | N | N | N | N | N |
-| [Copilot cloud](#44-github-copilot-cloud-agent) | N / repository | N | N / service config | ? | N | P / cloud subset |
-| [VS Code Local](#45-vs-code-local-agent) | N | N | N | N | N | N / preview |
-| [Gemini CLI](#46-gemini-cli) | N | N / gated features | N | N / extensions | N | N |
-| [Kiro](#47-kiro) | N | N | N | N / Powers | N / steering | N / versioned |
-| [Pi](#48-pi) | N | X | N | N / packages + code | N | X |
-| [Oh My Pi](#49-oh-my-pi-omp) | N | N | N | N / plugins | N | N / executable |
-| [OpenCode](#410-opencode) | N | N | N | N / executable | N | X |
-| [Cursor](#411-cursor) | N | N | N | N | N | N |
-| [Antigravity](#412-antigravity) | N | N / CLI verified | N | P / contract incomplete | N | N / surface-qualified |
-| [Roo Code](#413-roo-code) | N | P / custom modes | N | P / marketplace | N | ? |
-| [Cline](#414-cline) | N | P / built-in delegation | N | N CLI; — IDE | N | X / CLI SDK; ? IDE contract |
-| [Kilo](#415-kilo) | N | N | N | N / executable | N | X |
-| [Continue](#416-continue) | ? | P / agent configurations | N | P / configuration blocks | N | ? |
-| [Windsurf / Devin Cascade](#417-windsurf--devin-cascade) | N | ? custom file contract | N | ? portable contract | N | N |
-| [Amp](#418-amp) | N | X | N | N / executable | N | X |
-| [Zed native agent](#419-zed-native-agent-and-external-agent-boundary) | N | P / profiles | N | P / editor extensions | N | ? |
+| Target                                                                | Skills         | Agents                   | MCP                | Plugins                  | Rules        | Hooks                       |
+| --------------------------------------------------------------------- | -------------- | ------------------------ | ------------------ | ------------------------ | ------------ | --------------------------- |
+| [Claude Code](#41-claude-code)                                        | N              | N                        | N                  | N                        | N            | N                           |
+| [Codex](#42-codex)                                                    | N              | N                        | N                  | N                        | N            | N                           |
+| [Copilot CLI](#43-github-copilot-cli)                                 | N              | N                        | N                  | N                        | N            | N                           |
+| [Copilot cloud](#44-github-copilot-cloud-agent)                       | N / repository | N                        | N / service config | ?                        | N            | P / cloud subset            |
+| [VS Code Local](#45-vs-code-local-agent)                              | N              | N                        | N                  | N                        | N            | N / preview                 |
+| [Gemini CLI](#46-gemini-cli)                                          | N              | N / gated features       | N                  | N / extensions           | N            | N                           |
+| [Kiro](#47-kiro)                                                      | N              | N                        | N                  | N / Powers               | N / steering | N / versioned               |
+| [Pi](#48-pi)                                                          | N              | X                        | N                  | N / packages + code      | N            | X                           |
+| [Oh My Pi](#49-oh-my-pi-omp)                                          | N              | N                        | N                  | N / plugins              | N            | N / executable              |
+| [OpenCode](#410-opencode)                                             | N              | N                        | N                  | N / executable           | N            | X                           |
+| [Cursor](#411-cursor)                                                 | N              | N                        | N                  | N                        | N            | N                           |
+| [Antigravity](#412-antigravity)                                       | N              | N / CLI verified         | N                  | P / contract incomplete  | N            | N / surface-qualified       |
+| [Roo Code](#413-roo-code)                                             | N              | P / custom modes         | N                  | P / marketplace          | N            | ?                           |
+| [Cline](#414-cline)                                                   | N              | P / built-in delegation  | N                  | N CLI; — IDE             | N            | X / CLI SDK; ? IDE contract |
+| [Kilo](#415-kilo)                                                     | N              | N                        | N                  | N / executable           | N            | X                           |
+| [Continue](#416-continue)                                             | ?              | P / agent configurations | N                  | P / configuration blocks | N            | ?                           |
+| [Windsurf / Devin Cascade](#417-windsurf--devin-cascade)              | N              | ? custom file contract   | N                  | ? portable contract      | N            | N                           |
+| [Amp](#418-amp)                                                       | N              | X                        | N                  | N / executable           | N            | X                           |
+| [Zed native agent](#419-zed-native-agent-and-external-agent-boundary) | N              | P / profiles             | N                  | P / editor extensions    | N            | ?                           |
 
 Do not collapse Roo, Cline, Kilo, and Continue into one adapter because they share an editor distribution channel or historical ancestry. Their current public configuration contracts differ substantially. [RO-A] [CN-C] [KL-M] [CT-C]
 
@@ -196,14 +196,14 @@ Do not collapse Roo, Cline, Kilo, and Continue into one adapter because they sha
 
 **Target:** Claude Code native configuration, not Claude Desktop or a hosted managed-agent API.
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** `SKILL.md` with YAML frontmatter; Agent Skills plus Claude-specific invocation, tool, and fork-context fields. | P `.claude/skills/<name>/SKILL.md`, including discovered nested project roots; U `~/.claude/skills/`; B `skills/`; additional configured roots and managed skills. Legacy commands are another input format. [CL-S] | Generate one skill directory with all assets; do not treat Claude-only frontmatter as portable by default. |
-| Agents | **N.** Markdown/YAML subagents: `name`, `description`, prompt body, tools, model, and optional execution settings. | P `.claude/agents/`; U `~/.claude/agents/`; plugin agent directories; CLI-supplied definitions. [CL-A] | Native subagent renderer; explicitly resolve tool names and permission behavior. |
-| MCP | **N.** JSON `mcpServers`; stdio, HTTP, and legacy SSE definitions. | P `.mcp.json`; U `~/.claude.json`; project-local private registrations are also stored in the user's `.claude.json`, not a second repository MCP file. [CL-M] | Own managed keys inside the appropriate map; do not replace the full user file. |
-| Plugins | **N.** Claude plugin bundle; `.claude-plugin/plugin.json`, with components relative to the bundle root. | Native installed-plugin loader or `--plugin-dir`; B `skills/`, `agents/`, `commands/`, `hooks/hooks.json`, `.mcp.json`. [CL-P] | Pin a local bundle and register through a supported loader; do not infer installation from the existence of a manifest alone. |
-| Rules | **N.** Markdown memory/instructions; modular rules can have `paths` frontmatter. | P `CLAUDE.md`, `.claude/CLAUDE.md`, hierarchical `CLAUDE.md`, `.claude/rules/**/*.md`; U `~/.claude/CLAUDE.md`, `~/.claude/rules/`. [CL-R] | Prefer a separate managed modular rule where semantics fit; preserve hierarchy and imports. |
-| Hooks | **N.** JSON `hooks`, event → matcher groups → handlers; command and additional native handler types. | P `.claude/settings.json`, `.claude/settings.local.json`; U `~/.claude/settings.json`; B `hooks/hooks.json`; applicable agent frontmatter. [CL-H] | Merge only owned handlers; event spelling alone does not establish portability. |
+| Resource | Support and specification                                                                                             | Supported locations / loading                                                                                                                                                                                       | Etymon direction                                                                                                              |
+| -------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** `SKILL.md` with YAML frontmatter; Agent Skills plus Claude-specific invocation, tool, and fork-context fields. | P `.claude/skills/<name>/SKILL.md`, including discovered nested project roots; U `~/.claude/skills/`; B `skills/`; additional configured roots and managed skills. Legacy commands are another input format. [CL-S] | Generate one skill directory with all assets; do not treat Claude-only frontmatter as portable by default.                    |
+| Agents   | **N.** Markdown/YAML subagents: `name`, `description`, prompt body, tools, model, and optional execution settings.    | P `.claude/agents/`; U `~/.claude/agents/`; plugin agent directories; CLI-supplied definitions. [CL-A]                                                                                                              | Native subagent renderer; explicitly resolve tool names and permission behavior.                                              |
+| MCP      | **N.** JSON `mcpServers`; stdio, HTTP, and legacy SSE definitions.                                                    | P `.mcp.json`; U `~/.claude.json`; project-local private registrations are also stored in the user's `.claude.json`, not a second repository MCP file. [CL-M]                                                       | Own managed keys inside the appropriate map; do not replace the full user file.                                               |
+| Plugins  | **N.** Claude plugin bundle; `.claude-plugin/plugin.json`, with components relative to the bundle root.               | Native installed-plugin loader or `--plugin-dir`; B `skills/`, `agents/`, `commands/`, `hooks/hooks.json`, `.mcp.json`. [CL-P]                                                                                      | Pin a local bundle and register through a supported loader; do not infer installation from the existence of a manifest alone. |
+| Rules    | **N.** Markdown memory/instructions; modular rules can have `paths` frontmatter.                                      | P `CLAUDE.md`, `.claude/CLAUDE.md`, hierarchical `CLAUDE.md`, `.claude/rules/**/*.md`; U `~/.claude/CLAUDE.md`, `~/.claude/rules/`. [CL-R]                                                                          | Prefer a separate managed modular rule where semantics fit; preserve hierarchy and imports.                                   |
+| Hooks    | **N.** JSON `hooks`, event → matcher groups → handlers; command and additional native handler types.                  | P `.claude/settings.json`, `.claude/settings.local.json`; U `~/.claude/settings.json`; B `hooks/hooks.json`; applicable agent frontmatter. [CL-H]                                                                   | Merge only owned handlers; event spelling alone does not establish portability.                                               |
 
 **Mapping hazards.** Claude's documented skill precedence can put personal skills above project skills. Plugin-provided subagents ignore certain frontmatter features, including hooks, MCP-server declarations, and permission mode. Flattening such a subagent into a standalone file can therefore change effective authority. A plugin's root `CLAUDE.md` is not automatically its instruction source. [CL-S] [CL-A] [CL-P]
 
@@ -213,14 +213,14 @@ Do not collapse Roo, Cline, Kilo, and Continue into one adapter because they sha
 
 **Target:** Native Codex configuration. Keep app, CLI, IDE, and hosted availability as separate surface capabilities where their loaders differ.
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills; optional OpenAI-specific `agents/openai.yaml` metadata. | P `.agents/skills/` discovered from working directory toward repository root; U `~/.agents/skills/`; administrator `/etc/codex/skills/`; bundled sources. [CX-S] | Shared skill path is valid but has cross-harness visibility. Preserve OpenAI metadata as a native extension. |
-| Agents | **N.** TOML files with required `name`, `description`, `developer_instructions`; additional agent configuration forms a child-session config layer. | P `.codex/agents/*.toml`; U `~/.codex/agents/*.toml`; `[agents]` controls in Codex config. [CX-A] | Translate prompt body into `developer_instructions`; filename alone is not the agent identity. |
-| MCP | **N.** TOML `[mcp_servers.<id>]`; command/args or remote URL, native auth and tool-filter fields. | U `~/.codex/config.toml`; trusted P `.codex/config.toml`; config-root overrides must be respected. [CX-M] | Structured TOML edits; preserve unrelated model, approval, sandbox, and authentication settings. |
-| Plugins | **N.** Agent Plugins root `plugin.json`; OpenAI extensions. Compatibility packaging also exists. | Native plugin loader; B root `skills/`, `mcp.json`; compatibility `.codex-plugin/plugin.json`; native hook/application metadata where supported. [CX-P] | Prefer the declared portable spec version. Do not confuse compatibility `.mcp.json` with the standard's typed `mcp.json`. |
-| Rules | **N.** Hierarchical `AGENTS.md` and `AGENTS.override.md`. | U Codex home instruction files; P repository root through working directory. Configurable discovery and size limits apply. [CX-R] | Map always-on/directory rules, but do not pretend arbitrary file-glob activation is equivalent. |
-| Hooks | **N.** Native hook configuration and plugin hooks. | U `~/.codex/hooks.json`; P `.codex/hooks.json`; inline hooks configuration and B `hooks/hooks.json`/manifest-selected paths. [CX-H] | Sources can accumulate; prevent duplicate callbacks across inline, standalone, and plugin output. |
+| Resource | Support and specification                                                                                                                           | Supported locations / loading                                                                                                                                    | Etymon direction                                                                                                          |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** Agent Skills; optional OpenAI-specific `agents/openai.yaml` metadata.                                                                        | P `.agents/skills/` discovered from working directory toward repository root; U `~/.agents/skills/`; administrator `/etc/codex/skills/`; bundled sources. [CX-S] | Shared skill path is valid but has cross-harness visibility. Preserve OpenAI metadata as a native extension.              |
+| Agents   | **N.** TOML files with required `name`, `description`, `developer_instructions`; additional agent configuration forms a child-session config layer. | P `.codex/agents/*.toml`; U `~/.codex/agents/*.toml`; `[agents]` controls in Codex config. [CX-A]                                                                | Translate prompt body into `developer_instructions`; filename alone is not the agent identity.                            |
+| MCP      | **N.** TOML `[mcp_servers.<id>]`; command/args or remote URL, native auth and tool-filter fields.                                                   | U `~/.codex/config.toml`; trusted P `.codex/config.toml`; config-root overrides must be respected. [CX-M]                                                        | Structured TOML edits; preserve unrelated model, approval, sandbox, and authentication settings.                          |
+| Plugins  | **N.** Agent Plugins root `plugin.json`; OpenAI extensions. Compatibility packaging also exists.                                                    | Native plugin loader; B root `skills/`, `mcp.json`; compatibility `.codex-plugin/plugin.json`; native hook/application metadata where supported. [CX-P]          | Prefer the declared portable spec version. Do not confuse compatibility `.mcp.json` with the standard's typed `mcp.json`. |
+| Rules    | **N.** Hierarchical `AGENTS.md` and `AGENTS.override.md`.                                                                                           | U Codex home instruction files; P repository root through working directory. Configurable discovery and size limits apply. [CX-R]                                | Map always-on/directory rules, but do not pretend arbitrary file-glob activation is equivalent.                           |
+| Hooks    | **N.** Native hook configuration and plugin hooks.                                                                                                  | U `~/.codex/hooks.json`; P `.codex/hooks.json`; inline hooks configuration and B `hooks/hooks.json`/manifest-selected paths. [CX-H]                              | Sources can accumulate; prevent duplicate callbacks across inline, standalone, and plugin output.                         |
 
 **Mapping hazards.** Agent files inherit omitted session settings. A supposedly minimal agent can inherit MCP access or other configuration. The compiler must distinguish deliberate inheritance from a requested restrictive environment. Native plugin overlay precedence also matters; an OpenAI namespaced extension can replace a compatibility overlay rather than merge field by field. [CX-A] [CX-P]
 
@@ -228,14 +228,14 @@ Do not collapse Roo, Cline, Kilo, and Continue into one adapter because they sha
 
 ### 4.3 GitHub Copilot CLI
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills with CLI additions such as invocation/tool-approval metadata. | P `.github/skills/`, `.agents/skills/`, `.claude/skills/`; U `~/.copilot/skills/`, `~/.agents/skills/`; plugin/configured sources. [GH-S] | Prefer `.github/skills/` for project output and `~/.copilot/skills/` for user output; inspect shared/foreign aliases. An approval hint is not a deny policy. |
-| Agents | **N.** Markdown profiles, commonly `*.agent.md`; YAML description/tools and prompt body. | P `.github/agents/`; U `~/.copilot/agents/`; organization/enterprise agent repositories; Claude-compatible project directories are also documented by the plugin reference. [GH-A] [GH-A2] | Generate `.github/agents/<id>.agent.md`; account for user-level overrides and filename-derived identity. |
-| MCP | **N.** JSON `mcpServers` or accepted bare map; local stdio uses `type: "local"`; remote HTTP has its own fields. | U `~/.copilot/mcp-config.json`; P `.mcp.json` or `.github/mcp.json`, searched through project ancestors; additional CLI config. [GH-M] | Prefer owned entries in `.github/mcp.json` for project output; inspect root `.mcp.json` as another read source and collision risk. |
-| Plugins | **N.** Agent Plugins and legacy Copilot/Claude manifests. | Native plugin installation or `--plugin-dir`; U `~/.copilot/installed-plugins/`; standard root `plugin.json`; legacy `.plugin/`, `.github/plugin/`, `.claude-plugin/` manifest locations. [GH-P] | Pin the plugin spec and source; disable/avoid unmanaged auto-updating when claiming locked restoration. |
-| Rules | **N.** Repository/personal instructions, path-specific instruction files, and compatible agent instruction files. | P `.github/copilot-instructions.md`, `.github/instructions/**/*.instructions.md`, `AGENTS.md`, `CLAUDE.md`, `.claude/CLAUDE.md`, `GEMINI.md`; U `~/.copilot/copilot-instructions.md`, `instructions/`. [GH-R] | Preserve `applyTo` behavior and avoid duplicating the same text through aliases. |
-| Hooks | **N.** Versioned JSON with CLI event names such as `preToolUse`; shell-specific handler fields. | P `.github/hooks/*.json`; U `~/.copilot/hooks/`; additional settings/plugin/managed sources. [GH-H] | Use a CLI-specific hook adapter; do not copy VS Code's Local-agent hook dialect unchanged. |
+| Resource | Support and specification                                                                                         | Supported locations / loading                                                                                                                                                                                 | Etymon direction                                                                                                                                             |
+| -------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Skills   | **N.** Agent Skills with CLI additions such as invocation/tool-approval metadata.                                 | P `.github/skills/`, `.agents/skills/`, `.claude/skills/`; U `~/.copilot/skills/`, `~/.agents/skills/`; plugin/configured sources. [GH-S]                                                                     | Prefer `.github/skills/` for project output and `~/.copilot/skills/` for user output; inspect shared/foreign aliases. An approval hint is not a deny policy. |
+| Agents   | **N.** Markdown profiles, commonly `*.agent.md`; YAML description/tools and prompt body.                          | P `.github/agents/`; U `~/.copilot/agents/`; organization/enterprise agent repositories; Claude-compatible project directories are also documented by the plugin reference. [GH-A] [GH-A2]                    | Generate `.github/agents/<id>.agent.md`; account for user-level overrides and filename-derived identity.                                                     |
+| MCP      | **N.** JSON `mcpServers` or accepted bare map; local stdio uses `type: "local"`; remote HTTP has its own fields.  | U `~/.copilot/mcp-config.json`; P `.mcp.json` or `.github/mcp.json`, searched through project ancestors; additional CLI config. [GH-M]                                                                        | Prefer owned entries in `.github/mcp.json` for project output; inspect root `.mcp.json` as another read source and collision risk.                           |
+| Plugins  | **N.** Agent Plugins and legacy Copilot/Claude manifests.                                                         | Native plugin installation or `--plugin-dir`; U `~/.copilot/installed-plugins/`; standard root `plugin.json`; legacy `.plugin/`, `.github/plugin/`, `.claude-plugin/` manifest locations. [GH-P]              | Pin the plugin spec and source; disable/avoid unmanaged auto-updating when claiming locked restoration.                                                      |
+| Rules    | **N.** Repository/personal instructions, path-specific instruction files, and compatible agent instruction files. | P `.github/copilot-instructions.md`, `.github/instructions/**/*.instructions.md`, `AGENTS.md`, `CLAUDE.md`, `.claude/CLAUDE.md`, `GEMINI.md`; U `~/.copilot/copilot-instructions.md`, `instructions/`. [GH-R] | Preserve `applyTo` behavior and avoid duplicating the same text through aliases.                                                                             |
+| Hooks    | **N.** Versioned JSON with CLI event names such as `preToolUse`; shell-specific handler fields.                   | P `.github/hooks/*.json`; U `~/.copilot/hooks/`; additional settings/plugin/managed sources. [GH-H]                                                                                                           | Use a CLI-specific hook adapter; do not copy VS Code's Local-agent hook dialect unchanged.                                                                   |
 
 **Mapping hazards.** User custom agents can override repository definitions. The agent configuration reference permits omitted tool lists to expose all tools, while an empty list means none; unknown tools may be ignored. A broken restriction must therefore be caught before generation. Some fields accepted by one Copilot surface are ignored by another. [GH-A] [GH-A2]
 
@@ -245,14 +245,14 @@ Do not collapse Roo, Cline, Kilo, and Continue into one adapter because they sha
 
 This is a remote execution target, not the CLI running in a local directory. The installation mechanism may be an exported repository artifact or a settings operation rather than a filesystem write on the current machine.
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N, repository-scoped.** Agent Skills. | Repository skill directories supported by the cloud agent; do not assume laptop user directories are transferred. [GH-CS] | Generate committed/bootstrap-accessible skills; validate cloud discovery independently. |
-| Agents | **N.** Copilot agent-profile format, with surface-specific unsupported fields. | Repository `.github/agents/`; organization/enterprise sources. [GH-A] | Export an agent profile; do not retain IDE-only handoffs as though enforced. |
-| MCP | **N, service configuration.** Repository MCP settings and applicable agent-level `mcp-servers`. | Repository settings/service configuration; associated secret environment. This is not equivalent to writing local `~/.copilot/mcp-config.json`. [GH-CM] [GH-A] | Return a pending settings/export operation unless an authorized integration applies it. |
-| Plugins | **?** CLI plugin support does not establish cloud support. | No cloud-general plugin installation contract established in this review. | Flatten verified components only, and report all remaining components. |
-| Rules | **N.** Cloud-supported repository instructions. | P `.github/copilot-instructions.md`, `.github/instructions/**/*.instructions.md`, hierarchical `AGENTS.md`; compatible root `CLAUDE.md` / `GEMINI.md`. [GH-CR] | Generate repository-visible output and preserve target exclusions. |
-| Hooks | **P.** Cloud-supported hook subset. | Tracked repository `.github/hooks/*.json`; user/plugin sources are not automatically equivalent. [GH-H] | Validate event support against the cloud profile. |
+| Resource | Support and specification                                                                       | Supported locations / loading                                                                                                                                  | Etymon direction                                                                        |
+| -------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Skills   | **N, repository-scoped.** Agent Skills.                                                         | Repository skill directories supported by the cloud agent; do not assume laptop user directories are transferred. [GH-CS]                                      | Generate committed/bootstrap-accessible skills; validate cloud discovery independently. |
+| Agents   | **N.** Copilot agent-profile format, with surface-specific unsupported fields.                  | Repository `.github/agents/`; organization/enterprise sources. [GH-A]                                                                                          | Export an agent profile; do not retain IDE-only handoffs as though enforced.            |
+| MCP      | **N, service configuration.** Repository MCP settings and applicable agent-level `mcp-servers`. | Repository settings/service configuration; associated secret environment. This is not equivalent to writing local `~/.copilot/mcp-config.json`. [GH-CM] [GH-A] | Return a pending settings/export operation unless an authorized integration applies it. |
+| Plugins  | **?** CLI plugin support does not establish cloud support.                                      | No cloud-general plugin installation contract established in this review.                                                                                      | Flatten verified components only, and report all remaining components.                  |
+| Rules    | **N.** Cloud-supported repository instructions.                                                 | P `.github/copilot-instructions.md`, `.github/instructions/**/*.instructions.md`, hierarchical `AGENTS.md`; compatible root `CLAUDE.md` / `GEMINI.md`. [GH-CR] | Generate repository-visible output and preserve target exclusions.                      |
+| Hooks    | **P.** Cloud-supported hook subset.                                                             | Tracked repository `.github/hooks/*.json`; user/plugin sources are not automatically equivalent. [GH-H]                                                        | Validate event support against the cloud profile.                                       |
 
 **Cloud MCP constraints:** the reviewed repository schema requires a tool selection and transport type. It supports tools rather than all MCP primitives, and does not support remote OAuth servers in this surface. Secret/variable references use the service’s `COPILOT_MCP_` naming requirements. These restrictions must be validated separately from CLI support. [GH-CM]
 
@@ -262,14 +262,14 @@ This is a remote execution target, not the CLI running in a local directory. The
 
 This adapter means VS Code's **Local agent customization system**. Claude/Codex sessions hosted by the editor retain their own native contracts.
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills with local-agent extensions. | P `.github/skills/`, `.claude/skills/`, `.agents/skills/`; U `~/.copilot/skills/`, `~/.claude/skills/`, `~/.agents/skills/`; configured locations. [VS-S] | Allocate one discoverable copy; check flags for experimental extensions. |
-| Agents | **N.** `*.agent.md` with YAML fields, tool selection, model, handoffs, and visibility controls. | P `.github/agents/` and supported `.claude/agents/` compatibility; U `~/.copilot/agents/` / `.claude/agents/` and configured locations. [VS-A] | Keep handoffs as IDE-specific workflow metadata unless another target explicitly implements them. |
-| MCP | **N.** JSON **`servers`**, not `mcpServers`; interactive `inputs` supported. | P `.vscode/mcp.json`; workspace configuration; user-profile MCP configuration opened through VS Code's MCP configuration command. [VS-M] | Resolve the actual profile/remote context; never hard-code one OS's user directory. |
-| Plugins | **N.** Agent Plugins and compatible native plugin bundles; client extras in `com.github.copilot`. | Native plugin/marketplace loader; B root `plugin.json`, `skills/`, `mcp.json`, namespaced agent/rule/hook components. [VS-P] | Use native registration or flatten supported resources. A VSIX extension is a different artifact class. |
-| Rules | **N.** Repository instructions, `*.instructions.md`, and `AGENTS.md`. | P `.github/copilot-instructions.md`, `.github/instructions/`, `AGENTS.md`; configured/personal instruction locations. [VS-R] | Preserve `applyTo`, manual attachment, and other activation distinctions. |
-| Hooks | **N, preview.** Local-agent JSON hooks using PascalCase lifecycle events. | P `.github/hooks/*.json`; U `~/.copilot/hooks/`; agent/plugin hooks. Claude settings compatibility requires the applicable setting. [VS-H] | Separate from CLI camelCase hooks; never write competing files that both loaders execute. |
+| Resource | Support and specification                                                                         | Supported locations / loading                                                                                                                             | Etymon direction                                                                                        |
+| -------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** Agent Skills with local-agent extensions.                                                  | P `.github/skills/`, `.claude/skills/`, `.agents/skills/`; U `~/.copilot/skills/`, `~/.claude/skills/`, `~/.agents/skills/`; configured locations. [VS-S] | Allocate one discoverable copy; check flags for experimental extensions.                                |
+| Agents   | **N.** `*.agent.md` with YAML fields, tool selection, model, handoffs, and visibility controls.   | P `.github/agents/` and supported `.claude/agents/` compatibility; U `~/.copilot/agents/` / `.claude/agents/` and configured locations. [VS-A]            | Keep handoffs as IDE-specific workflow metadata unless another target explicitly implements them.       |
+| MCP      | **N.** JSON **`servers`**, not `mcpServers`; interactive `inputs` supported.                      | P `.vscode/mcp.json`; workspace configuration; user-profile MCP configuration opened through VS Code's MCP configuration command. [VS-M]                  | Resolve the actual profile/remote context; never hard-code one OS's user directory.                     |
+| Plugins  | **N.** Agent Plugins and compatible native plugin bundles; client extras in `com.github.copilot`. | Native plugin/marketplace loader; B root `plugin.json`, `skills/`, `mcp.json`, namespaced agent/rule/hook components. [VS-P]                              | Use native registration or flatten supported resources. A VSIX extension is a different artifact class. |
+| Rules    | **N.** Repository instructions, `*.instructions.md`, and `AGENTS.md`.                             | P `.github/copilot-instructions.md`, `.github/instructions/`, `AGENTS.md`; configured/personal instruction locations. [VS-R]                              | Preserve `applyTo`, manual attachment, and other activation distinctions.                               |
+| Hooks    | **N, preview.** Local-agent JSON hooks using PascalCase lifecycle events.                         | P `.github/hooks/*.json`; U `~/.copilot/hooks/`; agent/plugin hooks. Claude settings compatibility requires the applicable setting. [VS-H]                | Separate from CLI camelCase hooks; never write competing files that both loaders execute.               |
 
 **Hook compatibility warning:** VS Code Local can parse the numeric-version/camelCase Copilot hook format, but sends Local runtime payloads. Its optional Claude-settings compatibility ignores matcher values. Therefore syntactic acceptance is not proof that filtering or handler behavior is preserved. [VS-H]
 
@@ -277,14 +277,14 @@ This adapter means VS Code's **Local agent customization system**. Claude/Codex 
 
 ### 4.6 Gemini CLI
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills, with activation/permission behavior. | P `.gemini/skills/`, `.agents/skills/`; U `~/.gemini/skills/`, `~/.agents/skills/`; extension skills. [GE-S] | Prefer `.gemini/skills/` for project output and the native user root for global output; inspect shared paths rather than installing both. |
-| Agents | **N; feature-gated capabilities.** Markdown/YAML subagents, including local and remote forms. | P `.gemini/agents/*.md`; U `~/.gemini/agents/*.md`; extension agents. [GE-A] | Local isolated agent and remote A2A agent are different canonical variants. Record required feature flags. |
-| MCP | **N.** `mcpServers` in JSON settings. Stdio command/args; **`httpUrl` for Streamable HTTP**, **`url` for SSE**. | P `.gemini/settings.json`; U `~/.gemini/settings.json`; extension definitions. [GE-M] | Do not infer transport from a generic field named `url`; convert explicitly. |
-| Plugins | **N, called extensions.** `gemini-extension.json`, with MCP/context metadata and bundled resources. | U `~/.gemini/extensions/<name>/`; native install/link operations; B `skills/`, `agents/`, `hooks/hooks.json`. [GE-P] | Use an extension importer/exporter; installation scope and workspace enablement are distinct. |
-| Rules | **N.** `GEMINI.md`, configurable context filenames, and imports. | U `~/.gemini/GEMINI.md`; workspace/ancestor context and contextual directory discovery. [GE-R] | Keep hierarchical discovery; changing `context.fileName` is a global behavioral change, not a harmless file rename. |
-| Hooks | **N.** Settings hooks and extension hooks; tool, model, and session event families. | P/U `.gemini/settings.json`; B `hooks/hooks.json`. [GE-H] | Translate event payloads and decisions, not just event names. |
+| Resource | Support and specification                                                                                       | Supported locations / loading                                                                                        | Etymon direction                                                                                                                          |
+| -------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** Agent Skills, with activation/permission behavior.                                                       | P `.gemini/skills/`, `.agents/skills/`; U `~/.gemini/skills/`, `~/.agents/skills/`; extension skills. [GE-S]         | Prefer `.gemini/skills/` for project output and the native user root for global output; inspect shared paths rather than installing both. |
+| Agents   | **N; feature-gated capabilities.** Markdown/YAML subagents, including local and remote forms.                   | P `.gemini/agents/*.md`; U `~/.gemini/agents/*.md`; extension agents. [GE-A]                                         | Local isolated agent and remote A2A agent are different canonical variants. Record required feature flags.                                |
+| MCP      | **N.** `mcpServers` in JSON settings. Stdio command/args; **`httpUrl` for Streamable HTTP**, **`url` for SSE**. | P `.gemini/settings.json`; U `~/.gemini/settings.json`; extension definitions. [GE-M]                                | Do not infer transport from a generic field named `url`; convert explicitly.                                                              |
+| Plugins  | **N, called extensions.** `gemini-extension.json`, with MCP/context metadata and bundled resources.             | U `~/.gemini/extensions/<name>/`; native install/link operations; B `skills/`, `agents/`, `hooks/hooks.json`. [GE-P] | Use an extension importer/exporter; installation scope and workspace enablement are distinct.                                             |
+| Rules    | **N.** `GEMINI.md`, configurable context filenames, and imports.                                                | U `~/.gemini/GEMINI.md`; workspace/ancestor context and contextual directory discovery. [GE-R]                       | Keep hierarchical discovery; changing `context.fileName` is a global behavioral change, not a harmless file rename.                       |
+| Hooks    | **N.** Settings hooks and extension hooks; tool, model, and session event families.                             | P/U `.gemini/settings.json`; B `hooks/hooks.json`. [GE-H]                                                            | Translate event payloads and decisions, not just event names.                                                                             |
 
 **Preferred P0 writes:** `.gemini/skills/<name>/`, `.gemini/agents/<name>.md`, and owned `mcpServers` in `.gemini/settings.json`.
 
@@ -292,14 +292,14 @@ This adapter means VS Code's **Local agent customization system**. Claude/Codex 
 
 **Profile boundary:** the current shared documentation covers IDE 1.x / CLI 3.x and points separately to legacy releases. Older `.kiro.hook` examples must not define the current adapter. [KI-C]
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** `SKILL.md`; agent resources can refer to skills. | P `.kiro/skills/`; U `~/.kiro/skills/`; Powers/bundled skills. [KI-S] [KI-C] | Generate native skill directory or a declared agent resource reference. |
-| Agents | **N.** JSON or Markdown/YAML definitions; tools, exclusions, resources, MCP/Powers inclusion, permissions, and prompt fields. | P `.kiro/agents/`; U `~/.kiro/agents/`. [KI-A] | Model selectable agents and delegated execution explicitly; preserve `includeMcpJson` / Powers exposure decisions. |
-| MCP | **N.** JSON `mcpServers`; local and remote servers. | P `.kiro/settings/mcp.json`; U `~/.kiro/settings/mcp.json`; applicable agent/Powers configuration. [KI-M] [KI-C] | Own named server entries; do not broaden agent MCP inclusion automatically. |
-| Plugins | **N, called Powers.** Agent Plugins `plugin.json` or legacy `POWER.md`. | Native Powers install/import from local directory or repository; bundle-managed resources. A stable cache directory is not established here as a write API. [KI-P] [KI-PI] | Use supported registration. Standard Power MCPs are internally managed; flattening can change activation lifetime. |
-| Rules | **N, steering.** Markdown/YAML with `inclusion` and file-match/activation settings. | P `.kiro/steering/*.md`; U `~/.kiro/steering/*.md`. [KI-R] | Map always/file-match/manual/automatic modes only after comparing trigger semantics. |
-| Hooks | **N.** Current versioned JSON hook list with `trigger`, `matcher`, and `action`. | P `.kiro/hooks/*.json`; U `~/.kiro/hooks/*.json`. [KI-H] | Current renderer differs from legacy IDE and CLI hooks. Editor save events cannot be substituted for tool completion. |
+| Resource | Support and specification                                                                                                     | Supported locations / loading                                                                                                                                              | Etymon direction                                                                                                      |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** `SKILL.md`; agent resources can refer to skills.                                                                       | P `.kiro/skills/`; U `~/.kiro/skills/`; Powers/bundled skills. [KI-S] [KI-C]                                                                                               | Generate native skill directory or a declared agent resource reference.                                               |
+| Agents   | **N.** JSON or Markdown/YAML definitions; tools, exclusions, resources, MCP/Powers inclusion, permissions, and prompt fields. | P `.kiro/agents/`; U `~/.kiro/agents/`. [KI-A]                                                                                                                             | Model selectable agents and delegated execution explicitly; preserve `includeMcpJson` / Powers exposure decisions.    |
+| MCP      | **N.** JSON `mcpServers`; local and remote servers.                                                                           | P `.kiro/settings/mcp.json`; U `~/.kiro/settings/mcp.json`; applicable agent/Powers configuration. [KI-M] [KI-C]                                                           | Own named server entries; do not broaden agent MCP inclusion automatically.                                           |
+| Plugins  | **N, called Powers.** Agent Plugins `plugin.json` or legacy `POWER.md`.                                                       | Native Powers install/import from local directory or repository; bundle-managed resources. A stable cache directory is not established here as a write API. [KI-P] [KI-PI] | Use supported registration. Standard Power MCPs are internally managed; flattening can change activation lifetime.    |
+| Rules    | **N, steering.** Markdown/YAML with `inclusion` and file-match/activation settings.                                           | P `.kiro/steering/*.md`; U `~/.kiro/steering/*.md`. [KI-R]                                                                                                                 | Map always/file-match/manual/automatic modes only after comparing trigger semantics.                                  |
+| Hooks    | **N.** Current versioned JSON hook list with `trigger`, `matcher`, and `action`.                                              | P `.kiro/hooks/*.json`; U `~/.kiro/hooks/*.json`. [KI-H]                                                                                                                   | Current renderer differs from legacy IDE and CLI hooks. Editor save events cannot be substituted for tool completion. |
 
 **Preferred P0 writes:** `.kiro/skills/`, `.kiro/agents/`, `.kiro/settings/mcp.json`. Power installation remains a P2 registration operation rather than an invented cache-file contract.
 
@@ -307,14 +307,14 @@ This adapter means VS Code's **Local agent customization system**. Claude/Codex 
 
 **Source basis:** current coding-agent documentation in the official `earendil-works/pi` repository. Do not assume historical Pi limitations still apply. [PI-C]
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills. | P `.pi/skills/`, discovered `.agents/skills/`; U `~/.pi/agent/skills/`, `~/.agents/skills/`; package/configured paths. [PI-S] | Use a single discovered destination; preserve the complete skill tree. |
-| Agents | **X.** Official subagent example extension; Markdown/YAML definitions consumed by that extension. | U `~/.pi/agent/agents/*.md`; P `.pi/agents/*.md` only when the extension's agent scope enables project definitions. [PI-A] | Install and pin the extension as an explicit dependency; copying agent files alone is insufficient. |
-| MCP | **N, implemented by a built-in extension.** JSON `mcpServers`; stdio and Streamable HTTP. | P `.pi/mcp.json`; U `~/.pi/agent/mcp.json`. Legacy SSE is explicitly rejected by the reviewed implementation. [PI-M] | Verify the active MCP extension; another extension can replace the built-in command. |
-| Plugins | **N, packages/extensions.** `package.json` with `pi` resources; npm/Git/local packages and executable extensions. | P `.pi/settings.json` package entries and `.pi/extensions/`; U `~/.pi/agent/settings.json`, `extensions/`; package resource directories. [PI-P] [PI-C] | Lock executable package artifacts and their runtime dependencies; do not treat them as portable Markdown bundles. |
-| Rules | **N.** Agent instruction files and native context loading. | U `~/.pi/agent/AGENTS.override.md`, `AGENTS.md`, `CLAUDE.md`; project/ancestor instruction discovery. [PI-C] | Use the actual context loader's precedence and trust boundary; inspect ambient files. |
-| Hooks | **X.** TypeScript/JavaScript Extension API events such as tool calls and session events. | P `.pi/extensions/`; U `~/.pi/agent/extensions/`; loaded packages/explicit extension paths. [PI-H] | A portable hook needs a generated, pinned executable bridge; no generic native hooks JSON is established. |
+| Resource | Support and specification                                                                                         | Supported locations / loading                                                                                                                          | Etymon direction                                                                                                  |
+| -------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** Agent Skills.                                                                                              | P `.pi/skills/`, discovered `.agents/skills/`; U `~/.pi/agent/skills/`, `~/.agents/skills/`; package/configured paths. [PI-S]                          | Use a single discovered destination; preserve the complete skill tree.                                            |
+| Agents   | **X.** Official subagent example extension; Markdown/YAML definitions consumed by that extension.                 | U `~/.pi/agent/agents/*.md`; P `.pi/agents/*.md` only when the extension's agent scope enables project definitions. [PI-A]                             | Install and pin the extension as an explicit dependency; copying agent files alone is insufficient.               |
+| MCP      | **N, implemented by a built-in extension.** JSON `mcpServers`; stdio and Streamable HTTP.                         | P `.pi/mcp.json`; U `~/.pi/agent/mcp.json`. Legacy SSE is explicitly rejected by the reviewed implementation. [PI-M]                                   | Verify the active MCP extension; another extension can replace the built-in command.                              |
+| Plugins  | **N, packages/extensions.** `package.json` with `pi` resources; npm/Git/local packages and executable extensions. | P `.pi/settings.json` package entries and `.pi/extensions/`; U `~/.pi/agent/settings.json`, `extensions/`; package resource directories. [PI-P] [PI-C] | Lock executable package artifacts and their runtime dependencies; do not treat them as portable Markdown bundles. |
+| Rules    | **N.** Agent instruction files and native context loading.                                                        | U `~/.pi/agent/AGENTS.override.md`, `AGENTS.md`, `CLAUDE.md`; project/ancestor instruction discovery. [PI-C]                                           | Use the actual context loader's precedence and trust boundary; inspect ambient files.                             |
+| Hooks    | **X.** TypeScript/JavaScript Extension API events such as tool calls and session events.                          | P `.pi/extensions/`; U `~/.pi/agent/extensions/`; loaded packages/explicit extension paths. [PI-H]                                                     | A portable hook needs a generated, pinned executable bridge; no generic native hooks JSON is established.         |
 
 **Agent limitation:** the official example starts delegated Pi processes. User-level agents load by default; project agents require the appropriate `agentScope`. That prerequisite belongs in the capability plan, not hidden installation side effects. [PI-A]
 
@@ -322,40 +322,40 @@ This adapter means VS Code's **Local agent customization system**. Claude/Codex 
 
 Pi and OMP are separate targets with separate roots and extension contracts.
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** `SKILL.md`; native and compatibility providers. | P `.omp/skills/<name>/`; U `~/.omp/agent/skills/<name>/`; configured/profile sources. Native skill discovery expects the supported shallow layout. [OM-S] | Flatten skill names, not their internal assets; do not put a category directory between root and skill. |
-| Agents | **N.** Markdown/YAML subagents with name, description, tools, model, and prompt. | P `.omp/agents/*.md`; U `~/.omp/agent/agents/*.md`; named profiles under `~/.omp/profiles/<profile>/agent/agents/`; plugin/extension sources. [OM-A] | Choose one profile root and emit a native agent definition. |
-| MCP | **N.** JSON `mcpServers`, native configuration plus compatibility imports. | P `.omp/mcp.json`; U `~/.omp/agent/mcp.json`; profile equivalents; other harness files and generic root files can also be imported. [OM-M] | Enumerate all effective sources before writing; compatibility imports are a major duplication risk. |
-| Plugins | **N.** npm/Git/local plugins and supported Claude-style marketplaces; `omp` package metadata. | Native plugin manager with explicit scope; extension configuration in `~/.omp/agent/config.yml`; package-managed resource roots. [OM-P] | Record registration as well as artifact contents; native runtime code remains target-specific. |
-| Rules | **N.** Context files, `AGENTS.md`, and additional rule mechanisms. | P `.omp/AGENTS.md` and project instructions; U `~/.omp/agent/AGENTS.md`; `.omp/RULES.md` and compatibility context sources. [OM-R] | Do not assume every context file is concatenated; compatibility precedence can shadow another source. |
-| Hooks | **N, executable.** JS/TS hooks using Extension API events. | P `.omp/hooks/pre/`, `.omp/hooks/post/`; U `~/.omp/agent/hooks/pre/`, `post/`; profiles and explicit hook paths. [OM-H] | The `pre`/`post` directory name does not itself bind an event; inspect exported code/registration. |
+| Resource | Support and specification                                                                     | Supported locations / loading                                                                                                                             | Etymon direction                                                                                        |
+| -------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** `SKILL.md`; native and compatibility providers.                                        | P `.omp/skills/<name>/`; U `~/.omp/agent/skills/<name>/`; configured/profile sources. Native skill discovery expects the supported shallow layout. [OM-S] | Flatten skill names, not their internal assets; do not put a category directory between root and skill. |
+| Agents   | **N.** Markdown/YAML subagents with name, description, tools, model, and prompt.              | P `.omp/agents/*.md`; U `~/.omp/agent/agents/*.md`; named profiles under `~/.omp/profiles/<profile>/agent/agents/`; plugin/extension sources. [OM-A]      | Choose one profile root and emit a native agent definition.                                             |
+| MCP      | **N.** JSON `mcpServers`, native configuration plus compatibility imports.                    | P `.omp/mcp.json`; U `~/.omp/agent/mcp.json`; profile equivalents; other harness files and generic root files can also be imported. [OM-M]                | Enumerate all effective sources before writing; compatibility imports are a major duplication risk.     |
+| Plugins  | **N.** npm/Git/local plugins and supported Claude-style marketplaces; `omp` package metadata. | Native plugin manager with explicit scope; extension configuration in `~/.omp/agent/config.yml`; package-managed resource roots. [OM-P]                   | Record registration as well as artifact contents; native runtime code remains target-specific.          |
+| Rules    | **N.** Context files, `AGENTS.md`, and additional rule mechanisms.                            | P `.omp/AGENTS.md` and project instructions; U `~/.omp/agent/AGENTS.md`; `.omp/RULES.md` and compatibility context sources. [OM-R]                        | Do not assume every context file is concatenated; compatibility precedence can shadow another source.   |
+| Hooks    | **N, executable.** JS/TS hooks using Extension API events.                                    | P `.omp/hooks/pre/`, `.omp/hooks/post/`; U `~/.omp/agent/hooks/pre/`, `post/`; profiles and explicit hook paths. [OM-H]                                   | The `pre`/`post` directory name does not itself bind an event; inspect exported code/registration.      |
 
 **Preferred P0 writes:** OMP-native directories, with cross-harness aliases treated as inspected inputs rather than additional output destinations.
 
 ### 4.10 OpenCode
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills; unsupported frontmatter is not necessarily enforced. | P `.opencode/skills/`, `.claude/skills/`, `.agents/skills/`; U `~/.config/opencode/skills/`, `~/.claude/skills/`, `~/.agents/skills/`. [OC-S] | Emit only supported frontmatter; record unsupported semantics separately. |
-| Agents | **N.** Markdown agents or JSON `agent` configuration; modes include primary and subagent. | P `.opencode/agents/*.md`; U `~/.config/opencode/agents/*.md`; `agent` entries in config. [OC-A] | Translate permissions and mode explicitly; an agent persona is not automatically a child session. |
-| MCP | **N.** `mcp` map; `type: "local"` has a **command array** and `environment`; remote uses `type: "remote"`, URL/auth fields. | P `opencode.json` / `opencode.jsonc`; U `~/.config/opencode/opencode.json`; configured overrides. [OC-M] [OC-C] | Distinct renderer from `mcpServers` JSON clients. |
-| Plugins | **N, executable.** JS/TS plugin API; configured npm packages. | P `.opencode/plugins/`; U `~/.config/opencode/plugins/`; `plugin` array in native config. [OC-P] | Preserve native packages; generate a small bridge only for a narrowly specified portable operation. |
-| Rules | **N.** `AGENTS.md`, compatible instruction sources, and `instructions` configuration. | Project `AGENTS.md`; U `~/.config/opencode/AGENTS.md`; configured local/glob/other instruction sources. [OC-R] | Maintain file inclusion scope and avoid unwanted global content. |
-| Hooks | **X.** Plugin callbacks and events, including before/after tool execution. | Same plugin locations; no portable standalone hooks JSON contract. [OC-P] | Use an executable bridge; pin the plugin API version. |
+| Resource | Support and specification                                                                                                   | Supported locations / loading                                                                                                                 | Etymon direction                                                                                    |
+| -------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** Agent Skills; unsupported frontmatter is not necessarily enforced.                                                   | P `.opencode/skills/`, `.claude/skills/`, `.agents/skills/`; U `~/.config/opencode/skills/`, `~/.claude/skills/`, `~/.agents/skills/`. [OC-S] | Emit only supported frontmatter; record unsupported semantics separately.                           |
+| Agents   | **N.** Markdown agents or JSON `agent` configuration; modes include primary and subagent.                                   | P `.opencode/agents/*.md`; U `~/.config/opencode/agents/*.md`; `agent` entries in config. [OC-A]                                              | Translate permissions and mode explicitly; an agent persona is not automatically a child session.   |
+| MCP      | **N.** `mcp` map; `type: "local"` has a **command array** and `environment`; remote uses `type: "remote"`, URL/auth fields. | P `opencode.json` / `opencode.jsonc`; U `~/.config/opencode/opencode.json`; configured overrides. [OC-M] [OC-C]                               | Distinct renderer from `mcpServers` JSON clients.                                                   |
+| Plugins  | **N, executable.** JS/TS plugin API; configured npm packages.                                                               | P `.opencode/plugins/`; U `~/.config/opencode/plugins/`; `plugin` array in native config. [OC-P]                                              | Preserve native packages; generate a small bridge only for a narrowly specified portable operation. |
+| Rules    | **N.** `AGENTS.md`, compatible instruction sources, and `instructions` configuration.                                       | Project `AGENTS.md`; U `~/.config/opencode/AGENTS.md`; configured local/glob/other instruction sources. [OC-R]                                | Maintain file inclusion scope and avoid unwanted global content.                                    |
+| Hooks    | **X.** Plugin callbacks and events, including before/after tool execution.                                                  | Same plugin locations; no portable standalone hooks JSON contract. [OC-P]                                                                     | Use an executable bridge; pin the plugin API version.                                               |
 
 **Preferred P0 writes:** `.opencode/skills/<name>/`, `.opencode/agents/*.md`, and owned `mcp` entries in `opencode.json`; retain an existing current `opencode.jsonc` after ownership checks.
 
 ### 4.11 Cursor
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills with Cursor behavior. | P `.agents/skills/`, `.cursor/skills/`; U equivalents; `.claude/skills/` and `.codex/skills/` compatibility locations. [CU-S] | Inspect aliases; shared paths may expose a skill to other installed harnesses. |
-| Agents | **N.** Native subagent definitions with YAML frontmatter and prompt body. | P `.cursor/agents/`; U `~/.cursor/agents/`; documented Claude/Codex-compatible roots. [CU-A] | Prefer native `.cursor/agents/`; test the actual accepted format before importing a foreign directory wholesale. |
-| MCP | **N.** JSON `mcpServers`; stdio, SSE, and HTTP; native variable expansion. | P `.cursor/mcp.json`; U `~/.cursor/mcp.json`. [CU-M] | Typed variable conversion; `${env:NAME}` is not interchangeable with every other client's syntax. |
-| Plugins | **N.** Agent Plugins and Cursor-native plugin manifest. | Native plugin installation; local development `~/.cursor/plugins/local/<name>/`; root `plugin.json` or `.cursor-plugin/plugin.json`. [CU-P] | Do not invent a project plugin autoload directory. Preserve native components where possible. |
-| Rules | **N.** `.mdc` rules with `description`, `globs`, `alwaysApply`; plain `AGENTS.md` support. | P `.cursor/rules/**/*.mdc`; project `AGENTS.md`; user rules through settings and team-managed rules. [CU-R] | `.md` in the rules directory is not an equivalent output. Global rules may require a settings operation. |
-| Hooks | **N.** Cursor JSON hook events and handlers. | P `.cursor/hooks.json`; U `~/.cursor/hooks.json`; managed sources. [CU-H] | Account for working-directory and multi-scope aggregation semantics. |
+| Resource | Support and specification                                                                  | Supported locations / loading                                                                                                               | Etymon direction                                                                                                 |
+| -------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** Agent Skills with Cursor behavior.                                                  | P `.agents/skills/`, `.cursor/skills/`; U equivalents; `.claude/skills/` and `.codex/skills/` compatibility locations. [CU-S]               | Inspect aliases; shared paths may expose a skill to other installed harnesses.                                   |
+| Agents   | **N.** Native subagent definitions with YAML frontmatter and prompt body.                  | P `.cursor/agents/`; U `~/.cursor/agents/`; documented Claude/Codex-compatible roots. [CU-A]                                                | Prefer native `.cursor/agents/`; test the actual accepted format before importing a foreign directory wholesale. |
+| MCP      | **N.** JSON `mcpServers`; stdio, SSE, and HTTP; native variable expansion.                 | P `.cursor/mcp.json`; U `~/.cursor/mcp.json`. [CU-M]                                                                                        | Typed variable conversion; `${env:NAME}` is not interchangeable with every other client's syntax.                |
+| Plugins  | **N.** Agent Plugins and Cursor-native plugin manifest.                                    | Native plugin installation; local development `~/.cursor/plugins/local/<name>/`; root `plugin.json` or `.cursor-plugin/plugin.json`. [CU-P] | Do not invent a project plugin autoload directory. Preserve native components where possible.                    |
+| Rules    | **N.** `.mdc` rules with `description`, `globs`, `alwaysApply`; plain `AGENTS.md` support. | P `.cursor/rules/**/*.mdc`; project `AGENTS.md`; user rules through settings and team-managed rules. [CU-R]                                 | `.md` in the rules directory is not an equivalent output. Global rules may require a settings operation.         |
+| Hooks    | **N.** Cursor JSON hook events and handlers.                                               | P `.cursor/hooks.json`; U `~/.cursor/hooks.json`; managed sources. [CU-H]                                                                   | Account for working-directory and multi-scope aggregation semantics.                                             |
 
 **Mapping hazards.** A file generated for Claude or Codex may also be discovered by Cursor. Global hooks and project hooks can run in different working directories. Native event families include shell/MCP/file-edit distinctions that should not be flattened into one generic tool callback without a documented bridge. [CU-S] [CU-A] [CU-H]
 
@@ -363,40 +363,40 @@ Pi and OMP are separate targets with separate roots and extension contracts.
 
 **Target split:** CLI, IDE, and Antigravity 2.0 have overlapping but non-identical paths. The current documents include newer `.agents/` conventions and legacy `.agent/` compatibility. [AG-S] [AG-R]
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills. | P `.agents/skills/`, legacy `.agent/skills/`; IDE/2.0 U `~/.gemini/config/skills/`, legacy Antigravity root; CLI U `~/.gemini/antigravity-cli/skills/`; plugin skills. [AG-S] | Use a surface-specific user root; avoid overwriting Gemini CLI resources. |
-| Agents | **N for documented CLI custom agents.** Markdown/YAML. | P `.agents/agents/<name>.md` or `<name>/agent.md`; U `~/.gemini/config/agents/`. [AG-A] | CLI output can be specified; IDE parity remains separately gated. These directories cannot be used as inert source storage. |
-| MCP | **N.** JSON `mcpServers`; local command/args; remote **`serverUrl`** in the reviewed configuration. | P `.agents/mcp_config.json`; U `~/.gemini/config/mcp_config.json`; surface-dependent integration. [AG-M] | Do not generate Gemini CLI's `httpUrl` or a generic `url` for this contract. |
-| Plugins | **P.** CLI plugin installation and bundled skills/rules/hooks are documented, but a complete manifest/import contract was not established here. | CLI-installed bundles under `~/.gemini/antigravity-cli/plugins/<name>/`; native installation flow. [AG-S] [AG-R] [AG-H] | P2 importer blocked pending manifest/version verification; P0 components can be projected independently. |
-| Rules | **N.** Directory instructions and YAML rules with `trigger` (`always_on`, `glob`, `model_decision`, `manual`). | P `AGENTS.md` / `GEMINI.md`, `.agents/AGENTS.md`, `.agents/rules/*.md`, legacy `.agent/rules/`; U `.gemini` instruction files and `~/.gemini/config/rules/`; CLI-specific rules root. [AG-R] | Validate required frontmatter. Flat scanning and explicit nested-rule registration differ from recursive loaders. |
-| Hooks | **N, surface-qualified.** Named hook packs containing lifecycle events and handlers. | P `.agents/hooks.json`; U `~/.gemini/config/hooks.json`; CLI settings and plugin hook files. [AG-H] | The extra named-pack layer matters; Claude-like event names do not imply an identical top-level schema. |
+| Resource | Support and specification                                                                                                                       | Supported locations / loading                                                                                                                                                                | Etymon direction                                                                                                            |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** Agent Skills.                                                                                                                            | P `.agents/skills/`, legacy `.agent/skills/`; IDE/2.0 U `~/.gemini/config/skills/`, legacy Antigravity root; CLI U `~/.gemini/antigravity-cli/skills/`; plugin skills. [AG-S]                | Use a surface-specific user root; avoid overwriting Gemini CLI resources.                                                   |
+| Agents   | **N for documented CLI custom agents.** Markdown/YAML.                                                                                          | P `.agents/agents/<name>.md` or `<name>/agent.md`; U `~/.gemini/config/agents/`. [AG-A]                                                                                                      | CLI output can be specified; IDE parity remains separately gated. These directories cannot be used as inert source storage. |
+| MCP      | **N.** JSON `mcpServers`; local command/args; remote **`serverUrl`** in the reviewed configuration.                                             | P `.agents/mcp_config.json`; U `~/.gemini/config/mcp_config.json`; surface-dependent integration. [AG-M]                                                                                     | Do not generate Gemini CLI's `httpUrl` or a generic `url` for this contract.                                                |
+| Plugins  | **P.** CLI plugin installation and bundled skills/rules/hooks are documented, but a complete manifest/import contract was not established here. | CLI-installed bundles under `~/.gemini/antigravity-cli/plugins/<name>/`; native installation flow. [AG-S] [AG-R] [AG-H]                                                                      | P2 importer blocked pending manifest/version verification; P0 components can be projected independently.                    |
+| Rules    | **N.** Directory instructions and YAML rules with `trigger` (`always_on`, `glob`, `model_decision`, `manual`).                                  | P `AGENTS.md` / `GEMINI.md`, `.agents/AGENTS.md`, `.agents/rules/*.md`, legacy `.agent/rules/`; U `.gemini` instruction files and `~/.gemini/config/rules/`; CLI-specific rules root. [AG-R] | Validate required frontmatter. Flat scanning and explicit nested-rule registration differ from recursive loaders.           |
+| Hooks    | **N, surface-qualified.** Named hook packs containing lifecycle events and handlers.                                                            | P `.agents/hooks.json`; U `~/.gemini/config/hooks.json`; CLI settings and plugin hook files. [AG-H]                                                                                          | The extra named-pack layer matters; Claude-like event names do not imply an identical top-level schema.                     |
 
 **Preferred P0 writes:** current `.agents/skills/<name>/`, CLI-native `.agents/agents/` output only for its verified CLI profile, and owned `.agents/mcp_config.json` entries. Legacy `.agent/` paths are inspection/import inputs, not default new output.
 
 ### 4.13 Roo Code
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills and native mode-aware skill features. | P `.roo/skills/`, `.agents/skills/`; U `~/.roo/skills/`, `~/.agents/skills/`; native mode-specific mechanisms require their own profile. [RO-S] | Base skill projection is straightforward; retain mode targeting as an extension. |
-| Agents | **P: custom modes.** YAML/JSON `customModes`, with slug, role definition, tool groups, and instructions. | P `.roomodes`; user `custom_modes.yaml` opened/managed by the extension. [RO-A] | A mode is not an isolated reusable subagent. Translate only when the source permits persona/mode fallback. |
-| MCP | **N.** Native JSON `mcpServers`. | P `.roo/mcp.json`; user `mcp_settings.json` in extension-managed storage. [RO-M] | Prefer project config; use the editor to resolve user config instead of hard-coding storage paths. |
-| Plugins | **P: marketplace catalog.** Catalogued modes/MCP integrations are not evidence of a universal executable agent-plugin runtime. | Roo Marketplace and native component installation. [RO-P] | Decompose a package into supported skills, modes, and MCP definitions. |
-| Rules | **N.** Markdown custom instructions, including mode-specific rules. | P `.roo/rules/`, `.roo/rules-<mode>/`; U `~/.roo/` equivalents; legacy `.roorules`; optional `AGENTS.md` support. [RO-R] | Preserve mode association; do not turn a mode rule into an unconditional project rule. |
-| Hooks | **?** No precise native lifecycle-hook installation/schema contract established in the reviewed material. | No approved Etymon write destination. | Reject required portable hooks; do not invent a `.roo/hooks.json`. |
+| Resource | Support and specification                                                                                                      | Supported locations / loading                                                                                                                   | Etymon direction                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** Agent Skills and native mode-aware skill features.                                                                      | P `.roo/skills/`, `.agents/skills/`; U `~/.roo/skills/`, `~/.agents/skills/`; native mode-specific mechanisms require their own profile. [RO-S] | Base skill projection is straightforward; retain mode targeting as an extension.                           |
+| Agents   | **P: custom modes.** YAML/JSON `customModes`, with slug, role definition, tool groups, and instructions.                       | P `.roomodes`; user `custom_modes.yaml` opened/managed by the extension. [RO-A]                                                                 | A mode is not an isolated reusable subagent. Translate only when the source permits persona/mode fallback. |
+| MCP      | **N.** Native JSON `mcpServers`.                                                                                               | P `.roo/mcp.json`; user `mcp_settings.json` in extension-managed storage. [RO-M]                                                                | Prefer project config; use the editor to resolve user config instead of hard-coding storage paths.         |
+| Plugins  | **P: marketplace catalog.** Catalogued modes/MCP integrations are not evidence of a universal executable agent-plugin runtime. | Roo Marketplace and native component installation. [RO-P]                                                                                       | Decompose a package into supported skills, modes, and MCP definitions.                                     |
+| Rules    | **N.** Markdown custom instructions, including mode-specific rules.                                                            | P `.roo/rules/`, `.roo/rules-<mode>/`; U `~/.roo/` equivalents; legacy `.roorules`; optional `AGENTS.md` support. [RO-R]                        | Preserve mode association; do not turn a mode rule into an unconditional project rule.                     |
+| Hooks    | **?** No precise native lifecycle-hook installation/schema contract established in the reviewed material.                      | No approved Etymon write destination.                                                                                                           | Reject required portable hooks; do not invent a `.roo/hooks.json`.                                         |
 
 ### 4.14 Cline
 
 **Target split is mandatory:** IDE extension versus CLI/SDK/Kanban. Current plugin documentation explicitly excludes VS Code and JetBrains from its newer plugin runtime. [CN-P]
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills. | P `.cline/skills/` (preferred), `.clinerules/skills/`, `.claude/skills/`; U `~/.cline/skills/`. Global same-name skills take precedence. [CN-S] | Generate one skill bundle and check compatibility aliases before activation. |
-| Agents | **P.** Documented experimental read-only subagent research; CLI teams are another mechanism. A complete portable named-agent file schema was not established. | Config docs list P `.cline/agents/` and U `~/.cline/agents/`, but a directory listing is not a sufficient renderer contract. [CN-C] [CN-A] [CN-T] | Do not write guessed Claude-style files and call them installed. Keep custom-agent export gated. |
-| MCP | **N, with a documentation conflict.** Native `mcpServers`; remote `streamableHttp` naming differs from some clients. | Configuration guide identifies `~/.cline/data/settings/cline_mcp_settings.json`; MCP guide names `~/.cline/mcp.json` for CLI. IDE uses its active settings interface. [CN-C] [CN-M] | Resolve by surface/release and active-config probe. Do not write both to hide uncertainty. |
-| Plugins | **N CLI/SDK; unavailable in the stated IDE surfaces.** Executable `AgentPlugin` modules and package metadata. | P `.cline/plugins/`; U `~/.cline/plugins/`; native installed-plugin storage and CLI configuration. [CN-P] | Native-only modules; flatten portable resources for IDE targets rather than pretending the runtime exists there. |
-| Rules | **N.** Cline rule files and current/legacy discovery conventions. | P `.clinerules/` and documented `.cline/rules/`; U `~/.cline/rules/`, legacy Documents/Cline rule locations. [CN-R] [CN-C] | Choose the verified generation's preferred root; inspect compatibility sources for duplicate loading. |
-| Hooks | **X in current SDK plugin system.** Typed before/after run/model/tool callbacks and events. Standalone/IDE hook schema remains unverified here. | Loaded plugin modules; config also lists hook directories without establishing their complete contract. [CN-H] [CN-C] | Bridge against a pinned SDK plugin API; do not claim old hook-script conventions cover all current surfaces. |
+| Resource | Support and specification                                                                                                                                     | Supported locations / loading                                                                                                                                                       | Etymon direction                                                                                                 |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** Agent Skills.                                                                                                                                          | P `.cline/skills/` (preferred), `.clinerules/skills/`, `.claude/skills/`; U `~/.cline/skills/`. Global same-name skills take precedence. [CN-S]                                     | Generate one skill bundle and check compatibility aliases before activation.                                     |
+| Agents   | **P.** Documented experimental read-only subagent research; CLI teams are another mechanism. A complete portable named-agent file schema was not established. | Config docs list P `.cline/agents/` and U `~/.cline/agents/`, but a directory listing is not a sufficient renderer contract. [CN-C] [CN-A] [CN-T]                                   | Do not write guessed Claude-style files and call them installed. Keep custom-agent export gated.                 |
+| MCP      | **N, with a documentation conflict.** Native `mcpServers`; remote `streamableHttp` naming differs from some clients.                                          | Configuration guide identifies `~/.cline/data/settings/cline_mcp_settings.json`; MCP guide names `~/.cline/mcp.json` for CLI. IDE uses its active settings interface. [CN-C] [CN-M] | Resolve by surface/release and active-config probe. Do not write both to hide uncertainty.                       |
+| Plugins  | **N CLI/SDK; unavailable in the stated IDE surfaces.** Executable `AgentPlugin` modules and package metadata.                                                 | P `.cline/plugins/`; U `~/.cline/plugins/`; native installed-plugin storage and CLI configuration. [CN-P]                                                                           | Native-only modules; flatten portable resources for IDE targets rather than pretending the runtime exists there. |
+| Rules    | **N.** Cline rule files and current/legacy discovery conventions.                                                                                             | P `.clinerules/` and documented `.cline/rules/`; U `~/.cline/rules/`, legacy Documents/Cline rule locations. [CN-R] [CN-C]                                                          | Choose the verified generation's preferred root; inspect compatibility sources for duplicate loading.            |
+| Hooks    | **X in current SDK plugin system.** Typed before/after run/model/tool callbacks and events. Standalone/IDE hook schema remains unverified here.               | Loaded plugin modules; config also lists hook directories without establishing their complete contract. [CN-H] [CN-C]                                                               | Bridge against a pinned SDK plugin API; do not claim old hook-script conventions cover all current surfaces.     |
 
 **Agent limitation:** documented research subagents exclude several capabilities available to the main agent. An imported browser-enabled or write-enabled reviewer cannot be mapped to that primitive as an exact translation. [CN-A]
 
@@ -404,14 +404,14 @@ Pi and OMP are separate targets with separate roots and extension contracts.
 
 **Current platform, not a copy of Roo's historical configuration.** Native configuration and plugin docs contain migration-era inconsistencies that require release-specific probes. [KL-M] [KL-P]
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills and compatibility discovery. | P `.kilo/skills/`; U `~/.kilo/skills/`; compatible `.claude/skills/` and `.agents/skills/`; configured skill paths. [KL-S] | Do not carry over obsolete mode-specific folder assumptions. |
-| Agents | **N.** Markdown subagents or native `agent` configuration. | P `.kilo/agents/*.md`; U `~/.config/kilo/agents/`; native config entries. [KL-A] | Preserve primary/subagent mode and native permissions. |
-| MCP | **N.** `mcp` map, local command arrays or remote URL definitions. | P `kilo.json(c)` or `.kilo/kilo.json(c)`; U `~/.config/kilo/kilo.json(c)`. [KL-M] | Current-schema renderer; identify legacy `mcpServers` imports instead of merging dialects. |
-| Plugins | **N, executable.** Native plugin descriptor/module and npm/local packages. | P `.kilo/plugin/` or `plugins/` alias; U `~/.config/kilo/plugin/`; config plugin entries; legacy `.kilocode/` compatibility. [KL-P] | Pin Kilo's API. Similarity to OpenCode is not proof of module-ABI compatibility. |
-| Rules | **N.** Configured instruction files/globs and compatible rule sources. | `instructions` in Kilo config; files such as `.kilo/rules/` when referenced; legacy `.kilocode/rules/` discovery. [KL-R] | Do not assume every arbitrary file in a new folder auto-loads. |
-| Hooks | **X.** Native plugin callbacks, including before/after tool execution. | Same executable plugin locations. [KL-P] | Generate an API-specific bridge rather than a nonexistent universal hooks file. |
+| Resource | Support and specification                                                  | Supported locations / loading                                                                                                       | Etymon direction                                                                           |
+| -------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Skills   | **N.** Agent Skills and compatibility discovery.                           | P `.kilo/skills/`; U `~/.kilo/skills/`; compatible `.claude/skills/` and `.agents/skills/`; configured skill paths. [KL-S]          | Do not carry over obsolete mode-specific folder assumptions.                               |
+| Agents   | **N.** Markdown subagents or native `agent` configuration.                 | P `.kilo/agents/*.md`; U `~/.config/kilo/agents/`; native config entries. [KL-A]                                                    | Preserve primary/subagent mode and native permissions.                                     |
+| MCP      | **N.** `mcp` map, local command arrays or remote URL definitions.          | P `kilo.json(c)` or `.kilo/kilo.json(c)`; U `~/.config/kilo/kilo.json(c)`. [KL-M]                                                   | Current-schema renderer; identify legacy `mcpServers` imports instead of merging dialects. |
+| Plugins  | **N, executable.** Native plugin descriptor/module and npm/local packages. | P `.kilo/plugin/` or `plugins/` alias; U `~/.config/kilo/plugin/`; config plugin entries; legacy `.kilocode/` compatibility. [KL-P] | Pin Kilo's API. Similarity to OpenCode is not proof of module-ABI compatibility.           |
+| Rules    | **N.** Configured instruction files/globs and compatible rule sources.     | `instructions` in Kilo config; files such as `.kilo/rules/` when referenced; legacy `.kilocode/rules/` discovery. [KL-R]            | Do not assume every arbitrary file in a new folder auto-loads.                             |
+| Hooks    | **X.** Native plugin callbacks, including before/after tool execution.     | Same executable plugin locations. [KL-P]                                                                                            | Generate an API-specific bridge rather than a nonexistent universal hooks file.            |
 
 **Validation blocker:** parts of the plugin documentation still mention OpenCode-named config/cache paths while the configuration reference specifies Kilo paths. The adapter must confirm the active release's behavior before managing plugin registration. [KL-P] [KL-M]
 
@@ -419,51 +419,51 @@ Pi and OMP are separate targets with separate roots and extension contracts.
 
 **Reviewed scope:** public config-v1/IDE customization documentation. Do not extend these conclusions to every separately released Continue CLI or hosted service without a profile audit.
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **?** A native Agent Skills `SKILL.md` discovery contract was not verified in the reviewed documentation. | No approved standalone skill destination established here. | Offer an explicitly lossy prompt/rule export only when requested; do not claim progressive-disclosure skill support. |
-| Agents | **P.** “Agent” configuration composes models, rules, tools, context, and other blocks; not a verified isolated named-subagent file format. | Selected `config.yaml`/Hub configuration; user configuration commonly `~/.continue/config.yaml`. [CT-C] [CT-L] | Treat as a whole-profile export, not a Markdown subagent renderer. |
-| MCP | **N.** Config-v1 `mcpServers` list; stdio/SSE/Streamable HTTP; JSON compatibility ingestion. | Selected config; P `.continue/mcpServers/*.yaml` or `*.json`. Standalone YAML blocks require metadata such as name/version/schema. [CT-M] | Prefer an owned standalone block rather than replacing the active agent configuration. |
-| Plugins | **P.** Shareable configuration blocks and Hub composition. | `uses`/configuration composition in selected config; no generic executable agent-plugin ABI established here. [CT-C] | Decompose supported configuration components, not arbitrary plugin code. |
-| Rules | **N.** Markdown/YAML rule metadata with `globs`, `regex`, `description`, `alwaysApply`. | P `.continue/rules/`; rules in selected configuration/Hub sources. [CT-R] | Preserve matching against supplied context and its lexicographic ordering. |
-| Hooks | **?** No precise native lifecycle-hook schema/location established for the reviewed surface. | No approved write destination. | Block required hook projection until a versioned contract is verified. |
+| Resource | Support and specification                                                                                                                  | Supported locations / loading                                                                                                             | Etymon direction                                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Skills   | **?** A native Agent Skills `SKILL.md` discovery contract was not verified in the reviewed documentation.                                  | No approved standalone skill destination established here.                                                                                | Offer an explicitly lossy prompt/rule export only when requested; do not claim progressive-disclosure skill support. |
+| Agents   | **P.** “Agent” configuration composes models, rules, tools, context, and other blocks; not a verified isolated named-subagent file format. | Selected `config.yaml`/Hub configuration; user configuration commonly `~/.continue/config.yaml`. [CT-C] [CT-L]                            | Treat as a whole-profile export, not a Markdown subagent renderer.                                                   |
+| MCP      | **N.** Config-v1 `mcpServers` list; stdio/SSE/Streamable HTTP; JSON compatibility ingestion.                                               | Selected config; P `.continue/mcpServers/*.yaml` or `*.json`. Standalone YAML blocks require metadata such as name/version/schema. [CT-M] | Prefer an owned standalone block rather than replacing the active agent configuration.                               |
+| Plugins  | **P.** Shareable configuration blocks and Hub composition.                                                                                 | `uses`/configuration composition in selected config; no generic executable agent-plugin ABI established here. [CT-C]                      | Decompose supported configuration components, not arbitrary plugin code.                                             |
+| Rules    | **N.** Markdown/YAML rule metadata with `globs`, `regex`, `description`, `alwaysApply`.                                                    | P `.continue/rules/`; rules in selected configuration/Hub sources. [CT-R]                                                                 | Preserve matching against supplied context and its lexicographic ordering.                                           |
+| Hooks    | **?** No precise native lifecycle-hook schema/location established for the reviewed surface.                                               | No approved write destination.                                                                                                            | Block required hook projection until a versioned contract is verified.                                               |
 
 ### 4.17 Windsurf / Devin Cascade
 
 The reviewed official Windsurf URLs redirect to current Devin Desktop/Cascade documentation. These sources describe newer `.devin/` paths and retained `.windsurf/` compatibility. **Ship separate legacy/current profiles rather than rewriting every existing Windsurf setup.** [WI-S] [WI-R]
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills. | P `.devin/skills/`, legacy `.windsurf/skills/`, shared `.agents/skills/`; U documented Devin and `~/.codeium/windsurf/skills/` locations; compatibility loaders. [WI-S] | Select paths from the actual detected product/release, not brand-name inference. |
-| Agents | **? for reusable custom-subagent files.** Native modes/workflows do not establish an equivalent file contract. | No approved custom-agent destination established here. | Keep required isolated agents unsupported pending verification. |
-| MCP | **N.** JSON `mcpServers`, local/remote server configuration. | Current U `~/.config/devin/mcp_config.json` or platform config equivalent; legacy roots require their own adapter. No project MCP destination is established here. [WI-M] | Project request may need an explicit user-scope registration or a supported isolated config root. |
-| Plugins | **? for a portable agent-bundle loader.** Editor extensions and integrations are not interchangeable with agent plugins. | No approved generic package destination established here. | Extract only verified components. |
-| Rules | **N.** Triggered Markdown rules and compatible instruction files. | P `.devin/rules/`, fallback `.windsurf/rules/`; `AGENTS.md`; U `~/.codeium/windsurf/memories/global_rules.md`. [WI-R] | Preserve activation modes; don't broaden a scoped rule during legacy migration. |
-| Hooks | **N.** Native lifecycle hooks. | P `.devin/hooks.json`, fallback `.windsurf/hooks.json`; U `~/.codeium/windsurf/hooks.json`; JetBrains/system roots differ. [WI-H] | Surface-specific event and execution mapping. |
+| Resource | Support and specification                                                                                                | Supported locations / loading                                                                                                                                             | Etymon direction                                                                                  |
+| -------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** Agent Skills.                                                                                                     | P `.devin/skills/`, legacy `.windsurf/skills/`, shared `.agents/skills/`; U documented Devin and `~/.codeium/windsurf/skills/` locations; compatibility loaders. [WI-S]   | Select paths from the actual detected product/release, not brand-name inference.                  |
+| Agents   | **? for reusable custom-subagent files.** Native modes/workflows do not establish an equivalent file contract.           | No approved custom-agent destination established here.                                                                                                                    | Keep required isolated agents unsupported pending verification.                                   |
+| MCP      | **N.** JSON `mcpServers`, local/remote server configuration.                                                             | Current U `~/.config/devin/mcp_config.json` or platform config equivalent; legacy roots require their own adapter. No project MCP destination is established here. [WI-M] | Project request may need an explicit user-scope registration or a supported isolated config root. |
+| Plugins  | **? for a portable agent-bundle loader.** Editor extensions and integrations are not interchangeable with agent plugins. | No approved generic package destination established here.                                                                                                                 | Extract only verified components.                                                                 |
+| Rules    | **N.** Triggered Markdown rules and compatible instruction files.                                                        | P `.devin/rules/`, fallback `.windsurf/rules/`; `AGENTS.md`; U `~/.codeium/windsurf/memories/global_rules.md`. [WI-R]                                                     | Preserve activation modes; don't broaden a scoped rule during legacy migration.                   |
+| Hooks    | **N.** Native lifecycle hooks.                                                                                           | P `.devin/hooks.json`, fallback `.windsurf/hooks.json`; U `~/.codeium/windsurf/hooks.json`; JetBrains/system roots differ. [WI-H]                                         | Surface-specific event and execution mapping.                                                     |
 
 ### 4.18 Amp
 
 Amp is an additional integration candidate because its current docs cover skills, MCP, and an executable plugin API. This is a coverage decision, not a measured popularity ranking.
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N.** Agent Skills plus native fields and plugin-qualified registrations. | P `.agents/skills/` and compatible sources; U `~/.config/agents/skills/`, `~/.agents/skills/`, `~/.config/amp/skills/`; Claude-compatible/configured sources. [AM-S] | Global definitions can mask project ones; inspect effective resolution. |
-| Agents | **X.** Plugin API `createAgent` and registered delegation tools; custom modes also use executable registration. | Executable plugin modules, not a verified universal `agents/*.md` loader. [AM-A] | A custom subagent renderer requires a pinned bridge and an explicit runtime dependency. |
-| MCP | **N.** `amp.mcpServers` configuration and other native sources. | P `.amp/settings.json`; U `~/.config/amp/settings.json`; `--mcp-config`; skill-bundled and remote definitions. [AM-M] | Preserve project trust checks and the separate environment used by hosted Orbs. |
-| Plugins | **N, executable.** JS/TS module or directory `index.ts` / `index.js`, using `@ampcode/plugin`. | P `.amp/plugins/`; U config-root `amp/plugins/`; personal/workspace plugin repositories. [AM-P] | Pin source and loader contract; copying a skills subfolder does not perform native plugin registration. |
-| Rules | **N.** `AGENTS.md` project instructions and native context conventions. | P/ancestor/subtree `AGENTS.md`; U `~/.config/amp/AGENTS.md` and `~/.config/AGENTS.md`; platform-managed guidance. [AM-R] | Preserve hierarchical scope. |
-| Hooks | **X.** Plugin events such as `session.start`, `tool.call`, `tool.result`, `agent.start`, `agent.end`. | Same plugin module roots. [AM-H] | Match decision semantics; an agent turn ending is not a process/session ending. |
+| Resource | Support and specification                                                                                       | Supported locations / loading                                                                                                                                        | Etymon direction                                                                                        |
+| -------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Skills   | **N.** Agent Skills plus native fields and plugin-qualified registrations.                                      | P `.agents/skills/` and compatible sources; U `~/.config/agents/skills/`, `~/.agents/skills/`, `~/.config/amp/skills/`; Claude-compatible/configured sources. [AM-S] | Global definitions can mask project ones; inspect effective resolution.                                 |
+| Agents   | **X.** Plugin API `createAgent` and registered delegation tools; custom modes also use executable registration. | Executable plugin modules, not a verified universal `agents/*.md` loader. [AM-A]                                                                                     | A custom subagent renderer requires a pinned bridge and an explicit runtime dependency.                 |
+| MCP      | **N.** `amp.mcpServers` configuration and other native sources.                                                 | P `.amp/settings.json`; U `~/.config/amp/settings.json`; `--mcp-config`; skill-bundled and remote definitions. [AM-M]                                                | Preserve project trust checks and the separate environment used by hosted Orbs.                         |
+| Plugins  | **N, executable.** JS/TS module or directory `index.ts` / `index.js`, using `@ampcode/plugin`.                  | P `.amp/plugins/`; U config-root `amp/plugins/`; personal/workspace plugin repositories. [AM-P]                                                                      | Pin source and loader contract; copying a skills subfolder does not perform native plugin registration. |
+| Rules    | **N.** `AGENTS.md` project instructions and native context conventions.                                         | P/ancestor/subtree `AGENTS.md`; U `~/.config/amp/AGENTS.md` and `~/.config/AGENTS.md`; platform-managed guidance. [AM-R]                                             | Preserve hierarchical scope.                                                                            |
+| Hooks    | **X.** Plugin events such as `session.start`, `tool.call`, `tool.result`, `agent.start`, `agent.end`.           | Same plugin module roots. [AM-H]                                                                                                                                     | Match decision semantics; an agent turn ending is not a process/session ending.                         |
 
 ### 4.19 Zed native agent and external-agent boundary
 
-| Resource | Support and specification | Supported locations / loading | Etymon direction |
-|---|---|---|---|
-| Skills | **N for Zed Agent.** Agent Skills, flat skill-root layout. | P `<worktree>/.agents/skills/<name>/`; U `~/.agents/skills/<name>/`; trusted worktrees required for project discovery. [ZD-S] | Do not use nested category folders; skills for external agents follow that agent's loader. |
-| Agents | **P: profiles.** Native profiles select model and available tools; not equivalent to isolated prompt-defined subagents. | `agent.profiles` in Zed settings. [ZD-A] | Persona/tool-profile export only; reject required isolated-agent semantics. |
-| MCP | **N.** `context_servers` configuration with command/args/env or remote URL. | Active Zed settings file opened through the editor; configured servers may be forwarded over ACP to external agents. [ZD-M] | Avoid configuring the same server in both host and delegated harness without a defined ownership policy. |
-| Plugins | **P: editor extensions.** MCP/agent-server extensions have their own extension contracts. | Native Zed extension manager and development-extension workflow. [ZD-M] [ZD-X] | Not a drop-in Agent Plugins target. Extract skills/MCP where possible. |
-| Rules | **N.** Personal/project instructions with a compatibility precedence list. | U `~/.config/zed/AGENTS.md` or Windows equivalent; P `AGENTS.md` plus higher-priority compatible filenames such as `.rules`. [ZD-R] | A newly generated `AGENTS.md` may be shadowed. Do not assume all files are concatenated. |
-| Hooks | **? for a general native lifecycle-hook file/API suitable here.** | No approved portable-hook destination established in this review. | Delegate to the actual external harness where appropriate; do not confuse editor events with agent events. |
+| Resource | Support and specification                                                                                               | Supported locations / loading                                                                                                       | Etymon direction                                                                                           |
+| -------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Skills   | **N for Zed Agent.** Agent Skills, flat skill-root layout.                                                              | P `<worktree>/.agents/skills/<name>/`; U `~/.agents/skills/<name>/`; trusted worktrees required for project discovery. [ZD-S]       | Do not use nested category folders; skills for external agents follow that agent's loader.                 |
+| Agents   | **P: profiles.** Native profiles select model and available tools; not equivalent to isolated prompt-defined subagents. | `agent.profiles` in Zed settings. [ZD-A]                                                                                            | Persona/tool-profile export only; reject required isolated-agent semantics.                                |
+| MCP      | **N.** `context_servers` configuration with command/args/env or remote URL.                                             | Active Zed settings file opened through the editor; configured servers may be forwarded over ACP to external agents. [ZD-M]         | Avoid configuring the same server in both host and delegated harness without a defined ownership policy.   |
+| Plugins  | **P: editor extensions.** MCP/agent-server extensions have their own extension contracts.                               | Native Zed extension manager and development-extension workflow. [ZD-M] [ZD-X]                                                      | Not a drop-in Agent Plugins target. Extract skills/MCP where possible.                                     |
+| Rules    | **N.** Personal/project instructions with a compatibility precedence list.                                              | U `~/.config/zed/AGENTS.md` or Windows equivalent; P `AGENTS.md` plus higher-priority compatible filenames such as `.rules`. [ZD-R] | A newly generated `AGENTS.md` may be shadowed. Do not assume all files are concatenated.                   |
+| Hooks    | **? for a general native lifecycle-hook file/API suitable here.**                                                       | No approved portable-hook destination established in this review.                                                                   | Delegate to the actual external harness where appropriate; do not confuse editor events with agent events. |
 
 ### 4.20 Further discovery queue
 
@@ -475,27 +475,27 @@ For editor-hosted agents and ACP clients, first determine whether a new resource
 
 These selections apply the Etymon native-first policy to the inventory, with each row still subject to release validation. User-scope equivalents and non-filesystem prerequisites remain in the individual profiles. A dash here means **no approved Etymon writer in this inventory**, not universal native feature absence.
 
-| Target/profile | Skill output | Agent output | MCP output |
-|---|---|---|---|
-| Claude Code | `.claude/skills/<name>/` | `.claude/agents/<name>.md` | Owned `mcpServers` in `.mcp.json` |
-| Codex | `.agents/skills/<name>/` | `.codex/agents/<name>.toml` | Owned `[mcp_servers]` in `.codex/config.toml` |
-| Copilot CLI | `.github/skills/<name>/` | `.github/agents/<name>.agent.md` | Owned `mcpServers` in `.github/mcp.json` |
-| Copilot cloud | Repository-visible supported skill output | `.github/agents/<name>.agent.md` | Explicit repository/service settings operation |
-| VS Code Local | `.github/skills/<name>/` | `.github/agents/<name>.agent.md` | Owned `servers` in `.vscode/mcp.json` |
-| Gemini CLI | `.gemini/skills/<name>/` | `.gemini/agents/<name>.md` | `.gemini/settings.json` |
-| Kiro current | `.kiro/skills/<name>/` | `.kiro/agents/`, verified current profile schema | `.kiro/settings/mcp.json` |
-| Pi | `.pi/skills/<name>/` | `.pi/agents/` only with the pinned extension and allowed project scope | `.pi/mcp.json` |
-| OMP | `.omp/skills/<name>/` | `.omp/agents/<name>.md` | `.omp/mcp.json` |
-| OpenCode | `.opencode/skills/<name>/` | `.opencode/agents/<name>.md` | `opencode.json`; retain an existing current `.jsonc` variant |
-| Cursor | `.cursor/skills/<name>/` | `.cursor/agents/<name>.md` | `.cursor/mcp.json` |
-| Antigravity current | `.agents/skills/<name>/` | `.agents/agents/` for the verified CLI surface | `.agents/mcp_config.json` for the supported surface |
-| Roo | `.roo/skills/<name>/` | `.roomodes` only for an explicitly permitted persona mapping | `.roo/mcp.json` |
-| Cline | `.cline/skills/<name>/` | — until schema/loader verification | — until requested scope/surface resolves the documented path conflict |
-| Kilo current | `.kilo/skills/<name>/` | `.kilo/agents/<name>.md` | Project `kilo.json`; verified current variants inspected before writing |
-| Continue reviewed IDE profile | — | Explicit whole-profile export only | `.continue/mcpServers/etymon-<name>.yaml` |
-| Devin Cascade current | `.devin/skills/<name>/` | — | No verified project writer; do not silently use user scope |
-| Amp | `.agents/skills/<name>/` | Explicit pinned executable bridge, not guessed Markdown | `.amp/settings.json` |
-| Zed native | `.agents/skills/<name>/` | Explicit native profile operation, not an isolated-agent file | Active settings operation; verify requested scope |
+| Target/profile                | Skill output                              | Agent output                                                           | MCP output                                                              |
+| ----------------------------- | ----------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Claude Code                   | `.claude/skills/<name>/`                  | `.claude/agents/<name>.md`                                             | Owned `mcpServers` in `.mcp.json`                                       |
+| Codex                         | `.agents/skills/<name>/`                  | `.codex/agents/<name>.toml`                                            | Owned `[mcp_servers]` in `.codex/config.toml`                           |
+| Copilot CLI                   | `.github/skills/<name>/`                  | `.github/agents/<name>.agent.md`                                       | Owned `mcpServers` in `.github/mcp.json`                                |
+| Copilot cloud                 | Repository-visible supported skill output | `.github/agents/<name>.agent.md`                                       | Explicit repository/service settings operation                          |
+| VS Code Local                 | `.github/skills/<name>/`                  | `.github/agents/<name>.agent.md`                                       | Owned `servers` in `.vscode/mcp.json`                                   |
+| Gemini CLI                    | `.gemini/skills/<name>/`                  | `.gemini/agents/<name>.md`                                             | `.gemini/settings.json`                                                 |
+| Kiro current                  | `.kiro/skills/<name>/`                    | `.kiro/agents/`, verified current profile schema                       | `.kiro/settings/mcp.json`                                               |
+| Pi                            | `.pi/skills/<name>/`                      | `.pi/agents/` only with the pinned extension and allowed project scope | `.pi/mcp.json`                                                          |
+| OMP                           | `.omp/skills/<name>/`                     | `.omp/agents/<name>.md`                                                | `.omp/mcp.json`                                                         |
+| OpenCode                      | `.opencode/skills/<name>/`                | `.opencode/agents/<name>.md`                                           | `opencode.json`; retain an existing current `.jsonc` variant            |
+| Cursor                        | `.cursor/skills/<name>/`                  | `.cursor/agents/<name>.md`                                             | `.cursor/mcp.json`                                                      |
+| Antigravity current           | `.agents/skills/<name>/`                  | `.agents/agents/` for the verified CLI surface                         | `.agents/mcp_config.json` for the supported surface                     |
+| Roo                           | `.roo/skills/<name>/`                     | `.roomodes` only for an explicitly permitted persona mapping           | `.roo/mcp.json`                                                         |
+| Cline                         | `.cline/skills/<name>/`                   | — until schema/loader verification                                     | — until requested scope/surface resolves the documented path conflict   |
+| Kilo current                  | `.kilo/skills/<name>/`                    | `.kilo/agents/<name>.md`                                               | Project `kilo.json`; verified current variants inspected before writing |
+| Continue reviewed IDE profile | —                                         | Explicit whole-profile export only                                     | `.continue/mcpServers/etymon-<name>.yaml`                               |
+| Devin Cascade current         | `.devin/skills/<name>/`                   | —                                                                      | No verified project writer; do not silently use user scope              |
+| Amp                           | `.agents/skills/<name>/`                  | Explicit pinned executable bridge, not guessed Markdown                | `.amp/settings.json`                                                    |
+| Zed native                    | `.agents/skills/<name>/`                  | Explicit native profile operation, not an isolated-agent file          | Active settings operation; verify requested scope                       |
 
 Evidence is supplied in Sections 4.1–4.19. The extra selection table is Etymon policy, not a claim that each application mandates the selected spelling when multiple current paths exist. Legacy Windsurf and other old-generation profiles require separate explicit selection; they are not fallback writers for a current target.
 
@@ -525,14 +525,14 @@ The native importer produces an **ImportPlan** for source and lock changes. It d
 
 ### 5.2 Resource contracts
 
-| Resource | Portable starting point | Etymon-owned additions |
-|---|---|---|
-| Skill | Agent Skills directory and metadata | Provenance, dependencies, activation requirements, bounded native extensions |
-| MCP | Explicit connection/transport semantics; supported standard plugin MCP input | Artifact/runtime resolution, typed values and auth, scope, target-specific configuration |
-| Agent | Versioned Etymon Markdown/YAML profile | Prompt, execution role, resource relationships, supported tools/restrictions |
-| Rule | Markdown content with Etymon-declared activation | Scope, matching basis, ordering and native import/export |
-| Plugin | Recognized Agent Plugins or native package format | Parent-child graph, lifecycle requirements, decomposition decisions |
-| Hook | Versioned opt-in Etymon handler contract | Precisely modeled events, payload/result conversion and execution requirements |
+| Resource | Portable starting point                                                      | Etymon-owned additions                                                                   |
+| -------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Skill    | Agent Skills directory and metadata                                          | Provenance, dependencies, activation requirements, bounded native extensions             |
+| MCP      | Explicit connection/transport semantics; supported standard plugin MCP input | Artifact/runtime resolution, typed values and auth, scope, target-specific configuration |
+| Agent    | Versioned Etymon Markdown/YAML profile                                       | Prompt, execution role, resource relationships, supported tools/restrictions             |
+| Rule     | Markdown content with Etymon-declared activation                             | Scope, matching basis, ordering and native import/export                                 |
+| Plugin   | Recognized Agent Plugins or native package format                            | Parent-child graph, lifecycle requirements, decomposition decisions                      |
+| Hook     | Versioned opt-in Etymon handler contract                                     | Precisely modeled events, payload/result conversion and execution requirements           |
 
 Agent Skills and Agent Plugins define their respective file formats; the remaining columns are Etymon design choices, not fields claimed to be part of those standards. [STD-S] [STD-P]
 
@@ -541,21 +541,21 @@ Agent Skills and Agent Plugins define their respective file formats; the remaini
 The following TypeScript sketches describe the implementation boundary. They are not a released SDK. Persistence schemas validate equivalent concepts without requiring all resources to be stored in one file format.
 
 ```ts
-type ResourceKind = "skill" | "mcp" | "agent" | "rule" | "plugin" | "hook";
+type ResourceKind = 'skill' | 'mcp' | 'agent' | 'rule' | 'plugin' | 'hook';
 type ResourceId = string; // Validated as kind:local/name or kind:external/name.
-type RequirementLevel = "required" | "optional";
+type RequirementLevel = 'required' | 'optional';
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
 type ResourceOrigin =
-  | { kind: "authored"; manifestKey: string; sourceRoot: string }
-  | { kind: "external"; lockId: ResourceId; artifactDigest: string };
+  | { kind: 'authored'; manifestKey: string; sourceRoot: string }
+  | { kind: 'external'; lockId: ResourceId; artifactDigest: string };
 
 type ValueRef =
-  | { kind: "literal"; value: string }
-  | { kind: "environment"; name: string }
-  | { kind: "secret"; name: string }
-  | { kind: "project-path"; path: string }
-  | { kind: "artifact-path"; resourceId: ResourceId; path: string };
+  | { kind: 'literal'; value: string }
+  | { kind: 'environment'; name: string }
+  | { kind: 'secret'; name: string }
+  | { kind: 'project-path'; path: string }
+  | { kind: 'artifact-path'; resourceId: ResourceId; path: string };
 
 interface Requirement {
   capability: string;
@@ -582,20 +582,20 @@ interface ResourceBase {
 }
 
 interface SkillResource extends ResourceBase {
-  kind: "skill";
+  kind: 'skill';
   name: string;
   instructionFile: string; // Relative to its authored or immutable source tree.
   activation: {
-    automatic: "inherit" | "enabled" | "disabled";
-    userInvocable: "inherit" | "enabled" | "disabled";
-    isolation: "inherit" | "child-session";
+    automatic: 'inherit' | 'enabled' | 'disabled';
+    userInvocable: 'inherit' | 'enabled' | 'disabled';
+    isolation: 'inherit' | 'child-session';
   };
   declaredToolPreferences: string[];
 }
 
 type McpConnection =
   | {
-      transport: "stdio";
+      transport: 'stdio';
       executable: ValueRef;
       args: ValueRef[];
       env: Record<string, ValueRef>;
@@ -603,86 +603,86 @@ type McpConnection =
       runtimeArtifact?: ResourceId;
     }
   | {
-      transport: "streamable-http" | "sse";
+      transport: 'streamable-http' | 'sse';
       url: string;
       headers: Record<string, ValueRef>;
       auth:
-        | { scheme: "none" }
-        | { scheme: "bearer"; token: ValueRef }
-        | { scheme: "oauth" | "native"; provider?: string };
+        | { scheme: 'none' }
+        | { scheme: 'bearer'; token: ValueRef }
+        | { scheme: 'oauth' | 'native'; provider?: string };
     };
 
 interface McpResource extends ResourceBase {
-  kind: "mcp";
+  kind: 'mcp';
   connection: McpConnection;
   timeouts?: { startupMs?: number; requestMs?: number };
   exposedTools?: { allow?: string[]; deny?: string[] };
-  scope: "session" | "agent" | "plugin";
+  scope: 'session' | 'agent' | 'plugin';
 }
 
 type AgentExecution =
-  | { kind: "persona" }
-  | { kind: "isolated-subagent"; delegateFurther: "inherit" | "allow" | "deny" }
-  | { kind: "remote-agent"; protocol: string; endpoint: string };
+  | { kind: 'persona' }
+  | { kind: 'isolated-subagent'; delegateFurther: 'inherit' | 'allow' | 'deny' }
+  | { kind: 'remote-agent'; protocol: string; endpoint: string };
 
 interface AgentResource extends ResourceBase {
-  kind: "agent";
+  kind: 'agent';
   instructionFile: string;
   execution: AgentExecution;
   skills: ResourceId[];
   mcpServers: ResourceId[];
   tools: { include: string[]; exclude: string[]; inherit: boolean };
   authority: {
-    filesystem: "inherit" | "read-only" | "workspace-write";
-    shell: "inherit" | "deny" | "allow";
-    network: "inherit" | "deny" | "allow";
+    filesystem: 'inherit' | 'read-only' | 'workspace-write';
+    shell: 'inherit' | 'deny' | 'allow';
+    network: 'inherit' | 'deny' | 'allow';
   };
-  model: { strategy: "inherit" | "named-policy"; policyName?: string };
+  model: { strategy: 'inherit' | 'named-policy'; policyName?: string };
 }
 
 type RuleActivation =
-  | { kind: "always" }
-  | { kind: "directory"; root: string }
-  | { kind: "file-match"; patterns: string[]; matchBasis: "accessed-file" | "attached-context" }
-  | { kind: "model-select"; description: string }
-  | { kind: "manual" };
+  | { kind: 'always' }
+  | { kind: 'directory'; root: string }
+  | { kind: 'file-match'; patterns: string[]; matchBasis: 'accessed-file' | 'attached-context' }
+  | { kind: 'model-select'; description: string }
+  | { kind: 'manual' };
 
 interface RuleResource extends ResourceBase {
-  kind: "rule";
+  kind: 'rule';
   instructionFile: string;
   activation: RuleActivation;
   order: number;
 }
 
 interface PluginResource extends ResourceBase {
-  kind: "plugin";
+  kind: 'plugin';
   format: string;
   manifestPath: string;
   children: ResourceId[];
   nativeRuntimeModules: string[];
-  activation: "always" | "on-demand" | "native";
+  activation: 'always' | 'on-demand' | 'native';
 }
 
 interface HookResource extends ResourceBase {
-  kind: "hook";
-  event: "tool.before" | "tool.after" | "session.start" | "session.end" | "agent.turn.end";
+  kind: 'hook';
+  event: 'tool.before' | 'tool.after' | 'session.start' | 'session.end' | 'agent.turn.end';
   handlerRoot: string;
   handlerEntrypoint: string;
   inputContract: string;
   outputContract: string;
   blocking: boolean;
-  failureMode: "deny" | "report";
+  failureMode: 'deny' | 'report';
   timeoutMs: number;
 }
 
-type Resource = SkillResource | McpResource | AgentResource |
-                RuleResource | PluginResource | HookResource;
+type Resource =
+  SkillResource | McpResource | AgentResource | RuleResource | PluginResource | HookResource;
 
 interface Environment {
   schemaVersion: number;
   resources: ReadonlyMap<ResourceId, Resource>;
   roots: readonly ResourceId[];
-  inputDigest: string;       // Hash of this build's authored + locked inputs.
+  inputDigest: string; // Hash of this build's authored + locked inputs.
   toolchainRevision: string;
 }
 ```
@@ -712,10 +712,10 @@ Model selection is similarly explicit: preserve a native-only model requirement 
 Use four primary outcomes at resource or feature granularity:
 
 ```ts
-type ConversionOutcome = "exact" | "adapted" | "native-only" | "blocked";
-type EvidenceStatus = "verified" | "documentation-only" | "unverified";
-type ActivationStatus = "not-applied" | "materialized" | "registered" |
-                        "discovered" | "usable" | "external-step";
+type ConversionOutcome = 'exact' | 'adapted' | 'native-only' | 'blocked';
+type EvidenceStatus = 'verified' | 'documentation-only' | 'unverified';
+type ActivationStatus =
+  'not-applied' | 'materialized' | 'registered' | 'discovered' | 'usable' | 'external-step';
 
 interface ConversionResult {
   resourceId?: ResourceId;
@@ -745,16 +745,16 @@ For broad compatibility, emit a flat `<skill-root>/<name>/SKILL.md` structure. T
 
 ### 6.2 Feature-level treatment
 
-| Skill feature | Canonical handling | Translation policy |
-|---|---|---|
-| Name, description, Markdown body | Standard skill fields and artifact files | Preserve bytes where possible; validate target constraints. |
-| Relative scripts/assets/references | Full artifact subtree | Never copy only `SKILL.md`; preserve safe relative references and executable file modes. |
-| Manual invocation | Explicit activation field | Keep native invocation syntax in the adapter, not in the resource identity. |
-| Automatic activation disabled | Explicit requirement | If the target cannot prevent automatic loading, block a required manual-only skill. |
-| Tool hints / `allowed-tools` | Declared preferences plus native semantics | Do not reinterpret an approval list as a security allowlist. |
-| Forked context / subagent binding | Isolation and agent dependency | Treat as agent execution, not an innocuous extra frontmatter field. |
-| Dynamic shell-expanded instructions | Executable/native extension | Never evaluate during dependency resolution; trust and execution phase must be explicit. |
-| Vendor UI metadata | Namespaced extension | Preserve only for consumers that understand it. |
+| Skill feature                       | Canonical handling                         | Translation policy                                                                       |
+| ----------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Name, description, Markdown body    | Standard skill fields and artifact files   | Preserve bytes where possible; validate target constraints.                              |
+| Relative scripts/assets/references  | Full artifact subtree                      | Never copy only `SKILL.md`; preserve safe relative references and executable file modes. |
+| Manual invocation                   | Explicit activation field                  | Keep native invocation syntax in the adapter, not in the resource identity.              |
+| Automatic activation disabled       | Explicit requirement                       | If the target cannot prevent automatic loading, block a required manual-only skill.      |
+| Tool hints / `allowed-tools`        | Declared preferences plus native semantics | Do not reinterpret an approval list as a security allowlist.                             |
+| Forked context / subagent binding   | Isolation and agent dependency             | Treat as agent execution, not an innocuous extra frontmatter field.                      |
+| Dynamic shell-expanded instructions | Executable/native extension                | Never evaluate during dependency resolution; trust and execution phase must be explicit. |
+| Vendor UI metadata                  | Namespaced extension                       | Preserve only for consumers that understand it.                                          |
 
 For example, Claude and Copilot document skill-specific behavior beyond the base format, and OpenCode may ignore unrecognized fields. “The file parses” therefore does not imply every field is enforced. [CL-S] [GH-S] [OC-S]
 
@@ -780,7 +780,7 @@ Never execute unrestricted `npx skills add` inside the user's actual project and
 
 ### 6.5 Skill import and source ownership
 
-`convert` imports the full skill tree into `.agents/etymon/skills/<name>/` when it is authored, modified or lacks verified external provenance. Preserve relative references, executable modes and source-native metadata without executing dynamic instructions or scripts. Register the source path in `etymon.toml`.
+`convert` imports the full skill tree into `.agents/skills/<name>/` when it is authored, modified or lacks verified external provenance. Preserve relative references, executable modes and source-native metadata without executing dynamic instructions or scripts. Register the source path in `etymon.toml`.
 
 A verified unchanged external skill is represented by its lock entry instead. Project-specific supported configuration belongs in a typed manifest binding, not an edited package cache. A locally modified external skill is a fork; do not discard its edits when a similarly named registry package is found.
 
@@ -811,25 +811,25 @@ A registry record can offer multiple alternatives. Choose explicitly, record the
 
 These are native configuration shapes, not interchangeable protocol names.
 
-| Target | Container/key | Local server | Remote server | Important distinction |
-|---|---|---|---|---|
-| Claude | `mcpServers.<id>` | `command`, `args`, `env` | `type: "http"`, `url`; SSE variant | Local/private scope is not the same file as project scope. [CL-M] |
-| Codex | `[mcp_servers.<id>]` | `command`, `args`, `env_vars` / `env`, `cwd` | `url`, native auth/header fields | TOML; inherited environment and literal environment are separate. [CX-M] |
-| Copilot CLI | `mcpServers.<id>` | `type: "local"`, `command`, `args` | `type: "http"`, `url` | CLI/cloud tool filtering and config ingestion differ. [GH-M] |
-| VS Code Local | **`servers.<id>`** | `type: "stdio"`, command/args/env | HTTP/SSE URL config | `inputs` and user-profile resolution are native features. [VS-M] |
-| Gemini CLI | `mcpServers.<id>` | command/args/env/cwd | **`httpUrl`** or legacy **`url`** | `url` denotes SSE rather than being a generic remote alias. [GE-M] |
-| Kiro | `mcpServers.<id>` | command/args/env | Native remote connection fields | Powers and agent-scoped definitions can change activation/exposure. [KI-M] |
-| Pi | `mcpServers.<id>` | command/args/env/cwd | HTTP URL/auth | Reviewed built-in implementation rejects SSE. [PI-M] |
-| OMP | `mcpServers.<id>` | Native local definition | Native remote definition | Compatibility discovery requires deduplication before writes. [OM-M] |
-| OpenCode | **`mcp.<id>`** | `type: "local"`, **`command: [executable, ...args]`**, `environment` | `type: "remote"`, `url`, headers/OAuth | Neither the top-level map nor the command shape matches Claude. [OC-M] |
-| Cursor | `mcpServers.<id>` | command/args/env | URL and native auth fields | Variable syntax is client-specific. [CU-M] |
-| Antigravity | `mcpServers.<id>` | command/args | **`serverUrl`** | The reviewed config rejects assumptions based on `url`/`httpUrl`. [AG-M] |
-| Roo | `mcpServers.<id>` | Native local definition | Native typed remote definition | User file is editor-managed; project config is `.roo/mcp.json`. [RO-M] |
-| Cline | `mcpServers.<id>` | command/args/env | `type: "streamableHttp"`, `url` | Exact active config path needs surface/release verification. [CN-M] |
-| Kilo | **`mcp.<id>`** | local command array | `type: "remote"`, `url` | Use current Kilo dialect, not legacy Roo-style configuration. [KL-M] |
-| Continue | `mcpServers` **list** in YAML; JSON compatibility map | `name`, command/args/env | `type: "streamable-http"` or `"sse"`, `url` | Standalone YAML file has its own metadata envelope. [CT-M] |
-| Amp | `amp.mcpServers` in settings | Local launch definition | Remote definition | Project trust and hosted Orb scope are separate. [AM-M] |
-| Zed | **`context_servers.<id>`** | command/args/env | URL/headers | ACP forwarding is a host capability, not target-native configuration. [ZD-M] |
+| Target        | Container/key                                         | Local server                                                         | Remote server                               | Important distinction                                                        |
+| ------------- | ----------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------- |
+| Claude        | `mcpServers.<id>`                                     | `command`, `args`, `env`                                             | `type: "http"`, `url`; SSE variant          | Local/private scope is not the same file as project scope. [CL-M]            |
+| Codex         | `[mcp_servers.<id>]`                                  | `command`, `args`, `env_vars` / `env`, `cwd`                         | `url`, native auth/header fields            | TOML; inherited environment and literal environment are separate. [CX-M]     |
+| Copilot CLI   | `mcpServers.<id>`                                     | `type: "local"`, `command`, `args`                                   | `type: "http"`, `url`                       | CLI/cloud tool filtering and config ingestion differ. [GH-M]                 |
+| VS Code Local | **`servers.<id>`**                                    | `type: "stdio"`, command/args/env                                    | HTTP/SSE URL config                         | `inputs` and user-profile resolution are native features. [VS-M]             |
+| Gemini CLI    | `mcpServers.<id>`                                     | command/args/env/cwd                                                 | **`httpUrl`** or legacy **`url`**           | `url` denotes SSE rather than being a generic remote alias. [GE-M]           |
+| Kiro          | `mcpServers.<id>`                                     | command/args/env                                                     | Native remote connection fields             | Powers and agent-scoped definitions can change activation/exposure. [KI-M]   |
+| Pi            | `mcpServers.<id>`                                     | command/args/env/cwd                                                 | HTTP URL/auth                               | Reviewed built-in implementation rejects SSE. [PI-M]                         |
+| OMP           | `mcpServers.<id>`                                     | Native local definition                                              | Native remote definition                    | Compatibility discovery requires deduplication before writes. [OM-M]         |
+| OpenCode      | **`mcp.<id>`**                                        | `type: "local"`, **`command: [executable, ...args]`**, `environment` | `type: "remote"`, `url`, headers/OAuth      | Neither the top-level map nor the command shape matches Claude. [OC-M]       |
+| Cursor        | `mcpServers.<id>`                                     | command/args/env                                                     | URL and native auth fields                  | Variable syntax is client-specific. [CU-M]                                   |
+| Antigravity   | `mcpServers.<id>`                                     | command/args                                                         | **`serverUrl`**                             | The reviewed config rejects assumptions based on `url`/`httpUrl`. [AG-M]     |
+| Roo           | `mcpServers.<id>`                                     | Native local definition                                              | Native typed remote definition              | User file is editor-managed; project config is `.roo/mcp.json`. [RO-M]       |
+| Cline         | `mcpServers.<id>`                                     | command/args/env                                                     | `type: "streamableHttp"`, `url`             | Exact active config path needs surface/release verification. [CN-M]          |
+| Kilo          | **`mcp.<id>`**                                        | local command array                                                  | `type: "remote"`, `url`                     | Use current Kilo dialect, not legacy Roo-style configuration. [KL-M]         |
+| Continue      | `mcpServers` **list** in YAML; JSON compatibility map | `name`, command/args/env                                             | `type: "streamable-http"` or `"sse"`, `url` | Standalone YAML file has its own metadata envelope. [CT-M]                   |
+| Amp           | `amp.mcpServers` in settings                          | Local launch definition                                              | Remote definition                           | Project trust and hosted Orb scope are separate. [AM-M]                      |
+| Zed           | **`context_servers.<id>`**                            | command/args/env                                                     | URL/headers                                 | ACP forwarding is a host capability, not target-native configuration. [ZD-M] |
 
 ### 7.3 One local connection, seven outputs
 
@@ -972,11 +972,11 @@ Where a bundled MCP uses the Agent Plugins connection format, import that recogn
 
 ### 8.1 The three agent primitives
 
-| Primitive | Meaning | Valid examples of mapping |
-|---|---|---|
-| **Persona / mode / profile** | Selects instructions or tools in an existing interactive session. | A Roo custom mode or Zed tool profile, within its actual supported fields. |
-| **Isolated subagent** | A distinct delegated context/run with its own instructions and selected capabilities. | A native Claude/Codex/Copilot subagent or an explicitly installed Pi bridge. |
-| **Remote agent** | Delegates through a remote protocol/service boundary. | A Gemini remote-agent configuration where supported. |
+| Primitive                    | Meaning                                                                               | Valid examples of mapping                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **Persona / mode / profile** | Selects instructions or tools in an existing interactive session.                     | A Roo custom mode or Zed tool profile, within its actual supported fields.   |
+| **Isolated subagent**        | A distinct delegated context/run with its own instructions and selected capabilities. | A native Claude/Codex/Copilot subagent or an explicitly installed Pi bridge. |
+| **Remote agent**             | Delegates through a remote protocol/service boundary.                                 | A Gemini remote-agent configuration where supported.                         |
 
 The native distinctions are documented in the respective agent systems. [RO-A] [ZD-A] [CL-A] [CX-A] [GE-A]
 
@@ -984,14 +984,14 @@ A persona fallback must not be reported as an exact subagent conversion. Isolati
 
 ### 8.2 Field mapping strategy
 
-| Canonical field | Claude | Codex | Copilot / VS Code | OpenCode / Kilo | Other targets |
-|---|---|---|---|---|---|
-| Identity | Frontmatter name and native file | TOML `name` | Filename-derived ID plus display metadata | Filename or named config entry | Adapter-defined native identity |
-| Instructions | Markdown body | `developer_instructions` | Markdown body | Markdown body / prompt config | Preserve prompt role and loader |
-| Tool inclusion | Native tool identifiers | Child config / available controls | Tools and aliases | Native tools/permissions | Explicit mapping table, never guessed casing |
-| Execution kind | Subagent | Child agent | Custom agent with surface-specific behavior | Primary/subagent mode | Persona/extension/remote distinctions |
-| Model selection | Native model field | Native model/effort config | Surface-specific model support | Native model/provider config | Resolve explicit policy, not marketing tiers |
-| Skills/MCP dependencies | Native bindings where supported | Child config can inherit or override | Surface-specific | Session/config/agent semantics differ | Reject unintended scope widening |
+| Canonical field         | Claude                           | Codex                                | Copilot / VS Code                           | OpenCode / Kilo                       | Other targets                                |
+| ----------------------- | -------------------------------- | ------------------------------------ | ------------------------------------------- | ------------------------------------- | -------------------------------------------- |
+| Identity                | Frontmatter name and native file | TOML `name`                          | Filename-derived ID plus display metadata   | Filename or named config entry        | Adapter-defined native identity              |
+| Instructions            | Markdown body                    | `developer_instructions`             | Markdown body                               | Markdown body / prompt config         | Preserve prompt role and loader              |
+| Tool inclusion          | Native tool identifiers          | Child config / available controls    | Tools and aliases                           | Native tools/permissions              | Explicit mapping table, never guessed casing |
+| Execution kind          | Subagent                         | Child agent                          | Custom agent with surface-specific behavior | Primary/subagent mode                 | Persona/extension/remote distinctions        |
+| Model selection         | Native model field               | Native model/effort config           | Surface-specific model support              | Native model/provider config          | Resolve explicit policy, not marketing tiers |
+| Skills/MCP dependencies | Native bindings where supported  | Child config can inherit or override | Surface-specific                            | Session/config/agent semantics differ | Reject unintended scope widening             |
 
 The concrete fields above come from each target's agent reference; the canonical interpretation and rejection policy are Etymon's design. [CL-A] [CX-A] [GH-A2] [VS-A] [OC-A] [KL-A]
 
@@ -1065,14 +1065,14 @@ On import, a required native restriction remains required. Unknown authority-rel
 
 The shared core is Markdown text. The difficult part is **when** it enters context and **which scope** it affects.
 
-| Rule intent | Candidate representations | Risk |
-|---|---|---|
-| Always-on project guidance | `AGENTS.md`, `CLAUDE.md`, native always-included rule | Hierarchy, precedence, and context budgets can differ. |
-| Directory-scoped guidance | Nested instruction file or native scoped rule | Some loaders scan from cwd; others react to accessed files. |
-| File-pattern rule | Claude `paths`, Copilot `applyTo`, Cursor `globs`, Kiro file matching | Matching against an opened file is not the same as matching attached context. |
-| Model-selected rule | Native description/automatic-selection rule | No exact fallback to always-on instructions. |
-| Manual-only rule | Native manual attachment/command | Automatic loading would change intent. |
-| Mode-specific rule | Roo mode rules or other agent binding | Flattening to project scope broadens its audience. |
+| Rule intent                | Candidate representations                                             | Risk                                                                          |
+| -------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Always-on project guidance | `AGENTS.md`, `CLAUDE.md`, native always-included rule                 | Hierarchy, precedence, and context budgets can differ.                        |
+| Directory-scoped guidance  | Nested instruction file or native scoped rule                         | Some loaders scan from cwd; others react to accessed files.                   |
+| File-pattern rule          | Claude `paths`, Copilot `applyTo`, Cursor `globs`, Kiro file matching | Matching against an opened file is not the same as matching attached context. |
+| Model-selected rule        | Native description/automatic-selection rule                           | No exact fallback to always-on instructions.                                  |
+| Manual-only rule           | Native manual attachment/command                                      | Automatic loading would change intent.                                        |
+| Mode-specific rule         | Roo mode rules or other agent binding                                 | Flattening to project scope broadens its audience.                            |
 
 These activation mechanisms are documented in the individual rule specifications. [CL-R] [GH-R] [CU-R] [KI-R] [RO-R] [CT-R]
 
@@ -1185,15 +1185,15 @@ For example, current Codex documentation says some tool paths are outside normal
 
 This table identifies implementation candidates, **not certified equivalence**.
 
-| Canonical family | Native candidates | Required validation |
-|---|---|---|
-| `tool.before` | Claude/Codex `PreToolUse`; Copilot CLI `preToolUse`; Gemini `BeforeTool`; Kiro `PreToolUse` | Which tools are covered? Can the result deny execution? Does failure deny or continue? [CL-H] [CX-H] [GH-H] [GE-H] [KI-H] |
-| `tool.after` | Claude/Codex `PostToolUse`; CLI `postToolUse`; Gemini `AfterTool`; native plugin callbacks | Distinguish observation, result replacement, and rejecting an already-executed operation. [CL-H] [CX-H] [GH-H] [GE-H] |
-| Tool-specific pre/post | Cursor shell/MCP/edit event families | One family may require several bindings; direct filesystem changes might not be covered. [CU-H] |
-| Executable `tool.before/after` | Pi/OMP event APIs; OpenCode/Kilo plugin callbacks; Cline SDK before/after tool; Amp tool events | Versioned bridge, native payload conversion, errors, async behavior. [PI-H] [OM-H] [OC-P] [KL-P] [CN-H] [AM-H] |
-| `session.start` | Native lifecycle hooks or executable plugin event | Process startup, thread opening, and conversation start are not necessarily identical. |
-| `agent.turn.end` | Native completion/stop or plugin turn-end event | Do not substitute session termination; avoid infinite continuation loops. |
-| Editor file save | Kiro and other editor-specific events | Keep separate from model tool execution. [KI-H] |
+| Canonical family               | Native candidates                                                                               | Required validation                                                                                                       |
+| ------------------------------ | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `tool.before`                  | Claude/Codex `PreToolUse`; Copilot CLI `preToolUse`; Gemini `BeforeTool`; Kiro `PreToolUse`     | Which tools are covered? Can the result deny execution? Does failure deny or continue? [CL-H] [CX-H] [GH-H] [GE-H] [KI-H] |
+| `tool.after`                   | Claude/Codex `PostToolUse`; CLI `postToolUse`; Gemini `AfterTool`; native plugin callbacks      | Distinguish observation, result replacement, and rejecting an already-executed operation. [CL-H] [CX-H] [GH-H] [GE-H]     |
+| Tool-specific pre/post         | Cursor shell/MCP/edit event families                                                            | One family may require several bindings; direct filesystem changes might not be covered. [CU-H]                           |
+| Executable `tool.before/after` | Pi/OMP event APIs; OpenCode/Kilo plugin callbacks; Cline SDK before/after tool; Amp tool events | Versioned bridge, native payload conversion, errors, async behavior. [PI-H] [OM-H] [OC-P] [KL-P] [CN-H] [AM-H]            |
+| `session.start`                | Native lifecycle hooks or executable plugin event                                               | Process startup, thread opening, and conversation start are not necessarily identical.                                    |
+| `agent.turn.end`               | Native completion/stop or plugin turn-end event                                                 | Do not substitute session termination; avoid infinite continuation loops.                                                 |
+| Editor file save               | Kiro and other editor-specific events                                                           | Keep separate from model tool execution. [KI-H]                                                                           |
 
 VS Code Local and Copilot CLI should remain separate hook dialects even when they share `.github/hooks/`. Antigravity adds its own named-pack envelope. These are structural differences, not just casing preferences. [VS-H] [GH-H] [AG-H]
 
@@ -1209,9 +1209,9 @@ Define a small versioned Etymon contract for hooks that opt into portability. A 
   "tool": {
     "logicalCapability": "process.exec",
     "nativeName": "Bash",
-    "arguments": {"command": "echo example"}
+    "arguments": { "command": "echo example" }
   },
-  "context": {"projectRoot": "/work/demo"}
+  "context": { "projectRoot": "/work/demo" }
 }
 ```
 
@@ -1254,19 +1254,19 @@ etymon.lock      external dependency requests and immutable resolutions
 
 They live together under `.agents/`. The manifest is optional for registry-only environments. A local-only environment can have no external resources; `init` may still create a lock containing the format/toolchain metadata. Do not put every local resource into the lock merely to force one-file ownership.
 
-| Information | Authoritative location |
-|---|---|
-| Local resource ID and source reference | Corresponding manifest declaration |
-| Local skill metadata/instructions/assets | Standard skill tree |
-| Local agent prompt, role, dependencies and restrictions | Etymon agent file; manifest only registers its path |
-| Local rule content | Rule Markdown file; activation is declared in the manifest |
-| Custom MCP connection | Authored manifest entry |
-| External package source, selector and update policy | External lock request |
-| Exact external artifact and base definitions | Locked artifact; optional normalized cache is derived and validated |
-| Project-specific external-resource configuration | Typed binding in the manifest referencing the locked resource ID |
-| Imported native fields not modeled portably | Sanitized authored native preservation records/files |
-| Active native aliases and output ownership | Ignored machine state |
-| Credentials, OAuth/session state and trust approvals | User-controlled secret/native state, never portable source or lock |
+| Information                                             | Authoritative location                                              |
+| ------------------------------------------------------- | ------------------------------------------------------------------- |
+| Local resource ID and source reference                  | Corresponding manifest declaration                                  |
+| Local skill metadata/instructions/assets                | Standard skill tree                                                 |
+| Local agent prompt, role, dependencies and restrictions | Etymon agent file; manifest only registers its path                 |
+| Local rule content                                      | Rule Markdown file; activation is declared in the manifest          |
+| Custom MCP connection                                   | Authored manifest entry                                             |
+| External package source, selector and update policy     | External lock request                                               |
+| Exact external artifact and base definitions            | Locked artifact; optional normalized cache is derived and validated |
+| Project-specific external-resource configuration        | Typed binding in the manifest referencing the locked resource ID    |
+| Imported native fields not modeled portably             | Sanitized authored native preservation records/files                |
+| Active native aliases and output ownership              | Ignored machine state                                               |
+| Credentials, OAuth/session state and trust approvals    | User-controlled secret/native state, never portable source or lock  |
 
 The complete build graph is computed from these inputs. Local relationships may point to locked external IDs, but this does not make local prompts or authored dependency edges machine-owned.
 
@@ -1278,7 +1278,7 @@ This is an Etymon schema proposal. All file paths below resolve relative to `.ag
 schema_version = 1
 
 [skills.release-check]
-path = "etymon/skills/release-check"
+path = "skills/release-check"
 
 [agents.reviewer]
 path = "etymon/agents/reviewer.md"
@@ -1316,15 +1316,15 @@ Paths supplied to CLI commands are shell-working-directory relative; the CLI nor
 
 Use a versioned machine-readable lock with deterministic ordering. JSON is the proposed serialization despite the `.lock` extension; this is an Etymon choice, not an upstream format requirement.
 
-| Area | Lock content |
-|---|---|
-| Format/toolchain | Lock and normalization versions; pinned Etymon/adapter implementation set |
-| Requests | Provider, source, selector, alias, explicit/transitive status, update policy |
-| Resolution | Commit and subtree, exact package artifact/integrity, image digest, or explicit hosted endpoint |
-| Materialization | Full tree integrity, file modes, platform constraints, required runtime artifacts |
-| External graph | External package/component identities, relationships and base requirements |
-| Provenance | Registry identity/schema/record version, verified package evidence, license where available |
-| Reproducibility limits | Artifact versus runtime versus hosted-binding guarantees |
+| Area                   | Lock content                                                                                    |
+| ---------------------- | ----------------------------------------------------------------------------------------------- |
+| Format/toolchain       | Lock and normalization versions; pinned Etymon/adapter implementation set                       |
+| Requests               | Provider, source, selector, alias, explicit/transitive status, update policy                    |
+| Resolution             | Commit and subtree, exact package artifact/integrity, image digest, or explicit hosted endpoint |
+| Materialization        | Full tree integrity, file modes, platform constraints, required runtime artifacts               |
+| External graph         | External package/component identities, relationships and base requirements                      |
+| Provenance             | Registry identity/schema/record version, verified package evidence, license where available     |
+| Reproducibility limits | Artifact versus runtime versus hosted-binding guarantees                                        |
 
 Do not store current local file contents, local prompt hashes that must be manually refreshed after every edit, personal harness preferences, credential values, or absolute machine paths in the external dependency graph.
 
@@ -1385,12 +1385,12 @@ Capture stable source bytes into staging for the plan; detect changes during app
 
 ### 12.6 Reproducibility levels
 
-| Level | What is fixed/verified | What remains outside the guarantee |
-|---|---|---|
-| Configuration | Authored snapshot, normalized settings, target profile and generation rules | Ambient host tools, mutable dependencies, live services |
-| Artifact | Above plus exact external source/package bytes | Transitive startup installs and unpinned runtimes |
-| Runtime | Above plus the executable environment for a specified platform | Credentials, live data, relevant OS/kernel differences |
-| Hosted binding | Endpoint and declared transport/auth/configuration | Remote implementation, available tools and service availability |
+| Level          | What is fixed/verified                                                      | What remains outside the guarantee                              |
+| -------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Configuration  | Authored snapshot, normalized settings, target profile and generation rules | Ambient host tools, mutable dependencies, live services         |
+| Artifact       | Above plus exact external source/package bytes                              | Transitive startup installs and unpinned runtimes               |
+| Runtime        | Above plus the executable environment for a specified platform              | Credentials, live data, relevant OS/kernel differences          |
+| Hosted binding | Endpoint and declared transport/auth/configuration                          | Remote implementation, available tools and service availability |
 
 Report the weakest applicable level per resource. A local command relying on a host binary can be valid configuration without being a locked executable environment. The UI must state that limitation; strict runtime requirements must fail rather than pretend the host dependency was pinned.
 
@@ -1398,16 +1398,16 @@ Pin the generation implementation as well as the artifacts. The CLI must check i
 
 ### 12.7 CLI mutation contract
 
-| Command | Canonical inputs changed | Native effect |
-|---|---|---|
-| `init` | Creates initial lock; manifest/source only as needed | Narrow machine-state/ignore setup, not adoption of existing settings |
-| `<kind> add <external-source>` | Lock requests/resolutions | Fetch/cache only; activation through sync |
-| `<kind> add <local-path>` | Manifest registration; source import only when explicitly requested | No automatic native activation |
-| `convert <harness>` | Reviewed authored files/manifest and verified external resolutions | Original native setup unchanged |
-| `sync` | None | Restores locked bytes and applies owned native output |
-| `update` | Selected external resolutions | Native targets are regenerated by subsequent sync |
-| `<kind> remove <id>` | The owning declaration/lock root | Safely removes owned output; source files retained by default |
-| `doctor` | None | Inspects state; no implied destructive repair |
+| Command                        | Canonical inputs changed                                            | Native effect                                                        |
+| ------------------------------ | ------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `init`                         | Creates initial lock; manifest/source only as needed                | Narrow machine-state/ignore setup, not adoption of existing settings |
+| `<kind> add <external-source>` | Lock requests/resolutions                                           | Fetch/cache only; activation through sync                            |
+| `<kind> add <local-path>`      | Manifest registration; source import only when explicitly requested | No automatic native activation                                       |
+| `convert <harness>`            | Reviewed authored files/manifest and verified external resolutions  | Original native setup unchanged                                      |
+| `sync`                         | None                                                                | Restores locked bytes and applies owned native output                |
+| `update`                       | Selected external resolutions                                       | Native targets are regenerated by subsequent sync                    |
+| `<kind> remove <id>`           | The owning declaration/lock root                                    | Safely removes owned output; source files retained by default        |
+| `doctor`                       | None                                                                | Inspects state; no implied destructive repair                        |
 
 If a removal would orphan a required relationship, stop with the references that need attention. External packages and plugin children still referenced by another resource remain present. Cache garbage collection is not source deletion.
 
@@ -1434,10 +1434,10 @@ npx etymon doctor --harness codex --json
 
 ### 12.8 Project and global scope
 
-| Scope | Manifest | Lock | Authored source |
-|---|---|---|---|
+| Scope   | Manifest                     | Lock                         | Authored source          |
+| ------- | ---------------------------- | ---------------------------- | ------------------------ |
 | Project | `<repo>/.agents/etymon.toml` | `<repo>/.agents/etymon.lock` | `<repo>/.agents/etymon/` |
-| Global | `~/.agents/etymon.toml` | `~/.agents/etymon.lock` | `~/.agents/etymon/` |
+| Global  | `~/.agents/etymon.toml`      | `~/.agents/etymon.lock`      | `~/.agents/etymon/`      |
 
 Default commands address the project. `--global` addresses the current user's global Etymon environment and target roots. No project resource is silently promoted to a global target, and no user's global configuration is silently vendored into a team repository.
 
@@ -1485,13 +1485,13 @@ Build one whole-project write plan. Do not let adapters independently mutate the
 
 Examples requiring coordination:
 
-| Shared surface | Conflict |
-|---|---|
-| `.agents/skills/<name>/` | Several selected and unselected harnesses may discover one copy. |
-| `.mcp.json` | Claude and Copilot CLI can read the same file with overlapping but not identical contracts. |
-| `.github/agents/*.agent.md` | VS Code Local and Copilot CLI/cloud can interpret different fields. |
-| `.github/hooks/*.json` | Different event dialects can occupy the same directory. |
-| `AGENTS.md` / `CLAUDE.md` | Compatibility loaders may duplicate, shadow, or broaden instructions. |
+| Shared surface              | Conflict                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------- |
+| `.agents/skills/<name>/`    | Several selected and unselected harnesses may discover one copy.                            |
+| `.mcp.json`                 | Claude and Copilot CLI can read the same file with overlapping but not identical contracts. |
+| `.github/agents/*.agent.md` | VS Code Local and Copilot CLI/cloud can interpret different fields.                         |
+| `.github/hooks/*.json`      | Different event dialects can occupy the same directory.                                     |
+| `AGENTS.md` / `CLAUDE.md`   | Compatibility loaders may duplicate, shadow, or broaden instructions.                       |
 
 These are documented shared locations, not hypothetical filename coincidences. [CU-S] [GH-M] [VS-A] [GH-H] [VS-H] [ZD-R]
 
@@ -1566,14 +1566,28 @@ The types build on Section 5. They describe data contracts, not an implementatio
 
 ```ts
 type HarnessId =
-  | "claude" | "codex" | "copilot-cli" | "copilot-cloud" | "vscode-local"
-  | "gemini" | "kiro" | "pi" | "omp" | "opencode" | "cursor" | "antigravity"
-  | "roo" | "cline" | "kilo" | "continue" | "windsurf" | "devin-cascade"
-  | "amp" | "zed";
+  | 'claude'
+  | 'codex'
+  | 'copilot-cli'
+  | 'copilot-cloud'
+  | 'vscode-local'
+  | 'gemini'
+  | 'kiro'
+  | 'pi'
+  | 'omp'
+  | 'opencode'
+  | 'cursor'
+  | 'antigravity'
+  | 'roo'
+  | 'cline'
+  | 'kilo'
+  | 'continue'
+  | 'windsurf'
+  | 'devin-cascade'
+  | 'amp'
+  | 'zed';
 
-type Scope =
-  | { kind: "project"; projectRoot: string }
-  | { kind: "global"; userHome: string };
+type Scope = { kind: 'project'; projectRoot: string } | { kind: 'global'; userHome: string };
 
 interface TargetContext {
   harness: HarnessId;
@@ -1591,7 +1605,7 @@ interface TargetProfile extends TargetContext {
   featureFlags: Readonly<Record<string, boolean>>;
 }
 
-type DirectionSupport = "supported" | "partial" | "native-only" | "unverified" | "unavailable";
+type DirectionSupport = 'supported' | 'partial' | 'native-only' | 'unverified' | 'unavailable';
 
 interface ResourceSupport {
   resource: ResourceKind;
@@ -1603,7 +1617,7 @@ interface ResourceSupport {
 
 interface Diagnostic {
   code: string;
-  severity: "info" | "warning" | "error";
+  severity: 'info' | 'warning' | 'error';
   resourceId?: ResourceId;
   target?: string;
   message: string;
@@ -1611,10 +1625,10 @@ interface Diagnostic {
 }
 
 interface NativeArtifactSnapshot {
-  sourceLocator: string;       // Local/private diagnostic; redact before portable persistence.
+  sourceLocator: string; // Local/private diagnostic; redact before portable persistence.
   schemaId: string;
   sourceDigest: string;
-  scope: "project" | "global" | "private-project" | "managed";
+  scope: 'project' | 'global' | 'private-project' | 'managed';
   sanitizedContent: string;
   referencedAssets: readonly string[];
 }
@@ -1626,8 +1640,7 @@ interface NativeSnapshot {
 }
 
 type ImportDisposition =
-  | "authored" | "verified-external" | "local-fork"
-  | "preserved-native" | "needs-review";
+  'authored' | 'verified-external' | 'local-fork' | 'preserved-native' | 'needs-review';
 
 interface ImportedItem {
   sourceLocator: string;
@@ -1637,7 +1650,7 @@ interface ImportedItem {
 }
 
 interface PlannedOperation {
-  kind: "write-file" | "merge-keys" | "remove-owned" | "register-native" | "external-step";
+  kind: 'write-file' | 'merge-keys' | 'remove-owned' | 'register-native' | 'external-step';
   destination: string;
   owner: string;
   expectedPreviousDigest?: string;
@@ -1654,7 +1667,7 @@ interface ImportPlan {
   items: readonly ImportedItem[];
   sourceOperations: readonly PlannedOperation[];
   diagnostics: readonly Diagnostic[];
-  status: "ready" | "review-required" | "blocked";
+  status: 'ready' | 'review-required' | 'blocked';
 }
 
 interface ExportPlan {
@@ -1662,7 +1675,7 @@ interface ExportPlan {
   results: readonly ConversionResult[];
   diagnostics: readonly Diagnostic[];
   inputDigest: string;
-  status: "ready" | "blocked" | "external-step";
+  status: 'ready' | 'blocked' | 'external-step';
 }
 
 interface HarnessAdapter {
@@ -1708,18 +1721,18 @@ Claude's user state can mix MCP records, sign-in state and per-project trust inf
 
 ### 14.4 Import classification and destination
 
-| Source finding | Destination/behavior |
-|---|---|
-| Self-authored skill/agent/rule | Normalize supported format into `.agents/etymon/<kind>/`; register in TOML |
-| Custom MCP command or URL | Authored MCP entry, with typed environment/secret/path references |
-| Unchanged external resource with verified exact origin | External lock entry; local configuration differences become typed manifest bindings |
-| Modified external resource | Editable local fork with upstream provenance; never substitute an upstream version and discard edits |
-| External-looking resource without provable origin | Preserve as local/unverified; do not fabricate a registry identity or historical version |
-| Native plugin with declarative components | P2 bundle importer; record parent/children and account for unsupported components |
-| Arbitrary executable module or unknown fields | Sanitized native-only preservation or a review/blocking diagnostic |
-| Credentials, session history or unrelated state | Excluded; report categories/counts without leaking values |
+| Source finding                                         | Destination/behavior                                                                                 |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Self-authored skill/agent/rule                         | Normalize supported format into `.agents/etymon/<kind>/`; register in TOML                           |
+| Custom MCP command or URL                              | Authored MCP entry, with typed environment/secret/path references                                    |
+| Unchanged external resource with verified exact origin | External lock entry; local configuration differences become typed manifest bindings                  |
+| Modified external resource                             | Editable local fork with upstream provenance; never substitute an upstream version and discard edits |
+| External-looking resource without provable origin      | Preserve as local/unverified; do not fabricate a registry identity or historical version             |
+| Native plugin with declarative components              | P2 bundle importer; record parent/children and account for unsupported components                    |
+| Arbitrary executable module or unknown fields          | Sanitized native-only preservation or a review/blocking diagnostic                                   |
+| Credentials, session history or unrelated state        | Excluded; report categories/counts without leaking values                                            |
 
-Proving external provenance may require an installed package record plus an artifact/tree comparison. A hash match against a guessed package is not sufficient identity evidence by itself. Registry lookup used to find a *candidate* must not become an automatic substitution.
+Proving external provenance may require an installed package record plus an artifact/tree comparison. A hash match against a guessed package is not sufficient identity evidence by itself. Registry lookup used to find a _candidate_ must not become an automatic substitution.
 
 A native `npx package@latest` connection does not establish the version that previously ran. Preserve it as configuration with an unpinned-runtime warning; resolving a new exact version is a new dependency operation whose result must be reviewed. An absolute local executable path is a machine dependency until it is explicitly rebased or packaged.
 
@@ -1808,23 +1821,23 @@ A supported native format with an unverified loading path is not an approved exp
 
 ### 15.1 Tests that establish real support
 
-| Test class | What it must establish |
-|---|---|
-| Schema/golden tests | Exact output fields, casing, file extension, container key, ordering, and path placement |
-| Native import fixtures | Current and supported legacy input schemas, scope/default/inheritance capture, full asset preservation |
+| Test class                  | What it must establish                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Schema/golden tests         | Exact output fields, casing, file extension, container key, ordering, and path placement                                  |
+| Native import fixtures      | Current and supported legacy input schemas, scope/default/inheritance capture, full asset preservation                    |
 | Authorship/provenance tests | Local versus external classification, modified forks, unknown origins, bindings without duplicate dependency declarations |
-| Source/lock ownership | Editing local source changes output without changing external resolution; update does not overwrite local source |
-| Migration tests | Non-destructive conversion, explicit adoption, re-import no-ops and three-way conflicts |
-| Native-first tests | Current output selected even when an accepted legacy or foreign file exists; current JSONC retained where appropriate |
-| Native discovery tests | The actual harness lists/loads the intended skill, agent, server, or plugin |
-| Behavioral contract tests | A required restriction, scope, or activation mode behaves as declared |
-| Transport tests | Local stdio and remote transports connect without protocol contamination or silent fallback |
-| Hook tests | Timing, payload conversion, deny behavior, errors, timeouts, cancellation, and coverage |
-| Scope tests | Project/user/parent/config-root precedence and ambient resource collisions |
-| Multi-target tests | Shared files and compatibility aliases do not duplicate or shadow managed resources |
-| Security tests | Traversal, symlink escapes, archive extraction, command injection, secret redaction, untrusted code activation |
-| Ownership tests | Unmanaged files preserved; edits detected; stale owned entries removed safely |
-| Recovery tests | Interrupted sync, concurrent sync, disk-full, partial external registration, and rollback |
+| Source/lock ownership       | Editing local source changes output without changing external resolution; update does not overwrite local source          |
+| Migration tests             | Non-destructive conversion, explicit adoption, re-import no-ops and three-way conflicts                                   |
+| Native-first tests          | Current output selected even when an accepted legacy or foreign file exists; current JSONC retained where appropriate     |
+| Native discovery tests      | The actual harness lists/loads the intended skill, agent, server, or plugin                                               |
+| Behavioral contract tests   | A required restriction, scope, or activation mode behaves as declared                                                     |
+| Transport tests             | Local stdio and remote transports connect without protocol contamination or silent fallback                               |
+| Hook tests                  | Timing, payload conversion, deny behavior, errors, timeouts, cancellation, and coverage                                   |
+| Scope tests                 | Project/user/parent/config-root precedence and ambient resource collisions                                                |
+| Multi-target tests          | Shared files and compatibility aliases do not duplicate or shadow managed resources                                       |
+| Security tests              | Traversal, symlink escapes, archive extraction, command injection, secret redaction, untrusted code activation            |
+| Ownership tests             | Unmanaged files preserved; edits detected; stale owned entries removed safely                                             |
+| Recovery tests              | Interrupted sync, concurrent sync, disk-full, partial external registration, and rollback                                 |
 
 Do not use “the model appeared to follow the instruction once” as proof of enforcement. Tool and loader behavior should be tested without relying on model judgment where possible.
 
@@ -1951,20 +1964,20 @@ Ship a small portable command-hook contract and a few rigorously tested bridges.
 
 ### 16.5 Research / implementation blockers
 
-| Item | Current finding | Required before release |
-|---|---|---|
-| Exact supported versions | Documentation/source review only | Pin releases and run real loader/behavior tests. |
-| Continue native skills/subagents/hooks | Precise contracts not established | Source/maintainer verification or keep those resource types unverified. |
-| Cline user MCP path | Official pages name different paths/surfaces | Detect active release/config; fixture both where justified. |
-| Cline custom-agent files | Config lists agent directories without sufficient schema | Obtain actual loader/schema; no guessed renderer. |
-| Antigravity plugin manifest | Installed plugin resources documented, full import contract not established | Verify manifest/version/registration and surface parity. |
-| Roo hook runtime | No verified portable lifecycle contract | Confirm native support or explicitly remain unsupported by Etymon. |
-| Kilo plugin registration | Current and migration-era path references coexist | Test active plugin loader and avoid foreign config names. |
-| Kiro Powers registration | Public native install flow is known; cache path is not a stable API here | Use documented install/link API or approved manual registration. |
-| Shared `.agents/` visibility | Several targets auto-read it | Cross-target discovery tests and inert source/cache layout. |
-| Headless skills.sh integration | CLI exists; stable resolver/no-lock API not established here | Pin and test isolated integration; do not rely on undocumented flags. |
-| Hosted targets | May not receive ignored local output or personal configuration | Explicit export/bootstrap/service registration mode. |
-| Hooks as hard security policy | Native coverage/failure semantics can be incomplete | Verify relevant operations or block a required enforcement claim. |
+| Item                                   | Current finding                                                             | Required before release                                                 |
+| -------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Exact supported versions               | Documentation/source review only                                            | Pin releases and run real loader/behavior tests.                        |
+| Continue native skills/subagents/hooks | Precise contracts not established                                           | Source/maintainer verification or keep those resource types unverified. |
+| Cline user MCP path                    | Official pages name different paths/surfaces                                | Detect active release/config; fixture both where justified.             |
+| Cline custom-agent files               | Config lists agent directories without sufficient schema                    | Obtain actual loader/schema; no guessed renderer.                       |
+| Antigravity plugin manifest            | Installed plugin resources documented, full import contract not established | Verify manifest/version/registration and surface parity.                |
+| Roo hook runtime                       | No verified portable lifecycle contract                                     | Confirm native support or explicitly remain unsupported by Etymon.      |
+| Kilo plugin registration               | Current and migration-era path references coexist                           | Test active plugin loader and avoid foreign config names.               |
+| Kiro Powers registration               | Public native install flow is known; cache path is not a stable API here    | Use documented install/link API or approved manual registration.        |
+| Shared `.agents/` visibility           | Several targets auto-read it                                                | Cross-target discovery tests and inert source/cache layout.             |
+| Headless skills.sh integration         | CLI exists; stable resolver/no-lock API not established here                | Pin and test isolated integration; do not rely on undocumented flags.   |
+| Hosted targets                         | May not receive ignored local output or personal configuration              | Explicit export/bootstrap/service registration mode.                    |
+| Hooks as hard security policy          | Native coverage/failure semantics can be incomplete                         | Verify relevant operations or block a required enforcement claim.       |
 
 The evidence for product-specific blockers is in the respective harness rows and their sources. Unknowns are not evidence of absence; they are reasons **not to ship a speculative write path**.
 
@@ -1991,7 +2004,6 @@ These migration and ownership behaviors are part of the MVP, not optional work a
 The primary-source reference index below is retained from the **September 30, 2026** inventory baseline. This architecture revision spot-checked Agent Skills, Agent Plugins, Claude settings, Codex skills/MCP, OpenCode configuration and the specific dot-agents site; it did **not** re-fetch every inventory source or run every native client. Some URLs redirect to current documentation. Proposed Etymon commands, schemas, conversion policies and test plans are original design recommendations, not upstream guarantees.
 
 **Evidence boundary:** no installed-client compatibility certification was performed in this research pass. The unknown and conflict entries are intentional release gates, not placeholder paths to implement blindly.
-
 
 **Shared standards and providers:** [Agent Skills specification][STD-S] · [Agent Plugins specification][STD-P] · [Skills CLI upstream repository][SK-CLI] · [MCP Registry overview][MCP-R] · [MCP Registry package types][MCP-P]
 
@@ -2035,119 +2047,118 @@ The primary-source reference index below is retained from the **September 30, 20
 
 <!-- Reference definitions. Stable public URLs; adapter releases should additionally pin source/schema revisions. -->
 
-[STD-S]: https://agentskills.io/specification "Agent Skills specification"
-[STD-P]: https://agent-plugins.org/specification "Agent Plugins specification"
-[SK-CLI]: https://github.com/vercel-labs/skills "Skills CLI upstream repository"
-[MCP-R]: https://modelcontextprotocol.io/registry/about "MCP Registry overview"
-[MCP-P]: https://modelcontextprotocol.io/registry/package-types "MCP Registry package types"
-[CL-S]: https://code.claude.com/docs/en/skills "Skills"
-[CL-A]: https://code.claude.com/docs/en/sub-agents "Subagents"
-[CL-M]: https://code.claude.com/docs/en/mcp "MCP"
-[CL-P]: https://code.claude.com/docs/en/plugins-reference "Plugin reference"
-[CL-R]: https://code.claude.com/docs/en/memory "Memory and rules"
-[CL-H]: https://code.claude.com/docs/en/hooks "Hooks reference"
-[CX-S]: https://learn.chatgpt.com/docs/build-skills "Skills"
-[CX-A]: https://learn.chatgpt.com/docs/agent-configuration/subagents "Subagents"
-[CX-M]: https://learn.chatgpt.com/docs/extend/mcp?surface=cli "MCP"
-[CX-P]: https://developers.openai.com/plugins/build/plugins "Plugin packaging"
-[CX-R]: https://learn.chatgpt.com/docs/agent-configuration/agents-md "AGENTS.md instructions"
-[CX-H]: https://learn.chatgpt.com/docs/hooks "Hooks"
-[GH-S]: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills "CLI skills"
-[GH-A]: https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/invoke-custom-agents "CLI custom-agent locations and precedence"
-[GH-A2]: https://docs.github.com/en/copilot/reference/custom-agents-configuration "Custom-agent configuration reference"
-[GH-M]: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers "CLI MCP servers"
-[GH-P]: https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference "CLI plugin reference"
-[GH-R]: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-custom-instructions "CLI custom instructions"
-[GH-H]: https://docs.github.com/en/copilot/reference/hooks-reference "Hooks reference"
-[GH-CS]: https://docs.github.com/en/copilot/concepts/agents/about-agent-skills "Agent skills and supported surfaces"
-[GH-CM]: https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/configure-mcp-servers "Cloud/repository MCP configuration"
-[GH-CR]: https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/add-custom-instructions/add-repository-instructions "Repository custom instructions"
-[VS-S]: https://code.visualstudio.com/docs/agent-customization/agent-skills "Agent skills"
-[VS-A]: https://code.visualstudio.com/docs/agent-customization/custom-agents "Custom agents"
-[VS-M]: https://code.visualstudio.com/docs/agent-customization/mcp-servers "MCP servers"
-[VS-P]: https://code.visualstudio.com/docs/agent-customization/agent-plugins "Agent plugins"
-[VS-R]: https://code.visualstudio.com/docs/agent-customization/custom-instructions "Custom instructions"
-[VS-H]: https://code.visualstudio.com/docs/agent-customization/hooks "Hooks"
-[GE-S]: https://geminicli.com/docs/cli/skills/ "Skills"
-[GE-A]: https://geminicli.com/docs/core/subagents/ "Subagents"
-[GE-M]: https://geminicli.com/docs/tools/mcp-server/ "MCP servers"
-[GE-P]: https://geminicli.com/docs/extensions/reference/ "Extension reference"
-[GE-R]: https://geminicli.com/docs/cli/gemini-md/ "GEMINI.md"
-[GE-H]: https://geminicli.com/docs/hooks/reference/ "Hooks reference"
-[KI-C]: https://kiro.dev/docs/configuration/ "Configuration scopes and current generations"
-[KI-S]: https://kiro.dev/docs/skills/ "Skills"
-[KI-A]: https://kiro.dev/docs/custom-agents/ "Custom agents"
-[KI-M]: https://kiro.dev/docs/mcp/ "MCP"
-[KI-P]: https://kiro.dev/docs/powers/ "Powers"
-[KI-PI]: https://kiro.dev/docs/powers/installation/ "Power installation and activation"
-[KI-R]: https://kiro.dev/docs/steering/ "Steering"
-[KI-H]: https://kiro.dev/docs/hooks/ "Hooks"
-[PI-C]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/docs/configuration.md "Configuration"
-[PI-S]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/docs/skills.md "Skills"
-[PI-A]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/examples/extensions/subagent/README.md "Official subagent extension example"
-[PI-M]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/docs/mcp.md "MCP"
-[PI-P]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/docs/packages.md "Packages"
-[PI-H]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/docs/extensions.md "Extension API"
-[OM-S]: https://omp.sh/docs/skills "Skills"
-[OM-A]: https://omp.sh/docs/subagent-authoring "Subagent authoring"
-[OM-M]: https://omp.sh/docs/mcp "MCP"
-[OM-P]: https://omp.sh/docs/plugins "Plugins"
-[OM-R]: https://omp.sh/docs/context-files "Context files"
-[OM-H]: https://omp.sh/docs/hooks "Hooks"
-[OC-S]: https://opencode.ai/docs/skills/ "Skills"
-[OC-A]: https://opencode.ai/docs/agents/ "Agents"
-[OC-M]: https://opencode.ai/docs/mcp-servers/ "MCP servers"
-[OC-P]: https://opencode.ai/docs/plugins/ "Plugins and callbacks"
-[OC-R]: https://opencode.ai/docs/rules/ "Rules"
-[OC-C]: https://opencode.ai/docs/config/ "Configuration"
-[CU-S]: https://cursor.com/docs/skills "Skills"
-[CU-A]: https://cursor.com/docs/subagents "Subagents"
-[CU-M]: https://cursor.com/docs/mcp "MCP"
-[CU-P]: https://cursor.com/docs/plugins "Plugins"
-[CU-R]: https://cursor.com/docs/rules "Rules"
-[CU-H]: https://cursor.com/docs/hooks "Hooks"
-[AG-S]: https://antigravity.google/docs/skills "Skills and plugin skill locations"
-[AG-A]: https://antigravity.google/docs/subagents/ "CLI subagents"
-[AG-M]: https://antigravity.google/docs/mcp "MCP"
-[AG-R]: https://antigravity.google/docs/rules "Rules and surface paths"
-[AG-H]: https://antigravity.google/docs/hooks/ "Hooks"
-[RO-S]: https://roocodeinc.github.io/Roo-Code/features/skills/ "Skills"
-[RO-A]: https://roocodeinc.github.io/Roo-Code/features/custom-modes/ "Custom modes"
-[RO-M]: https://roocodeinc.github.io/Roo-Code/features/mcp/using-mcp-in-roo/ "MCP configuration"
-[RO-P]: https://roocodeinc.github.io/Roo-Code/features/marketplace/ "Marketplace"
-[RO-R]: https://roocodeinc.github.io/Roo-Code/features/custom-instructions/ "Custom instructions"
-[CN-S]: https://docs.cline.bot/customization/skills "Skills"
-[CN-A]: https://docs.cline.bot/features/subagents "Subagents"
-[CN-M]: https://docs.cline.bot/mcp/mcp-overview "MCP overview"
-[CN-P]: https://docs.cline.bot/customization/plugins "Plugins and supported surfaces"
-[CN-R]: https://docs.cline.bot/customization/cline-rules "Rules"
-[CN-H]: https://docs.cline.bot/sdk/plugins "SDK plugins and hooks"
-[CN-C]: https://docs.cline.bot/getting-started/config "Configuration paths"
-[CN-T]: https://docs.cline.bot/cli/agent-teams "CLI agent teams"
-[KL-S]: https://kilo.ai/docs/customize/skills "Skills"
-[KL-A]: https://kilo.ai/docs/customize/custom-subagents "Custom subagents"
-[KL-M]: https://kilo.ai/docs/automate/mcp/using-in-kilo-code "MCP configuration"
-[KL-P]: https://kilo.ai/docs/automate/extending/plugins "Native plugins and hooks"
-[KL-R]: https://kilo.ai/docs/customize/custom-rules "Custom rules"
-[CT-C]: https://docs.continue.dev/reference "Config-v1 reference"
-[CT-L]: https://docs.continue.dev/guides/understanding-configs "Configuration locations"
-[CT-M]: https://docs.continue.dev/customize/deep-dives/mcp "MCP"
-[CT-R]: https://docs.continue.dev/customize/deep-dives/rules "Rules"
-[WI-S]: https://docs.devin.ai/desktop/cascade/skills "Skills"
-[WI-M]: https://docs.devin.ai/desktop/cascade/mcp "MCP"
-[WI-R]: https://docs.devin.ai/desktop/cascade/memories "Memories and rules"
-[WI-H]: https://docs.devin.ai/desktop/cascade/hooks "Hooks"
-[AM-S]: https://ampcode.com/docs/customize/skills "Skills"
-[AM-A]: https://ampcode.com/docs/plugin-api "Plugin API and custom subagents"
-[AM-M]: https://ampcode.com/docs/customize/mcp "MCP"
-[AM-P]: https://ampcode.com/docs/customize/plugins "Plugins and installation paths"
-[AM-R]: https://ampcode.com/docs/customize/agents-md "AGENTS.md"
-[AM-H]: https://ampcode.com/docs/plugin-api "Plugin event contract"
-[ZD-S]: https://zed.dev/docs/ai/skills "Skills"
-[ZD-A]: https://zed.dev/docs/ai/agent-profiles "Agent profiles"
-[ZD-M]: https://zed.dev/docs/ai/mcp "MCP and extension integration"
-[ZD-R]: https://zed.dev/docs/ai/instructions "Instructions"
-[ZD-X]: https://zed.dev/docs/ai/external-agents "External-agent configuration boundary"
-
-[CL-C]: https://code.claude.com/docs/en/settings "Claude settings, scopes, and mixed private state"
-[DOT]: https://www.dot-agents.com/ "Specific dot-agents project supplied in the discussion"
+[STD-S]: https://agentskills.io/specification 'Agent Skills specification'
+[STD-P]: https://agent-plugins.org/specification 'Agent Plugins specification'
+[SK-CLI]: https://github.com/vercel-labs/skills 'Skills CLI upstream repository'
+[MCP-R]: https://modelcontextprotocol.io/registry/about 'MCP Registry overview'
+[MCP-P]: https://modelcontextprotocol.io/registry/package-types 'MCP Registry package types'
+[CL-S]: https://code.claude.com/docs/en/skills 'Skills'
+[CL-A]: https://code.claude.com/docs/en/sub-agents 'Subagents'
+[CL-M]: https://code.claude.com/docs/en/mcp 'MCP'
+[CL-P]: https://code.claude.com/docs/en/plugins-reference 'Plugin reference'
+[CL-R]: https://code.claude.com/docs/en/memory 'Memory and rules'
+[CL-H]: https://code.claude.com/docs/en/hooks 'Hooks reference'
+[CX-S]: https://learn.chatgpt.com/docs/build-skills 'Skills'
+[CX-A]: https://learn.chatgpt.com/docs/agent-configuration/subagents 'Subagents'
+[CX-M]: https://learn.chatgpt.com/docs/extend/mcp?surface=cli 'MCP'
+[CX-P]: https://developers.openai.com/plugins/build/plugins 'Plugin packaging'
+[CX-R]: https://learn.chatgpt.com/docs/agent-configuration/agents-md 'AGENTS.md instructions'
+[CX-H]: https://learn.chatgpt.com/docs/hooks 'Hooks'
+[GH-S]: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills 'CLI skills'
+[GH-A]: https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/invoke-custom-agents 'CLI custom-agent locations and precedence'
+[GH-A2]: https://docs.github.com/en/copilot/reference/custom-agents-configuration 'Custom-agent configuration reference'
+[GH-M]: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers 'CLI MCP servers'
+[GH-P]: https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference 'CLI plugin reference'
+[GH-R]: https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-custom-instructions 'CLI custom instructions'
+[GH-H]: https://docs.github.com/en/copilot/reference/hooks-reference 'Hooks reference'
+[GH-CS]: https://docs.github.com/en/copilot/concepts/agents/about-agent-skills 'Agent skills and supported surfaces'
+[GH-CM]: https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/configure-mcp-servers 'Cloud/repository MCP configuration'
+[GH-CR]: https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/add-custom-instructions/add-repository-instructions 'Repository custom instructions'
+[VS-S]: https://code.visualstudio.com/docs/agent-customization/agent-skills 'Agent skills'
+[VS-A]: https://code.visualstudio.com/docs/agent-customization/custom-agents 'Custom agents'
+[VS-M]: https://code.visualstudio.com/docs/agent-customization/mcp-servers 'MCP servers'
+[VS-P]: https://code.visualstudio.com/docs/agent-customization/agent-plugins 'Agent plugins'
+[VS-R]: https://code.visualstudio.com/docs/agent-customization/custom-instructions 'Custom instructions'
+[VS-H]: https://code.visualstudio.com/docs/agent-customization/hooks 'Hooks'
+[GE-S]: https://geminicli.com/docs/cli/skills/ 'Skills'
+[GE-A]: https://geminicli.com/docs/core/subagents/ 'Subagents'
+[GE-M]: https://geminicli.com/docs/tools/mcp-server/ 'MCP servers'
+[GE-P]: https://geminicli.com/docs/extensions/reference/ 'Extension reference'
+[GE-R]: https://geminicli.com/docs/cli/gemini-md/ 'GEMINI.md'
+[GE-H]: https://geminicli.com/docs/hooks/reference/ 'Hooks reference'
+[KI-C]: https://kiro.dev/docs/configuration/ 'Configuration scopes and current generations'
+[KI-S]: https://kiro.dev/docs/skills/ 'Skills'
+[KI-A]: https://kiro.dev/docs/custom-agents/ 'Custom agents'
+[KI-M]: https://kiro.dev/docs/mcp/ 'MCP'
+[KI-P]: https://kiro.dev/docs/powers/ 'Powers'
+[KI-PI]: https://kiro.dev/docs/powers/installation/ 'Power installation and activation'
+[KI-R]: https://kiro.dev/docs/steering/ 'Steering'
+[KI-H]: https://kiro.dev/docs/hooks/ 'Hooks'
+[PI-C]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/docs/configuration.md 'Configuration'
+[PI-S]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/docs/skills.md 'Skills'
+[PI-A]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/examples/extensions/subagent/README.md 'Official subagent extension example'
+[PI-M]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/docs/mcp.md 'MCP'
+[PI-P]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/docs/packages.md 'Packages'
+[PI-H]: https://raw.githubusercontent.com/earendil-works/pi/main/packages/coding-agent/docs/extensions.md 'Extension API'
+[OM-S]: https://omp.sh/docs/skills 'Skills'
+[OM-A]: https://omp.sh/docs/subagent-authoring 'Subagent authoring'
+[OM-M]: https://omp.sh/docs/mcp 'MCP'
+[OM-P]: https://omp.sh/docs/plugins 'Plugins'
+[OM-R]: https://omp.sh/docs/context-files 'Context files'
+[OM-H]: https://omp.sh/docs/hooks 'Hooks'
+[OC-S]: https://opencode.ai/docs/skills/ 'Skills'
+[OC-A]: https://opencode.ai/docs/agents/ 'Agents'
+[OC-M]: https://opencode.ai/docs/mcp-servers/ 'MCP servers'
+[OC-P]: https://opencode.ai/docs/plugins/ 'Plugins and callbacks'
+[OC-R]: https://opencode.ai/docs/rules/ 'Rules'
+[OC-C]: https://opencode.ai/docs/config/ 'Configuration'
+[CU-S]: https://cursor.com/docs/skills 'Skills'
+[CU-A]: https://cursor.com/docs/subagents 'Subagents'
+[CU-M]: https://cursor.com/docs/mcp 'MCP'
+[CU-P]: https://cursor.com/docs/plugins 'Plugins'
+[CU-R]: https://cursor.com/docs/rules 'Rules'
+[CU-H]: https://cursor.com/docs/hooks 'Hooks'
+[AG-S]: https://antigravity.google/docs/skills 'Skills and plugin skill locations'
+[AG-A]: https://antigravity.google/docs/subagents/ 'CLI subagents'
+[AG-M]: https://antigravity.google/docs/mcp 'MCP'
+[AG-R]: https://antigravity.google/docs/rules 'Rules and surface paths'
+[AG-H]: https://antigravity.google/docs/hooks/ 'Hooks'
+[RO-S]: https://roocodeinc.github.io/Roo-Code/features/skills/ 'Skills'
+[RO-A]: https://roocodeinc.github.io/Roo-Code/features/custom-modes/ 'Custom modes'
+[RO-M]: https://roocodeinc.github.io/Roo-Code/features/mcp/using-mcp-in-roo/ 'MCP configuration'
+[RO-P]: https://roocodeinc.github.io/Roo-Code/features/marketplace/ 'Marketplace'
+[RO-R]: https://roocodeinc.github.io/Roo-Code/features/custom-instructions/ 'Custom instructions'
+[CN-S]: https://docs.cline.bot/customization/skills 'Skills'
+[CN-A]: https://docs.cline.bot/features/subagents 'Subagents'
+[CN-M]: https://docs.cline.bot/mcp/mcp-overview 'MCP overview'
+[CN-P]: https://docs.cline.bot/customization/plugins 'Plugins and supported surfaces'
+[CN-R]: https://docs.cline.bot/customization/cline-rules 'Rules'
+[CN-H]: https://docs.cline.bot/sdk/plugins 'SDK plugins and hooks'
+[CN-C]: https://docs.cline.bot/getting-started/config 'Configuration paths'
+[CN-T]: https://docs.cline.bot/cli/agent-teams 'CLI agent teams'
+[KL-S]: https://kilo.ai/docs/customize/skills 'Skills'
+[KL-A]: https://kilo.ai/docs/customize/custom-subagents 'Custom subagents'
+[KL-M]: https://kilo.ai/docs/automate/mcp/using-in-kilo-code 'MCP configuration'
+[KL-P]: https://kilo.ai/docs/automate/extending/plugins 'Native plugins and hooks'
+[KL-R]: https://kilo.ai/docs/customize/custom-rules 'Custom rules'
+[CT-C]: https://docs.continue.dev/reference 'Config-v1 reference'
+[CT-L]: https://docs.continue.dev/guides/understanding-configs 'Configuration locations'
+[CT-M]: https://docs.continue.dev/customize/deep-dives/mcp 'MCP'
+[CT-R]: https://docs.continue.dev/customize/deep-dives/rules 'Rules'
+[WI-S]: https://docs.devin.ai/desktop/cascade/skills 'Skills'
+[WI-M]: https://docs.devin.ai/desktop/cascade/mcp 'MCP'
+[WI-R]: https://docs.devin.ai/desktop/cascade/memories 'Memories and rules'
+[WI-H]: https://docs.devin.ai/desktop/cascade/hooks 'Hooks'
+[AM-S]: https://ampcode.com/docs/customize/skills 'Skills'
+[AM-A]: https://ampcode.com/docs/plugin-api 'Plugin API and custom subagents'
+[AM-M]: https://ampcode.com/docs/customize/mcp 'MCP'
+[AM-P]: https://ampcode.com/docs/customize/plugins 'Plugins and installation paths'
+[AM-R]: https://ampcode.com/docs/customize/agents-md 'AGENTS.md'
+[AM-H]: https://ampcode.com/docs/plugin-api 'Plugin event contract'
+[ZD-S]: https://zed.dev/docs/ai/skills 'Skills'
+[ZD-A]: https://zed.dev/docs/ai/agent-profiles 'Agent profiles'
+[ZD-M]: https://zed.dev/docs/ai/mcp 'MCP and extension integration'
+[ZD-R]: https://zed.dev/docs/ai/instructions 'Instructions'
+[ZD-X]: https://zed.dev/docs/ai/external-agents 'External-agent configuration boundary'
+[CL-C]: https://code.claude.com/docs/en/settings 'Claude settings, scopes, and mixed private state'
+[DOT]: https://www.dot-agents.com/ 'Specific dot-agents project supplied in the discussion'

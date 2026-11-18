@@ -273,7 +273,8 @@ describe('conversion discovery', () => {
 
   it('reuses existing manifest aliases rather than creating duplicate named resources', async () => {
     const { ws, write } = await fixture();
-    await write('.agents/etymon/skills/custom/SKILL.md', skill);
+    await write('.agents/etymon/skills/custom/SKILL.md', skill.replace('Run tests.', 'Legacy.'));
+    await write('.agents/skills/custom/SKILL.md', skill);
     await write('.claude/skills/checks/SKILL.md', skill);
     await write('.mcp.json', JSON.stringify({ mcpServers: { fixture: { command: 'node' } } }));
     await ws.saveManifest({
@@ -293,6 +294,7 @@ describe('conversion discovery', () => {
     expect(Object.keys(manifest.skill)).toEqual(['custom']);
     expect(Object.keys(manifest.mcp)).toEqual(['custom']);
     expect(manifest.skill.custom.name).toBe('checks');
+    expect(manifest.skill.custom.path).toBe('skills/custom');
     expect(manifest.mcp.custom.name).toBe('fixture');
     expect((await resources(ws)).map((resource) => resource.name).sort()).toEqual([
       'checks',

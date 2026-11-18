@@ -1,5 +1,5 @@
 import { promises as fs } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import { parseDocument, stringify as yaml } from 'yaml';
 import {
   Agent,
@@ -327,11 +327,23 @@ export async function importHarness(
 ): Promise<{ resources: Imported[]; diagnostics: Diagnostic[] }> {
   const resources: Imported[] = [],
     diagnostics: Diagnostic[] = [];
+  const manifest = await workspace.manifest();
+  const authoredSkills = await Promise.all(
+    Object.entries(manifest.skill).map(async ([key, skill]) => {
+      const canonical = join(workspace.agents, 'skills', key);
+      return (await exists(canonical)) ? canonical : resolve(workspace.agents, skill.path);
+    }),
+  );
+  const authored = (path: string) =>
+    authoredSkills.some((source) => {
+      const rel = relative(source, path);
+      return rel === '' || (rel !== '..' && !rel.startsWith('..' + sep));
+    });
   for (const skills of readLocations(p, 'skill', workspace))
     if (!discovery.excluded(skills) && (await exists(skills))) {
       for (const skill of await discoverNativeSkills(skills, workspace.root, {
         diagnostics,
-        excluded: (path) => discovery.excluded(path),
+        excluded: (path) => authored(path) || discovery.excluded(path),
       }))
         resources.push({
           kind: 'skill',

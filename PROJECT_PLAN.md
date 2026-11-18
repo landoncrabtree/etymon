@@ -44,11 +44,11 @@ The promise is **portable configuration and reproducible external artifacts for 
 
 The portable environment has three parts:
 
-| Part | Purpose | Owner |
-|---|---|---|
-| `.agents/etymon.toml` | Authored resource references, custom MCP connections, resource bindings, and reviewed project configuration | User; also created by `convert` or local-resource commands |
-| `.agents/etymon/` | Self-written or imported skills, agent prompts, rules, bundles, scripts, and preserved native material | User |
-| `.agents/etymon.lock` | External dependency requests and exact versions, commits, integrity, provenance, and dependency relationships | Etymon CLI |
+| Part                  | Purpose                                                                                                       | Owner                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `.agents/etymon.toml` | Authored resource references, custom MCP connections, resource bindings, and reviewed project configuration   | User; also created by `convert` or local-resource commands |
+| `.agents/etymon/`     | Self-written or imported skills, agent prompts, rules, bundles, scripts, and preserved native material        | User                                                       |
+| `.agents/etymon.lock` | External dependency requests and exact versions, commits, integrity, provenance, and dependency relationships | Etymon CLI                                                 |
 
 **The TOML file is not a second external dependency manifest.** Installing an upstream skill should not duplicate its repository and version in both files. The lock owns that resolution. A project-specific configuration entry may reference its stable dependency ID without redeclaring the dependency.
 
@@ -124,7 +124,7 @@ npx etymon sync --harness codex
 
 ```bash
 npx etymon agent add ./.agents/etymon/agents/reviewer.md
-npx etymon skill add ./.agents/etymon/skills/release-check
+npx etymon skill add ./.agents/skills/release-check
 
 # Edit the source files, then regenerate the native environment.
 npx etymon sync --harness claude,codex
@@ -157,11 +157,11 @@ npx etymon doctor --harness codex
 
 Etymon should inspect supported compatibility locations when importing, but **write the current first-class format for the selected harness and scope**. It should not use a foreign or legacy format merely because a client happens to accept it.
 
-| Example | Project output | Global/user output |
-|---|---|---|
-| Skill → Claude Code | `.claude/skills/<name>/SKILL.md` | `~/.claude/skills/<name>/SKILL.md` |
-| MCP → OpenCode | `opencode.json`; retain an existing current `opencode.jsonc` | `~/.config/opencode/opencode.json` |
-| MCP → Codex | `.codex/config.toml` | `~/.codex/config.toml` |
+| Example             | Project output                                               | Global/user output                 |
+| ------------------- | ------------------------------------------------------------ | ---------------------------------- |
+| Skill → Claude Code | `.claude/skills/<name>/SKILL.md`                             | `~/.claude/skills/<name>/SKILL.md` |
+| MCP → OpenCode      | `opencode.json`; retain an existing current `opencode.jsonc` | `~/.config/opencode/opencode.json` |
+| MCP → Codex         | `.codex/config.toml`                                         | `~/.codex/config.toml`             |
 
 These locations come from the respective native documentation. Real skills include their supporting files, and real MCP writes merge only Etymon-owned entries. Configuration-root overrides, trust requirements, and platform differences remain part of each adapter. [CL-S] [OC-C] [CX-M]
 
@@ -200,12 +200,12 @@ Support is feature- and version-specific. A harness can support importing one re
 
 The useful promise is to import supported native features, preserve nonportable information, and emit supported current-native equivalents. It is not to translate all possible behavior automatically.
 
-| Result | User meaning |
-|---|---|
-| **Exact** | The supported behavior is represented without a known semantic change. |
-| **Adapted** | A defined conversion is applied; any optional differences are disclosed. |
+| Result          | User meaning                                                                      |
+| --------------- | --------------------------------------------------------------------------------- |
+| **Exact**       | The supported behavior is represented without a known semantic change.            |
+| **Adapted**     | A defined conversion is applied; any optional differences are disclosed.          |
 | **Native-only** | Material is preserved for the source harness but not activated on another target. |
-| **Blocked** | A required feature, restriction, or dependency cannot be represented safely. |
+| **Blocked**     | A required feature, restriction, or dependency cannot be represented safely.      |
 
 Unknown mappings and pending authentication/registration are reported separately. Etymon must not claim that installing a file proves it is loaded or usable.
 
@@ -229,14 +229,14 @@ Hooks require deliberately designed event and payload mappings. Copying a script
 
 ## 12. Roadmap
 
-| Priority | Resource coverage | Source and conversion plan |
-|---|---|---|
-| **P0** | Skills | Agent Skills + skills.sh; local source and native import/export |
-| **P0** | MCP | Official MCP Registry + custom definitions; Etymon-owned native renderers/importers |
-| **P0** | Agents | Git/local sources initially; registry TBD; core agent model and native import/export |
-| **P1** | Rules | Local/Git; always-on and directory scope first, then carefully defined conditional rules |
-| **P2** | Plugins | Agent Plugins and native bundle importers; preserve parent/child identity and decompose where safe |
-| **P3** | Hooks | Small explicit portable contracts and tested native bridges |
+| Priority | Resource coverage | Source and conversion plan                                                                         |
+| -------- | ----------------- | -------------------------------------------------------------------------------------------------- |
+| **P0**   | Skills            | Agent Skills + skills.sh; local source and native import/export                                    |
+| **P0**   | MCP               | Official MCP Registry + custom definitions; Etymon-owned native renderers/importers                |
+| **P0**   | Agents            | Git/local sources initially; registry TBD; core agent model and native import/export               |
+| **P1**   | Rules             | Local/Git; always-on and directory scope first, then carefully defined conditional rules           |
+| **P2**   | Plugins           | Agent Plugins and native bundle importers; preserve parent/child identity and decompose where safe |
+| **P3**   | Hooks             | Small explicit portable contracts and tested native bridges                                        |
 
 The first end-to-end implementation should exercise Claude Code and Codex. Add Copilot CLI and VS Code as distinct targets, then OpenCode, Gemini, and the broader inventory as mappings are verified. This is implementation sequencing, not a popularity ranking.
 
@@ -280,13 +280,13 @@ The release must also demonstrate safe ownership, secret handling, current-nativ
 
 The technical document retains the full harness inventory and reference index. Product decisions and proposed Etymon commands above are design choices; the following links support external format and product facts.
 
-[STD-S]: https://agentskills.io/specification "Agent Skills specification"
-[SK-CLI]: https://github.com/vercel-labs/skills "Skills CLI"
-[MCP-R]: https://modelcontextprotocol.io/registry/about "Official MCP Registry"
-[STD-P]: https://agent-plugins.org/specification "Agent Plugins specification"
-[CL-S]: https://code.claude.com/docs/en/skills "Claude Code skills"
-[CL-C]: https://code.claude.com/docs/en/settings "Claude Code settings and sensitive state"
-[CX-S]: https://learn.chatgpt.com/docs/build-skills "Codex skill discovery"
-[CX-M]: https://learn.chatgpt.com/docs/extend/mcp?surface=cli "Codex MCP configuration"
-[OC-C]: https://opencode.ai/docs/config/ "OpenCode configuration"
-[DOT]: https://www.dot-agents.com/ "The specific dot-agents project supplied in the discussion"
+[STD-S]: https://agentskills.io/specification 'Agent Skills specification'
+[SK-CLI]: https://github.com/vercel-labs/skills 'Skills CLI'
+[MCP-R]: https://modelcontextprotocol.io/registry/about 'Official MCP Registry'
+[STD-P]: https://agent-plugins.org/specification 'Agent Plugins specification'
+[CL-S]: https://code.claude.com/docs/en/skills 'Claude Code skills'
+[CL-C]: https://code.claude.com/docs/en/settings 'Claude Code settings and sensitive state'
+[CX-S]: https://learn.chatgpt.com/docs/build-skills 'Codex skill discovery'
+[CX-M]: https://learn.chatgpt.com/docs/extend/mcp?surface=cli 'Codex MCP configuration'
+[OC-C]: https://opencode.ai/docs/config/ 'OpenCode configuration'
+[DOT]: https://www.dot-agents.com/ 'The specific dot-agents project supplied in the discussion'

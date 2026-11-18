@@ -12,7 +12,7 @@ Use the repository's built CLI so registration and source creation stay in one t
       --description "Use when doing a specific repository task" \
       --body-file - --yes
 
-Pipe the Markdown body into stdin. An interactive etymon skill add with no source opens the same form. Do not use --global for contributor resources. New source belongs in .agents/etymon/skills/<name>/SKILL.md and is registered in .agents/etymon.toml; it is not an external lock dependency.
+Pipe the Markdown body into stdin. An interactive etymon skill add with no source opens the same form. Do not use --global for contributor resources. New source belongs in .agents/skills/<name>/SKILL.md and is registered in .agents/etymon.toml; it is not an external lock dependency.
 
 Choose a lowercase hyphenated name and a description that says when the skill applies. Include repository-specific decisions, command examples, and useful file locations. Assume the contributor can code; skip generic advice. Keep the main instructions short. If a topic needs substantial reference material, add it inside the skill bundle and link it from SKILL.md. All assets are part of the bundle identity.
 

@@ -111,4 +111,6 @@ test-results/
 !/.agents/etymon.lock
 !/.agents/etymon/
 !/.agents/etymon/**
+!/.agents/skills/
+!/.agents/skills/**
 # <<< etymon generated outputs

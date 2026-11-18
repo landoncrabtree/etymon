@@ -63,7 +63,8 @@ export async function resources(
     lock = options.lock ?? (await workspace.lock());
   for (const [key, local] of Object.entries(manifest.skill)) {
     if (!local.path) throw new EtymonError('INVALID_MANIFEST', `Skill ${key} needs a path`);
-    const path = resolve(workspace.agents, local.path);
+    const canonical = join(workspace.agents, 'skills', key);
+    const path = (await exists(canonical)) ? canonical : resolve(workspace.agents, local.path);
     const artifact = await bundle(path);
     const metadata = skillMetadata(artifact);
     result.push({
@@ -544,17 +545,18 @@ export async function registerImported(
       }
     }
     const existing = manifest[resource.kind][key];
+    const canonicalSkill =
+      resource.kind === 'skill' ? join(workspace.agents, 'skills', key) : undefined;
     const destination =
       resource.kind === 'mcp'
         ? workspace.manifestPath
-        : existing && 'path' in existing
-          ? resolve(workspace.agents, existing.path)
-          : join(
-              workspace.agents,
-              'etymon',
-              resource.kind + 's',
-              key + (resource.kind === 'skill' ? '' : resource.extension),
-            );
+        : canonicalSkill && (await exists(canonicalSkill))
+          ? canonicalSkill
+          : existing && 'path' in existing
+            ? resolve(workspace.agents, existing.path)
+            : resource.kind === 'skill'
+              ? join(workspace.agents, 'skills', key)
+              : join(workspace.agents, 'etymon', resource.kind + 's', key + resource.extension);
     if (resource.kind === 'mcp') {
       const existingMcp = manifest.mcp[key];
       if (

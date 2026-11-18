@@ -1,25 +1,25 @@
 version = 1
 
 [skill.coding]
-path = "etymon/skills/coding"
+path = "skills/coding"
 
 [skill.testing]
-path = "etymon/skills/testing"
+path = "skills/testing"
 
 [skill.creating-new-interface]
-path = "etymon/skills/creating-new-interface"
+path = "skills/creating-new-interface"
 
 [skill.creating-new-harness]
-path = "etymon/skills/creating-new-harness"
+path = "skills/creating-new-harness"
 
 [skill.resource-lifecycle]
-path = "etymon/skills/resource-lifecycle"
+path = "skills/resource-lifecycle"
 
 [skill.adding-skill]
-path = "etymon/skills/adding-skill"
+path = "skills/adding-skill"
 
 [skill.releasing]
-path = "etymon/skills/releasing"
+path = "skills/releasing"
 
 [agent]
 [rule.project-context]
